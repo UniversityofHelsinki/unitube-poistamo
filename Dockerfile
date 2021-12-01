@@ -13,6 +13,6 @@ RUN npm install
 EXPOSE 8080
 
 # START APPLICATION
-CMD ["node index.js"]
+CMD [ "npm", "start" ]
 
 
