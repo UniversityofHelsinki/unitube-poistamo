@@ -33,7 +33,7 @@ deploy_dev:
   environment:
     name: development
   only:
-    - master
+    - main
   except:
     # Skip deploy when scheduled npm audit and outdated scans are executed.
     - schedules
