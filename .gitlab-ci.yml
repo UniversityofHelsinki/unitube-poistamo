@@ -1,0 +1,145 @@
+image: frolvlad/alpine-glibc
+
+before_script:
+  - apk update && apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python3 curl nodejs npm tar
+
+  # Cache node modules - speeds up future builds
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules
+
+# Define the stages
+stages:
+  - setup
+  - audit_scan
+  - deploy
+
+# Define the process for each stage
+
+# Define the process for setup stage
+setup:
+  stage: setup
+  tags:
+    - ohtu-build-1
+  script:
+    - npm ci --production
+
+# Define the process for deploy stage to development environment
+deploy_dev:
+  stage: deploy
+  tags:
+    - ohtu-build-1
+  environment:
+    name: development
+  only:
+    - master
+  except:
+    # Skip deploy when scheduled npm audit and outdated scans are executed.
+    - schedules
+  script:
+    - curl -fsSLO --compressed "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz";
+    - tar xvzf openshift-client-linux.tar.gz -C /usr/local/bin
+    # before any action, I connect to the OpenShift server with the appropriate credentials
+    # this parameter: `--insecure-skip-tls-verify` is important because we use a certificate signed by an unknown authority
+    - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST --insecure-skip-tls-verify
+    - oc project poistamo
+    # add secrets here
+    # list environment variables here
+    - oc set env dc/poistamo-dev OPENSHIFT_NODEJS_IP=$OPENSHIFT_NODEJS_IP
+    - oc set env dc/poistamo-dev OPENSHIFT_NODEJS_PORT=$OPENSHIFT_NODEJS_PORT
+    # start build process in OpenShift
+    - oc start-build poistamo-dev --from-dir=. --follow
+    # patch openshift buildConfig file
+    - oc patch bc/poistamo-dev --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
+    - oc patch bc/poistamo-dev --patch '{"spec":{"failedBuildsHistoryLimit":1}}'
+
+deploy_test:
+  stage: deploy
+  tags:
+    - ohtu-build-1
+  environment:
+    name: test
+  only:
+    - test
+  script:
+    - curl -fsSLO --compressed "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz";
+    - tar xvzf openshift-client-linux.tar.gz -C /usr/local/bin
+    # before any action, I connect to the OpenShift server with the appropriate credentials
+    # this parameter: `--insecure-skip-tls-verify` is important because we use a certificate signed by an unknown authority
+    - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST --insecure-skip-tls-verify
+    - oc project poistamo
+    # add secrets here
+    # list any environment variables here
+    - oc set env dc/poistamo-test OPENSHIFT_NODEJS_IP=$OPENSHIFT_NODEJS_IP
+    - oc set env dc/poistamo-test OPENSHIFT_NODEJS_PORT=$OPENSHIFT_NODEJS_PORT
+    - oc start-build poistamo-test --from-dir=. --follow
+    # patch openshift buildConfig file
+    - oc patch bc/poistamo-test --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
+    - oc patch bc/poistamo-test --patch '{"spec":{"failedBuildsHistoryLimit":1}}'
+
+deploy_prod:
+  stage: deploy
+  tags:
+    - ohtu-build-1
+  environment:
+    name: prod
+  only:
+    - prod
+  script:
+    - curl -fsSLO --compressed "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz";
+    - tar xvzf openshift-client-linux.tar.gz -C /usr/local/bin
+    # before any action, I connect to the OpenShift server with the appropriate credentials
+    # this parameter: `--insecure-skip-tls-verify` is important because we use a certificate signed by an unknown authority
+    - oc login https://$OPENSHIFT_ADDR_PROD:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_PROD --insecure-skip-tls-verify
+    - oc project poistamo
+    # add secrets here
+    # list any environment variables here
+    - oc set env dc/poistamo-prod OPENSHIFT_NODEJS_IP=$OPENSHIFT_NODEJS_IP
+    - oc set env dc/poistamo-prod OPENSHIFT_NODEJS_PORT=$OPENSHIFT_NODEJS_PORT
+    - oc start-build poistamo-prod --from-dir=. --follow
+    # patch openshift buildConfig file
+    - oc patch bc/poistamo-prod --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
+    - oc patch bc/poistamo-prod --patch '{"spec":{"failedBuildsHistoryLimit":1}}'
+
+# Rules for the scheduled npm audit and outdated scans
+dependency scanning:
+  stage: audit_scan
+  tags:
+    - ohtu-build-1
+  allow_failure: true
+  only:
+    - schedules
+  script:
+    # Run npm audit and npm outdated commands and write outputs to a txt file.
+    - echo "Running npm diagnostics, audit and outdated..."
+    - export RESULT_FILE="./npm_scan_results.txt"
+    # Create result file
+    - touch $RESULT_FILE
+    # Write to the result file
+    - echo " ************ POISTAMO NPM AUDIT RESULT ************ " >> $RESULT_FILE
+    - echo "https://version.helsinki.fi/tike-ohtu/orgrek-backend" >> $RESULT_FILE
+    - echo "" >> $RESULT_FILE
+    - echo "=== npm audit security report ===" >> $RESULT_FILE
+    - echo "" >> $RESULT_FILE
+    # Run npm audit and "catch" the possible non zero exit code (https://docs.gitlab.com/ee/ci/yaml/#script)
+    - "npm ci  >> $RESULT_FILE || exit_code=$?"
+    # npm audit --parseable | awk -F $'\t' 'NF {print "   Package: "$2, "\tLevel: "$3, "\tMore info: "$6}' # this would be nice format
+    # Add a message based on npm audit's return code
+    - if [ $exit_code -ne 0 ]; then echo "Some vulnerabilities was found, check the above packages." >> $RESULT_FILE; fi;
+    - if [ $exit_code -eq 0 ]; then echo "All is good, enjoy the moment." >> $RESULT_FILE; fi;
+    - echo "" >> $RESULT_FILE
+    - echo " ************ POISTAMO NPM OUTDATED RESULT ************ " >> $RESULT_FILE
+    - echo "" >> $RESULT_FILE
+    - echo "=== npm outdated report ===" >> $RESULT_FILE
+    - echo "" >> $RESULT_FILE
+    # Run npm outdated and "catch" the possible non zero exit code (https://docs.gitlab.com/ee/ci/yaml/#script)
+    - npm outdated >> $RESULT_FILE || exit_code=$?
+    - echo "" >> $RESULT_FILE
+    - echo " ************ END OF FILE ************ " >> $RESULT_FILE
+    - cat $RESULT_FILE
+    - echo "Done with npm diagnostics."
+    - echo "Sending results to Slack..."
+    # Send result file to "audit-logs" channel in Ohtu's Slack space (see https://api.slack.com/methods/files.upload).
+    - "curl -F file=@${CI_PROJECT_DIR}/$RESULT_FILE -F 'initial_comment=Poistamo npm report' -F channels=${AUDIT_RESULT_SLACK_CHANNEL_ID} -F filename=$RESULT_FILE -F filetype=text -H 'Authorization: Bearer '${SLACK_FILE_UPLOAD_TOKEN} https://slack.com/api/files.upload"
+    - echo "Done with sending results to Slack."
