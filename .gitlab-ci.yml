@@ -45,9 +45,17 @@ deploy_dev:
     - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST --insecure-skip-tls-verify
     - oc project poistamo
     # add secrets here
+    - oc delete secret generic POISTAMO_DEV_PASSWORD --ignore-not-found
+    - oc create secret generic POISTAMO_DEV_PASSWORD --from-literal=PASSWORD=$POISTAMO_DEV_PASSWORD
     # list environment variables here
+    - oc set env --from=secret/POISTAMO_DEV_PASSWORD dc/poistamo-dev
     - oc set env dc/poistamo-dev OPENSHIFT_NODEJS_IP=$OPENSHIFT_NODEJS_IP
     - oc set env dc/poistamo-dev OPENSHIFT_NODEJS_PORT=$OPENSHIFT_NODEJS_PORT
+    - oc set env dc/poistamo-dev POSTGRES_USER=$POISTAMO_DEV_USER_NAME
+    - oc set env dc/poistamo-dev PORT=$POISTAMO_DEV_PORT
+    - oc set env dc/poistamo-dev HOST=$POISTAMO_DEV_HOST
+    - oc set env dc/poistamo-dev DATABASE=$POISTAMO_DEV_DATABASE
+    - oc set env dc/poistamo-dev SSL=$POISTAMO_DEV_SSL
     # start build process in OpenShift
     - oc start-build poistamo-dev --from-dir=. --follow
     # patch openshift buildConfig file
