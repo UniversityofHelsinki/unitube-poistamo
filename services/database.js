@@ -1,5 +1,5 @@
 // Postgres client setup
-const { Pool } = require("pg");
+const Pool = require("pg-pool");
 
 module.exports = {
     pool : new Pool({
@@ -7,6 +7,7 @@ module.exports = {
         host: process.env.host,
         database: process.env.database,
         password: process.env.password,
-        port: process.env.port
+        port: process.env.port,
+        ssl: process.env.ssl ? true : false
     })
 };
