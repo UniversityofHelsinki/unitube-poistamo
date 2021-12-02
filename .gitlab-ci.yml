@@ -45,10 +45,10 @@ deploy_dev:
     - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST --insecure-skip-tls-verify
     - oc project poistamo
     # add secrets here
-    - oc delete secret generic POISTAMO-DEV-PASSWORD --ignore-not-found
-    - oc create secret generic POISTAMO-DEV-PASSWORD --from-literal=PASSWORD=$POISTAMO_DEV_PASSWORD
+    - oc delete secret generic poistamo-dev-password --ignore-not-found
+    - oc create secret generic poistamo-dev-password --from-literal=PASSWORD=$POISTAMO_DEV_PASSWORD
     # list environment variables here
-    - oc set env --from=secret/POISTAMO-DEV-PASSWORD dc/poistamo-dev
+    - oc set env --from=secret/poistamo-dev-password dc/poistamo-dev
     - oc set env dc/poistamo-dev OPENSHIFT_NODEJS_IP=$OPENSHIFT_NODEJS_IP
     - oc set env dc/poistamo-dev OPENSHIFT_NODEJS_PORT=$OPENSHIFT_NODEJS_PORT
     - oc set env dc/poistamo-dev POSTGRES_USER=$POISTAMO_DEV_USER_NAME
