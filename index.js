@@ -10,7 +10,7 @@ const fs = require("fs");
 const path = require("path");
 
 const ipaddress = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
-const port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+const port = process.env.OPENSHIFT_NODEJS_PORT || 3001;
 
 app.use(compression());
 app.use(helmet());
