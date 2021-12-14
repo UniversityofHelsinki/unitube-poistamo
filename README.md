@@ -1,3 +1,5 @@
+## Local Development Environment
+
 ## Environment variables
 Create and add environment variables in .env file:  
 POSTGRES_USER = postgres  
@@ -14,3 +16,17 @@ npm install
 
 ## Start application:
 node index.js
+
+
+## Environments and deployments
+### Development environment in OpenShift
+master branch deploys to test Openshift project named Poistamo with labeling poistamo-dev
+development environment communicates with Opencast test environment https://ocast-devel-a1.it.helsinki.fi 
+
+### Test environment in OpenShift
+master branch deploys to test Openshift project named Poistamo with labeling poistamo-test
+test environment communicates with devel Opencast https://ocast-a1-test.it.helsinki.fi (used for Version Switching)
+
+### Production environment in OpenShift
+master branch deploys to production Openshift project named Poistamo with labeling poistamo-prod
+production environment communicates with production Opencast https://webcast.it.helsinki.fi
