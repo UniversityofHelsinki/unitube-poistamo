@@ -113,9 +113,17 @@ deploy_prod:
     - oc login https://$OPENSHIFT_ADDR_PROD:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_PROD --insecure-skip-tls-verify
     - oc project poistamo
     # add secrets here
+    - oc delete secret generic poistamo-prod-password --ignore-not-found
+    - oc create secret generic poistamo-prod-password --from-literal=PASSWORD=$POISTAMO_PROD_PASSWORD
     # list any environment variables here
+    - oc set env --from=secret/poistamo-prod-password dc/poistamo-prod
     - oc set env dc/poistamo-prod OPENSHIFT_NODEJS_IP=$OPENSHIFT_NODEJS_IP
     - oc set env dc/poistamo-prod OPENSHIFT_NODEJS_PORT=$OPENSHIFT_NODEJS_PORT
+    - oc set env dc/poistamo-prod POSTGRES_USER=$POISTAMO_PROD_USER_NAME
+    - oc set env dc/poistamo-prod PORT=$POISTAMO_PROD_PORT
+    - oc set env dc/poistamo-prod HOST=$POISTAMO_PROD_HOST
+    - oc set env dc/poistamo-prod DATABASE=$POISTAMO_PROD_DATABASE
+    - oc set env dc/poistamo-prod SSL=$POISTAMO_PROD_SSL
     - oc start-build poistamo-prod --from-dir=. --follow
     # patch openshift buildConfig file
     - oc patch bc/poistamo-prod --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
