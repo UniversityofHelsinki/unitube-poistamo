@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS videos(
                        video_id VARCHAR(255) NOT NULL,
                        archived_date date,
+                       actual_archived_date date,
                        deletion_date date,
                        informed_date date,
                        video_creation_date date,

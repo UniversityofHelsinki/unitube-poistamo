@@ -8,6 +8,7 @@ const compression = require('compression');
 const database = require("./services/database");
 const fs = require("fs");
 const path = require("path");
+const cronJob = require('./services/cron');
 
 const ipaddress = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
 const port = process.env.OPENSHIFT_NODEJS_PORT || 3001;
@@ -31,3 +32,8 @@ app.get('/', (req, res) => {
 app.listen(port, ipaddress, () => {
     console.log( 'Listening on ' + ipaddress + ', port ' + port );
 });
+
+(async () => {
+    // START ARCHIVE CRONJOB
+    await cronJob.archiveCron;
+})();
