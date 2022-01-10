@@ -4,7 +4,7 @@ const path = require("path");
 const database = require("./database");
 const archivedVideos = require('./archivedVideos');
 
-// ARCHIVE CRON JOB
+// ARCHIVE CRONJOB
 archiveCron = cron.schedule('0 0 * * *', async() => {
     console.log('Run CronJob job daily at 00:00');
     const selectVideosWithArchivedDates = fs.readFileSync(path.resolve(__dirname, "../sql/getVideosWithArchivedDate.sql"), "utf8");
