@@ -64,6 +64,7 @@ deploy_dev:
     - oc set env --from=secret/poistamo-opencast-dev-password-d dc/poistamo-dev
     - oc set env dc/poistamo-dev POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_DEV
     - oc set env dc/poistamo-dev POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_DEV
+    - oc set env dc/poistamo-dev POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_DEV
     # start build process in OpenShift
     - oc start-build poistamo-dev --from-dir=. --follow
     # patch openshift buildConfig file
@@ -104,6 +105,7 @@ deploy_test:
     - oc set env --from=secret/poistamo-opencast-test-password-d dc/poistamo-test
     - oc set env dc/poistamo-test POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_TEST
     - oc set env dc/poistamo-test POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_TEST
+    - oc set env dc/poistamo-test POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_TEST
     - oc start-build poistamo-test --from-dir=. --follow
     # patch openshift buildConfig file
     - oc patch bc/poistamo-test --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
@@ -144,6 +146,7 @@ deploy_prod:
     - oc set env --from=secret/poistamo-opencast-prod-password-d dc/poistamo-prod
     - oc set env dc/poistamo-prod POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_PROD
     - oc set env dc/poistamo-prod POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_PROD
+    - oc set env dc/poistamo-prod POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_PROD
     - oc start-build poistamo-prod --from-dir=. --follow
     # patch openshift buildConfig file
     - oc patch bc/poistamo-prod --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'

@@ -12,8 +12,7 @@ DATABASE= expired_videos
 POISTAMO_OPENCAST_HOST (OpenCast development url)
 POISTAMO_OPENCAST_USER (found in keepass)
 POISTAMO_OPENCAST_PASS (found in keepass)
-
-POISTAMO_ARCHIVED_SERIES = (archived series unique identifier)
+POISTAMO_OPENCAST_ARCHIVED_SERIES = (archived series unique identifier)
 
 ## Start postgres as Docker container
 docker run --name exp-videos-postgres -p 5432:5432  -e POSTGRES_DB=expired_videos -e POSTGRES_PASSWORD=xxxxxx -d onjin/alpine-postgres
