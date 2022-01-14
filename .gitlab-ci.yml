@@ -61,7 +61,7 @@ deploy_dev:
     - oc set env dc/poistamo-dev DATABASE=$POISTAMO_DEV_DATABASE
     - oc set env dc/poistamo-dev SSL=$POISTAMO_DEV_SSL
     # opencast environment variables
-    - oc set env --from=secret/poistamo-opencast-dev-password-d dc/poistamo-dev
+    - oc set env --from=secret/poistamo-opencast-dev-password dc/poistamo-dev
     - oc set env dc/poistamo-dev POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_DEV
     - oc set env dc/poistamo-dev POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_DEV
     - oc set env dc/poistamo-dev POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_DEV
@@ -102,7 +102,7 @@ deploy_test:
     - oc set env dc/poistamo-test DATABASE=$POISTAMO_TEST_DATABASE
     - oc set env dc/poistamo-test SSL=$POISTAMO_TEST_SSL
     # opencast environment variables
-    - oc set env --from=secret/poistamo-opencast-test-password-d dc/poistamo-test
+    - oc set env --from=secret/poistamo-opencast-test-password dc/poistamo-test
     - oc set env dc/poistamo-test POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_TEST
     - oc set env dc/poistamo-test POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_TEST
     - oc set env dc/poistamo-test POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_TEST
@@ -143,7 +143,7 @@ deploy_prod:
     - oc set env dc/poistamo-prod DATABASE=$POISTAMO_PROD_DATABASE
     - oc set env dc/poistamo-prod SSL=$POISTAMO_PROD_SSL
     # opencast environment variables
-    - oc set env --from=secret/poistamo-opencast-prod-password-d dc/poistamo-prod
+    - oc set env --from=secret/poistamo-opencast-prod-password dc/poistamo-prod
     - oc set env dc/poistamo-prod POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_PROD
     - oc set env dc/poistamo-prod POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_PROD
     - oc set env dc/poistamo-prod POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_PROD
