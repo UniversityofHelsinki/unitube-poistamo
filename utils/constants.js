@@ -1,28 +1,25 @@
 const ARCHIVED_SERIES = process.env.POISTAMO_ARCHIVED_SERIES;
 
-const EVENT_METADATA = [
-    {
-        "flavor": "dublincore/episode",
-        "title": "EVENTS.EVENTS.DETAILS.CATALOG.EPISODE",
-        "fields": [
-            {
-                "translatable": false,
-                "readOnly": false,
-                "id": "isPartOf",
-                "label": "EVENTS.EVENTS.DETAILS.METADATA.SERIES",
-                "type": "text",
-                "value": "",
-                "required": false,
-                "tabindex": 8
-            }
-        ]
-    }
-];
-
 const OPENCAST_EVENTS_PATH = '/api/events/';
+const OPENCAST_METADATA_PATH = '/metadata';
+const OPENCAST_TYPE_QUERY_PARAMETER = '?type=';
+const OPENCAST_TYPE_DUBLINCORE_EPISODE = 'dublincore/episode';
+const OPENCAST_WORKFLOW_START_PATH = '/workflow/start';
+const OPENCAST_ASSETS_EPISODE_URL = '/assets/episode/';
+
+// properties object for the republish query
+// Opencast instantiates a java.util.Properties from the value, so key=value pairs and \n as a delimeter.
+// https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html#load(java.io.InputStream)
+const PROPERTIES_REPUBLISH_METADATA =
+    'publishLive=false\nuploadedSearchPreview=true\npublishToOaiPmh=false\ncomment=false\npublishToMediaModule=true';
 
 module.exports = {
     ARCHIVED_SERIES,
-    EVENT_METADATA,
-    OPENCAST_EVENTS_PATH
+    OPENCAST_EVENTS_PATH,
+    OPENCAST_METADATA_PATH,
+    OPENCAST_TYPE_QUERY_PARAMETER,
+    OPENCAST_TYPE_DUBLINCORE_EPISODE,
+    OPENCAST_WORKFLOW_START_PATH,
+    OPENCAST_ASSETS_EPISODE_URL,
+    PROPERTIES_REPUBLISH_METADATA
 }
