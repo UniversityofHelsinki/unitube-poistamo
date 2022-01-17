@@ -5,7 +5,7 @@ const FormData = require('form-data');
 exports.getEvent = async (videoId) => {
     const eventsUrl = constants.OPENCAST_EVENTS_PATH + videoId;
     const response = await security.opencastBase(eventsUrl);
-    return response.data;
+    return response;
 };
 
 const modifyEventMetadataForOpencast = (archivedSeriesId) => {
@@ -75,24 +75,33 @@ const republishEventMetadata = async(mediaPackageResponse) => {
     }
 }
 
+const isVideoAlreadyInArchivedSeries = (video, archivedSeriesId) => {
+    return video.is_part_of === archivedSeriesId;
+};
+
+const hasEventActiveTransaction = (activeTransaction) => {
+    return activeTransaction.data && activeTransaction.data.active === true;
+};
+
 exports.moveVideoToArchivedSeries = async (video, archivedSeriesId) => {
     try {
-        const isVideoAlreadyInArchivedSeries = video.is_part_of === archivedSeriesId;
-        if (isVideoAlreadyInArchivedSeries) {
-
-        } else {
-            const activeTransaction = await checkForEventActiveTransactionStatus(video);
-            if (activeTransaction.data && activeTransaction.data.active === false) {
-                const mediaPackageResponse = await updateEventMetadata(video, archivedSeriesId);
-                const response = await republishEventMetadata(mediaPackageResponse);
-                return response;
-            } else {
-                return {
-                    status: 403,
-                    statusText: 'error active transaction in progress'
-                };
-            }
+        if (isVideoAlreadyInArchivedSeries(video, archivedSeriesId)) {
+            return {
+                status: 500,
+                statusText: 'video already in archived series skipping to next one'
+            };
         }
+        const activeTransaction = await checkForEventActiveTransactionStatus(video);
+        if (hasEventActiveTransaction(activeTransaction)) {
+            return {
+                status: 403,
+                statusText: 'error active transaction in progress'
+            };
+        }
+        const mediaPackageResponse = await updateEventMetadata(video, archivedSeriesId);
+        const response = await republishEventMetadata(mediaPackageResponse);
+        return response;
+
     } catch (error) {
         throw error;
     }
