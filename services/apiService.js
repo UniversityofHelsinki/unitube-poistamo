@@ -19,45 +19,52 @@ const modifyEventMetadataForOpencast = (archivedSeriesId) => {
 };
 
 const updateEventMetadata = async(video, archivedSeriesId) => {
-    const videoMetaDataUrl = constants.OPENCAST_EVENTS_PATH + video.identifier + constants.OPENCAST_METADATA_PATH + constants.OPENCAST_TYPE_QUERY_PARAMETER + constants.OPENCAST_TYPE_DUBLINCORE_EPISODE;
-    const modifiedEventMetadata = modifyEventMetadataForOpencast(archivedSeriesId);
+    try {
+        const videoMetaDataUrl = constants.OPENCAST_EVENTS_PATH + video.identifier + constants.OPENCAST_METADATA_PATH + constants.OPENCAST_TYPE_QUERY_PARAMETER + constants.OPENCAST_TYPE_DUBLINCORE_EPISODE;
+        const modifiedEventMetadata = modifyEventMetadataForOpencast(archivedSeriesId);
 
-    // media package url
-    const mediaPackageUrl = constants.OPENCAST_ASSETS_EPISODE_URL + video.identifier;
+        // media package url
+        const mediaPackageUrl = constants.OPENCAST_ASSETS_EPISODE_URL + video.identifier;
 
-    let bodyFormData = new FormData();
-    bodyFormData.append('metadata', JSON.stringify(modifiedEventMetadata));
+        let bodyFormData = new FormData();
+        bodyFormData.append('metadata', JSON.stringify(modifiedEventMetadata));
 
-    let headers = {
-        ...bodyFormData.getHeaders(),
-        'Content-Length': bodyFormData.getLengthSync()
-    };
-    // update event metadata
-    await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
+        let headers = {
+            ...bodyFormData.getHeaders(),
+            'Content-Length': bodyFormData.getLengthSync()
+        };
+        // update event metadata
+        await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
 
-    // get media package to republish query
-    const mediaPackageResponse = await security.opencastBase.get(mediaPackageUrl);
-    return mediaPackageResponse;
+        // get media package to republish query
+        const mediaPackageResponse = await security.opencastBase.get(mediaPackageUrl);
+        return mediaPackageResponse;
+    } catch (error) {
+        throw error;
+    }
 };
 
 const republishEventMetadata = async(mediaPackageResponse) => {
-    // form data for the republish request
-    let bodyFormData = new FormData();
-    bodyFormData.append('definition', constants.REPUBLISH_METADATA_WORKFLOW_DEFINITION);
-    bodyFormData.append('mediapackage', mediaPackageResponse.data);
-    bodyFormData.append('properties', constants.PROPERTIES_REPUBLISH_METADATA);
+    try { // form data for the republish request
+        let bodyFormData = new FormData();
+        bodyFormData.append('definition', constants.REPUBLISH_METADATA_WORKFLOW_DEFINITION);
+        bodyFormData.append('mediapackage', mediaPackageResponse.data);
+        bodyFormData.append('properties', constants.PROPERTIES_REPUBLISH_METADATA);
 
-    // headers for the republish request
-    let headers = {
-        ...bodyFormData.getHeaders(),
-        'Content-Length': bodyFormData.getLengthSync()
-    };
+        // headers for the republish request
+        let headers = {
+            ...bodyFormData.getHeaders(),
+            'Content-Length': bodyFormData.getLengthSync()
+        };
 
-    // republish metadata url
-    const republishMetadataUrl = constants.OPENCAST_WORKFLOW_START_PATH;
+        // republish metadata url
+        const republishMetadataUrl = constants.OPENCAST_WORKFLOW_START_PATH;
 
-    // do the republish request
-    await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
+        // do the republish request
+        await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
+    } catch (error) {
+        throw error;
+    }
 }
 
 exports.moveVideoToArchivedSeries = async (video, archivedSeriesId) => {
