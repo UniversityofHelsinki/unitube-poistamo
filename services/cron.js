@@ -3,14 +3,14 @@ const fs = require("fs");
 const path = require("path");
 const database = require("./database");
 const archivedVideos = require('./archivedVideos');
+const databaseService = require('./databaseService');
 
 // ARCHIVE CRONJOB
-archiveCron = cron.schedule('* * * * *', async() => {
+archiveCron = cron.schedule('*/5 * * * *', async() => {
     console.log('Run CronJob job daily at 00:00');
-    const selectVideosWithArchivedDates = fs.readFileSync(path.resolve(__dirname, "../sql/getVideosWithArchivedDate.sql"), "utf8");
-    const selectedVideos = await database.pool.query(selectVideosWithArchivedDates);
-    if (selectedVideos && selectedVideos.rows && selectedVideos.rowCount > 0) {
-        await archivedVideos.archiveVideos(selectedVideos.rows);
+    const selectedVideosWithArchivedDates = await databaseService.selectedVideosWithArchivedDates();
+    if (selectedVideosWithArchivedDates && selectedVideosWithArchivedDates.rows && selectedVideosWithArchivedDates.rowCount > 0) {
+        await archivedVideos.archiveVideos(selectedVideosWithArchivedDates.rows);
     }
 });
 
