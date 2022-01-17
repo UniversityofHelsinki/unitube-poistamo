@@ -43,7 +43,7 @@ const updateEventMetadata = async(video, archivedSeriesId) => {
 const republishEventMetadata = async(mediaPackageResponse) => {
     // form data for the republish request
     let bodyFormData = new FormData();
-    bodyFormData.append('definition', 'republish-metadata');
+    bodyFormData.append('definition', constants.REPUBLISH_METADATA_WORKFLOW_DEFINITION);
     bodyFormData.append('mediapackage', mediaPackageResponse.data);
     bodyFormData.append('properties', constants.PROPERTIES_REPUBLISH_METADATA);
 
