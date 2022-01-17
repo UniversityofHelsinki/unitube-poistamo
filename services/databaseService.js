@@ -9,7 +9,14 @@ const selectedVideosWithArchivedDates = async() => {
     return selectedVideos;
 };
 
+const insertIntoVideoLogs = async(statusCode, message, videoId) => {
+    const insertNewVideoLogEntrySQL = fs.readFileSync(path.resolve(__dirname, "../sql/insertIntoVideoLogs.sql"), "utf8");
+    const newVideoLogEntry = await database.pool.query(insertNewVideoLogEntrySQL, [statusCode, message, videoId]);
+    return newVideoLogEntry.rowCount;
+};
+
 
 module.exports = {
-    selectedVideosWithArchivedDates : selectedVideosWithArchivedDates
+    selectedVideosWithArchivedDates : selectedVideosWithArchivedDates,
+    insertIntoVideoLogs : insertIntoVideoLogs
 };

@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS videos(
 );
 
 CREATE TABLE IF NOT EXISTS video_logs(
-                        video_log_id INT,
+                        video_log_id SERIAL NOT NULL,
                         status_code VARCHAR(255) NOT NULL,
                         oc_messages VARCHAR(255) NOT NULL,
                         video_id VARCHAR(255) NOT NULL,

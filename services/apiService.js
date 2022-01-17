@@ -18,6 +18,13 @@ const modifyEventMetadataForOpencast = (archivedSeriesId) => {
     return metadataArray;
 };
 
+const checkForEventActiveTransactionStatus= async(event) => {
+    // check event transaction status
+    const transactionStatusPath = constants.OPENCAST_ADMIN_EVENT_PREFIX + event.identifier + '/hasActiveTransaction';
+    const response = await security.opencastBase.get(transactionStatusPath);
+    return response;
+};
+
 const updateEventMetadata = async(video, archivedSeriesId) => {
     try {
         const videoMetaDataUrl = constants.OPENCAST_EVENTS_PATH + video.identifier + constants.OPENCAST_METADATA_PATH + constants.OPENCAST_TYPE_QUERY_PARAMETER + constants.OPENCAST_TYPE_DUBLINCORE_EPISODE;
@@ -61,7 +68,8 @@ const republishEventMetadata = async(mediaPackageResponse) => {
         const republishMetadataUrl = constants.OPENCAST_WORKFLOW_START_PATH;
 
         // do the republish request
-        await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
+        const response = await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
+        return response;
     } catch (error) {
         throw error;
     }
@@ -69,8 +77,17 @@ const republishEventMetadata = async(mediaPackageResponse) => {
 
 exports.moveVideoToArchivedSeries = async (video, archivedSeriesId) => {
     try {
-        const mediaPackageResponse = await updateEventMetadata(video, archivedSeriesId);
-        await republishEventMetadata(mediaPackageResponse);
+        const activeTransaction = await checkForEventActiveTransactionStatus(video);
+        if (activeTransaction.data && activeTransaction.data.active === false) {
+            const mediaPackageResponse = await updateEventMetadata(video, archivedSeriesId);
+            const response = await republishEventMetadata(mediaPackageResponse);
+            return response;
+        } else {
+            return {
+                status: 403,
+                statusText: 'error active transaction in progress'
+            };
+        }
     } catch (error) {
         throw error;
     }
