@@ -77,16 +77,21 @@ const republishEventMetadata = async(mediaPackageResponse) => {
 
 exports.moveVideoToArchivedSeries = async (video, archivedSeriesId) => {
     try {
-        const activeTransaction = await checkForEventActiveTransactionStatus(video);
-        if (activeTransaction.data && activeTransaction.data.active === false) {
-            const mediaPackageResponse = await updateEventMetadata(video, archivedSeriesId);
-            const response = await republishEventMetadata(mediaPackageResponse);
-            return response;
+        const isVideoAlreadyInArchivedSeries = video.is_part_of === archivedSeriesId;
+        if (isVideoAlreadyInArchivedSeries) {
+
         } else {
-            return {
-                status: 403,
-                statusText: 'error active transaction in progress'
-            };
+            const activeTransaction = await checkForEventActiveTransactionStatus(video);
+            if (activeTransaction.data && activeTransaction.data.active === false) {
+                const mediaPackageResponse = await updateEventMetadata(video, archivedSeriesId);
+                const response = await republishEventMetadata(mediaPackageResponse);
+                return response;
+            } else {
+                return {
+                    status: 403,
+                    statusText: 'error active transaction in progress'
+                };
+            }
         }
     } catch (error) {
         throw error;

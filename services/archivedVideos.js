@@ -18,13 +18,15 @@ const archiveVideos = async(archivedVideos) => {
             if (archiveResponse.status != '200') {
                 // insert into video_logs table for error in operation
                 await databaseService.insertIntoVideoLogs(archiveResponse.status, `error moving from series : ${event.is_part_of} to archived series : ${archivedSeriesId} ${archiveResponse.statusText}`, videoId );
+                // something went wrong continue to next video
+                continue;
             } else {
                 // insert into video_logs table for successful operation
                 await databaseService.insertIntoVideoLogs(archiveResponse.status, `moved from series : ${event.is_part_of} to archived series : ${archivedSeriesId}`, videoId );
+                // call api service to archive video in opencast
+                // update video_logs table for current video archived status
+                // update videos table actual_archived_date field to current date
             }
-            // call api service to archive video in opencast
-            // update video_logs table for current video archived status
-            // update videos table actual_archived_date field to current date
         } catch (error) {
             // insert into video_logs table for error  logs
             await databaseService.insertIntoVideoLogs(500, error.message, videoId);
