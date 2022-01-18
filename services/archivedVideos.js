@@ -7,7 +7,6 @@ const timer = ms => new Promise(res => setTimeout(res, ms));
 const archiveVideos = async(archivedVideos) => {
     for (let i = 0; i < archivedVideos.length; i++) {
         const videoId = archivedVideos[i].video_id;
-        await timer(10000); // wait for 10 seconds before next api call
         console.log(videoId);
         try {
             const eventResponse = await apiService.getEvent(videoId);
@@ -36,6 +35,7 @@ const archiveVideos = async(archivedVideos) => {
             await databaseService.insertIntoVideoLogs(500, error.message, videoId);
 
         }
+        await timer(60000); // wait for 1 minute before next api call
     }
 };
 

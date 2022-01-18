@@ -83,6 +83,9 @@ const hasEventActiveTransaction = (activeTransaction) => {
     return activeTransaction.data && activeTransaction.data.active === true;
 };
 
+// Returns a Promise that resolves after "ms" Milliseconds
+const timer = ms => new Promise(res => setTimeout(res, ms));
+
 exports.moveVideoToArchivedSeries = async (video, archivedSeriesId) => {
     try {
         if (isVideoAlreadyInArchivedSeries(video, archivedSeriesId)) {
@@ -99,6 +102,7 @@ exports.moveVideoToArchivedSeries = async (video, archivedSeriesId) => {
             };
         }
         const mediaPackageResponse = await updateEventMetadata(video, archivedSeriesId);
+        await timer(60000) // wait for 1 minute before republish call
         const response = await republishEventMetadata(mediaPackageResponse);
         return response;
 
