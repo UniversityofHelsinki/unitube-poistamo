@@ -105,7 +105,6 @@ exports.moveVideoToArchivedSeries = async (video, archivedSeriesId) => {
         await timer(60000) // wait for 1 minute before republish call
         const response = await republishEventMetadata(mediaPackageResponse);
         return response;
-
     } catch (error) {
         throw error;
     }

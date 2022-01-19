@@ -15,8 +15,16 @@ const insertIntoVideoLogs = async(statusCode, message, videoId) => {
     return newVideoLogEntry.rowCount;
 };
 
+const updateVideosTableArchivedStatus = async(videoId) => {
+    const now = new Date();
+    const updateVideoArchivedStatusSQL = fs.readFileSync(path.resolve(__dirname, "../sql/updateVideosTableArchivedStatus.sql"), "utf8");
+    const updatedVideoEntry = await database.pool.query(updateVideoArchivedStatusSQL, [now, videoId]);
+    return updatedVideoEntry.rowCount;
+};
+
 
 module.exports = {
     selectedVideosWithArchivedDates : selectedVideosWithArchivedDates,
-    insertIntoVideoLogs : insertIntoVideoLogs
+    insertIntoVideoLogs : insertIntoVideoLogs,
+    updateVideosTableArchivedStatus: updateVideosTableArchivedStatus
 };

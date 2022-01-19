@@ -5,8 +5,8 @@ const databaseService = require('./databaseService');
 const timer = ms => new Promise(res => setTimeout(res, ms));
 
 const archiveVideos = async(archivedVideos) => {
-    for (let i = 0; i < archivedVideos.length; i++) {
-        const videoId = archivedVideos[i].video_id;
+    for (const archivedVideo of archivedVideos) {
+        const videoId = archivedVideo.video_id;
         console.log(videoId);
         try {
             const eventResponse = await apiService.getEvent(videoId);
@@ -26,9 +26,8 @@ const archiveVideos = async(archivedVideos) => {
             } else {
                 // insert into video_logs table for successful operation
                 await databaseService.insertIntoVideoLogs(archiveResponse.status, `moved from series : ${eventResponse.data.is_part_of} to archived series : ${archivedSeriesId}`, videoId );
-                // call api service to archive video in opencast
-                // update video_logs table for current video archived status
                 // update videos table actual_archived_date field to current date
+                await databaseService.updateVideosTableArchivedStatus(videoId);
             }
         } catch (error) {
             // insert into video_logs table for error  logs
@@ -36,7 +35,7 @@ const archiveVideos = async(archivedVideos) => {
 
         }
         await timer(60000); // wait for 1 minute before next api call
-    }
+    };
 };
 
 
