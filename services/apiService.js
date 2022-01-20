@@ -64,11 +64,36 @@ const republishEventMetadata = async(mediaPackageResponse) => {
             'Content-Length': bodyFormData.getLengthSync()
         };
 
-        // republish metadata url
+        // workflow start url
         const republishMetadataUrl = constants.OPENCAST_WORKFLOW_START_PATH;
 
         // do the republish request
         const response = await security.opencastBase.post(republishMetadataUrl, bodyFormData, {headers});
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
+const startArchiveDeleteEventWorkFlow = async(mediaPackageResponse) => {
+    // form data for the workflow request
+    try {
+        let bodyFormData = new FormData();
+        bodyFormData.append('definition', constants.ARCHIVE_DELETE_WORKFLOW_DEFINITION);
+        bodyFormData.append('mediapackage', mediaPackageResponse.data);
+        bodyFormData.append('properties', constants.PROPERTIES_REPUBLISH_METADATA);
+
+        // headers for the republish request
+        let headers = {
+            ...bodyFormData.getHeaders(),
+            'Content-Length': bodyFormData.getLengthSync()
+        };
+
+        // workflow start path
+        const workFlowPath = constants.OPENCAST_WORKFLOW_START_PATH;
+
+        // start the workflow
+        const response = await security.opencastBase.post(workFlowPath, bodyFormData, {headers});
         return response;
     } catch (error) {
         throw error;
@@ -104,6 +129,29 @@ exports.moveVideoToArchivedSeries = async (video, archivedSeriesId) => {
         const mediaPackageResponse = await updateEventMetadata(video, archivedSeriesId);
         await timer(60000) // wait for 1 minute before republish call
         const response = await republishEventMetadata(mediaPackageResponse);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
+exports.deleteVideo = async (video) => {
+    try {
+        const activeTransaction = await checkForEventActiveTransactionStatus(video);
+        if (hasEventActiveTransaction(activeTransaction)) {
+            return {
+                status: 403,
+                statusText: 'error active transaction in progress'
+            };
+        }
+
+        // media package url
+        const mediaPackageUrl = constants.OPENCAST_ASSETS_EPISODE_URL + video.identifier;
+        // get media package for archive-delete workflow
+        const mediaPackageResponse = await security.opencastBase.get(mediaPackageUrl);
+
+        // start the archive deletion workflow
+        const response = await startArchiveDeleteEventWorkFlow(mediaPackageResponse);
         return response;
     } catch (error) {
         throw error;

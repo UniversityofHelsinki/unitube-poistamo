@@ -7,7 +7,7 @@ const timer = ms => new Promise(res => setTimeout(res, ms));
 const archiveVideos = async(archivedVideos) => {
     for (const archivedVideo of archivedVideos) {
         const videoId = archivedVideo.video_id;
-        console.log(videoId);
+        console.log("video id to be archived: ", videoId);
         try {
             const eventResponse = await apiService.getEvent(videoId);
             if (eventResponse.status != '200') {
@@ -35,7 +35,7 @@ const archiveVideos = async(archivedVideos) => {
 
         }
         await timer(60000); // wait for 1 minute before next api call
-    };
+    }
 };
 
 
