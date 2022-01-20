@@ -81,7 +81,7 @@ const startArchiveDeleteEventWorkFlow = async(mediaPackageResponse) => {
         let bodyFormData = new FormData();
         bodyFormData.append('definition', constants.ARCHIVE_DELETE_WORKFLOW_DEFINITION);
         bodyFormData.append('mediapackage', mediaPackageResponse.data);
-        
+
         // headers for the republish request
         let headers = {
             ...bodyFormData.getHeaders(),
