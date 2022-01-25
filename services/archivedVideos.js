@@ -15,7 +15,7 @@ const archiveVideos = async(archivedVideos) => {
                 // something went wrong continue to next video
                 continue;
             }
-            const archivedSeriesId = process.env.POISTAMO_ARCHIVED_SERIES;
+            const archivedSeriesId = process.env.POISTAMO_OPENCAST_ARCHIVED_SERIES;
             // call api service to move video to archived series
             const archiveResponse = await apiService.moveVideoToArchivedSeries(eventResponse.data, archivedSeriesId);
             if (archiveResponse.status != '200') {
