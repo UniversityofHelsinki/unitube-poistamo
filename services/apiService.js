@@ -3,10 +3,24 @@ const security = require('./security');
 const FormData = require('form-data');
 
 exports.getEvent = async (videoId) => {
-    const eventsUrl = constants.OPENCAST_EVENTS_PATH + videoId;
-    const response = await security.opencastBase(eventsUrl);
-    return response;
+    try {
+        const eventsUrl = constants.OPENCAST_EVENTS_PATH + videoId;
+        const response = await security.opencastBase.get(eventsUrl);
+        return response;
+    } catch (error) {
+        throw error;
+    }
 };
+
+exports.getSeries = async (seriesId) => {
+    try {
+        const seriesUrl = constants.OPENCAST_SERIES_PATH + seriesId;
+        const response = await security.opencastBase.get(seriesUrl);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+}
 
 const modifyEventMetadataForOpencast = (archivedSeriesId) => {
     const metadataArray = [];
