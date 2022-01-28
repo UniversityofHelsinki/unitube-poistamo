@@ -11,7 +11,7 @@ const deleteVideos = async(selectedVideosToBeDeleted) => {
         try {
             const eventResponse = await apiService.getEvent(videoId);
             if (eventResponse.status != '200') {
-                await databaseService.insertIntoVideoLogs(eventResponse.status, `error no video found for this id`, videoId);
+                await databaseService.insertIntoVideoLogs(eventResponse.status, `error deleting video, no video found for this id`, videoId, null, null, null, null);
                 // something went wrong continue to next video
                 continue;
             }
@@ -20,18 +20,18 @@ const deleteVideos = async(selectedVideosToBeDeleted) => {
             const deletionResponse = await apiService.deleteVideo(eventResponse.data);
             if (deletionResponse.status != '200') {
                 // insert into video_logs table for error in operation
-                await databaseService.insertIntoVideoLogs(deletionResponse.status, `error deleting video ${deletionResponse.statusText}`, videoId);
+                await databaseService.insertIntoVideoLogs(deletionResponse.status, `error deleting video ${deletionResponse.statusText}`, videoId, null, null, null, null);
                 // something went wrong continue to next video
                 continue;
             } else {
                 // insert into video_logs table for successful operation
-                await databaseService.insertIntoVideoLogs(deletionResponse.status, `successfully deleted video`, videoId);
+                await databaseService.insertIntoVideoLogs(deletionResponse.status, `successfully deleted video`, videoId, null, null, null, null);
                 // update videos table actual_archived_date field to current date
                 await databaseService.updateVideosTableDeletedStatus(videoId);
             }
         } catch (error) {
             // insert into video_logs table for error  logs
-            await databaseService.insertIntoVideoLogs(500, error.message, videoId);
+            await databaseService.insertIntoVideoLogs(500, error.message, videoId, null, null, null, null);
 
         }
         await timer(60000); // wait for 1 minute before next api call

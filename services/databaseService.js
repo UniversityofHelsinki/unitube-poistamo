@@ -9,9 +9,9 @@ const selectedVideosWithArchivedDates = async() => {
     return selectedVideos;
 };
 
-const insertIntoVideoLogs = async(statusCode, message, videoId) => {
+const insertIntoVideoLogs = async(statusCode, message, videoId, videoName, originalSeriesId, originalSeriesName, archivedSeriesId) => {
     const insertNewVideoLogEntrySQL = fs.readFileSync(path.resolve(__dirname, "../sql/insertIntoVideoLogs.sql"), "utf8");
-    const newVideoLogEntry = await database.pool.query(insertNewVideoLogEntrySQL, [statusCode, message, videoId]);
+    const newVideoLogEntry = await database.pool.query(insertNewVideoLogEntrySQL, [statusCode, message, videoId, videoName, originalSeriesId, originalSeriesName, archivedSeriesId]);
     return newVideoLogEntry.rowCount;
 };
 

@@ -13,6 +13,10 @@ CREATE TABLE IF NOT EXISTS video_logs(
                         status_code VARCHAR(255) NOT NULL,
                         oc_messages VARCHAR(255) NOT NULL,
                         video_id VARCHAR(255) NOT NULL,
+                        video_name varchar(255),
+                        original_series_id varchar(255),
+                        original_series_name varchar(255),
+                        archived_series_id varchar(255),
                         PRIMARY KEY(video_log_id),
                         CONSTRAINT fk_video
                         FOREIGN KEY(video_id)

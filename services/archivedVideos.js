@@ -11,27 +11,37 @@ const archiveVideos = async(archivedVideos) => {
         try {
             const eventResponse = await apiService.getEvent(videoId);
             if (eventResponse.status !== 200) {
-                await databaseService.insertIntoVideoLogs(eventResponse.status, `error no video found for this id`, videoId );
+                // statusCode, message, videoId, videoName, originalSeriesName, archivedSeriesId
+                await databaseService.insertIntoVideoLogs(eventResponse.status, `error archiving video, no video found for this id`, videoId , null, null, null, null);
                 // something went wrong continue to next video
                 continue;
             }
+            const originalSeriesId = eventResponse.data.is_part_of;
+            const videoTitle = eventResponse.data.title;
+            const seriesResponse = await apiService.getSeries(originalSeriesId);
+            if (seriesResponse.status !== 200) {
+                await databaseService.insertIntoVideoLogs(eventResponse.status, `error no series found for series id`, videoId, videoTitle, originalSeriesId, null, null);
+                // something went wrong no series found for video continue to next video
+                continue;
+            }
+            const originalSeriesName = seriesResponse.data.description;
             const archivedSeriesId = process.env.POISTAMO_OPENCAST_ARCHIVED_SERIES;
             // call api service to move video to archived series
             const archiveResponse = await apiService.moveVideoToArchivedSeries(eventResponse.data, archivedSeriesId);
             if (archiveResponse.status !== 200) {
                 // insert into video_logs table for error in operation
-                await databaseService.insertIntoVideoLogs(archiveResponse.status, `error moving from series : ${eventResponse.data.is_part_of} to archived series : ${archivedSeriesId} ${archiveResponse.statusText}`, videoId );
+                await databaseService.insertIntoVideoLogs(archiveResponse.status, `error archiving video: ${archiveResponse.statusText}`, videoId,  videoTitle, originalSeriesId, originalSeriesName, archivedSeriesId );
                 // something went wrong continue to next video
                 continue;
             } else {
                 // insert into video_logs table for successful operation
-                await databaseService.insertIntoVideoLogs(archiveResponse.status, `moved from series : ${eventResponse.data.is_part_of} to archived series : ${archivedSeriesId}`, videoId );
+                await databaseService.insertIntoVideoLogs(archiveResponse.status, `successfully archived video`, videoId, videoTitle, originalSeriesId, originalSeriesName, archivedSeriesId );
                 // update videos table actual_archived_date field to current date
                 await databaseService.updateVideosTableArchivedStatus(videoId);
             }
         } catch (error) {
             // insert into video_logs table for error  logs
-            await databaseService.insertIntoVideoLogs(500, error.message, videoId);
+            await databaseService.insertIntoVideoLogs(500, error.message, videoId, null, null, null, null);
 
         }
         await timer(60000); // wait for 1 minute before next api call
