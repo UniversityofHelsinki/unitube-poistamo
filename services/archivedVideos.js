@@ -24,7 +24,7 @@ const archiveVideos = async(archivedVideos) => {
                 // something went wrong no series found for video continue to next video
                 continue;
             }
-            const originalSeriesName = seriesResponse.data.description;
+            const originalSeriesName = seriesResponse.data.title;
             const archivedSeriesId = process.env.POISTAMO_OPENCAST_ARCHIVED_SERIES;
             // call api service to move video to archived series
             const archiveResponse = await apiService.moveVideoToArchivedSeries(eventResponse.data, archivedSeriesId);
