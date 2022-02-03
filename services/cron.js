@@ -4,7 +4,7 @@ const deletedVideos = require('./deletedVideos');
 const databaseService = require('./databaseService');
 
 // CRONJOB
-cronJob = cron.schedule('05 10 * * *', async() => {
+cronJob = cron.schedule('0 0 * * *', async() => {
     console.log('Run CronJob job daily at 00:00');
     const selectedVideosWithArchivedDates = await databaseService.selectedVideosWithArchivedDates();
     if (selectedVideosWithArchivedDates && selectedVideosWithArchivedDates.rows && selectedVideosWithArchivedDates.rowCount > 0) {
