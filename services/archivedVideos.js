@@ -26,9 +26,14 @@ const archiveVideos = async(archivedVideos) => {
             }
             const originalSeriesName = seriesResponse.data.title;
             const archivedSeriesId = process.env.POISTAMO_OPENCAST_ARCHIVED_SERIES;
+
             // call api service to move video to archived series
             const archiveResponse = await apiService.moveVideoToArchivedSeries(eventResponse.data, archivedSeriesId);
             if (archiveResponse.status !== 200) {
+                if (archiveResponse.status === 500) {
+                    // video was already in archived series so update videos actual_archived_date
+                    await databaseService.updateVideosTableArchivedStatus(videoId);
+                }
                 // insert into video_logs table for error in operation
                 await databaseService.insertIntoVideoLogs(archiveResponse.status, `error archiving video: ${archiveResponse.statusText}`, videoId,  videoTitle, originalSeriesId, originalSeriesName, archivedSeriesId );
                 // something went wrong continue to next video
