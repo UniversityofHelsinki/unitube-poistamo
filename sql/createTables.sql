@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS videos(
                        deletion_date date,
                        informed_date date,
                        video_creation_date date,
+                       error_date date,
                        PRIMARY KEY(video_id)
 );
 
