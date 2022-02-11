@@ -17,6 +17,8 @@ const OPENCAST_ADMIN_EVENT_PREFIX = '/admin-ng/event/';
 const PROPERTIES_REPUBLISH_METADATA =
     'publishLive=false\nuploadedSearchPreview=true\npublishToOaiPmh=false\ncomment=false\npublishToMediaModule=true';
 
+const DEFAULT_VIDEO_ARCHIVED_YEAR_AMOUNT = 3;
+
 module.exports = {
     ARCHIVED_SERIES,
     OPENCAST_EVENTS_PATH,
@@ -29,5 +31,6 @@ module.exports = {
     PROPERTIES_REPUBLISH_METADATA,
     REPUBLISH_METADATA_WORKFLOW_DEFINITION,
     OPENCAST_ADMIN_EVENT_PREFIX,
-    ARCHIVE_DELETE_WORKFLOW_DEFINITION
+    ARCHIVE_DELETE_WORKFLOW_DEFINITION,
+    DEFAULT_VIDEO_ARCHIVED_YEAR_AMOUNT
 }
