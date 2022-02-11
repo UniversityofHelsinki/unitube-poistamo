@@ -31,7 +31,7 @@ const deleteVideos = async(selectedVideosToBeDeleted) => {
 
             // call api service to delete video
             const deletionResponse = await apiService.deleteVideo(eventResponse.data, archivedSeriesId);
-            if (deletionResponse.status != '200') {
+            if (deletionResponse.status !== 200) {
                 if (deletionResponse.status === 500) {
                     // video was not in archived series so empty videos actual_archived_date and deletion_date and put video's archived_date field to 3 years from now
                     await databaseService.restoreVideoStateToBeArchived(videoId);

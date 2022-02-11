@@ -148,7 +148,7 @@ exports.moveVideoToArchivedSeries = async (video, archivedSeriesId) => {
     }
 };
 
-exports.deleteVideo = async (video) => {
+exports.deleteVideo = async (video, archivedSeriesId) => {
     try {
         if (!isVideoInArchivedSeries(video, archivedSeriesId)) {
             return {
