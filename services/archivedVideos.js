@@ -13,6 +13,8 @@ const archiveVideos = async(archivedVideos) => {
             if (eventResponse.status !== 200) {
                 // statusCode, message, videoId, videoName, originalSeriesName, archivedSeriesId
                 await databaseService.insertIntoVideoLogs(eventResponse.status, `error archiving video, no video found for this id`, videoId , null, null, null, null);
+                await databaseService.updateVideosTableArchivedStatus(videoId);
+                await databaseService.updateVideosTableDeletedStatus(videoId);
                 // something went wrong continue to next video
                 continue;
             }
