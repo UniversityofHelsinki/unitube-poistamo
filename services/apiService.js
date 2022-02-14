@@ -113,7 +113,7 @@ const startArchiveDeleteEventWorkFlow = async(mediaPackageResponse) => {
     }
 }
 
-const isVideoAlreadyInArchivedSeries = (video, archivedSeriesId) => {
+const isVideoInArchivedSeries = (video, archivedSeriesId) => {
     return video.is_part_of === archivedSeriesId;
 };
 
@@ -126,7 +126,7 @@ const timer = ms => new Promise(res => setTimeout(res, ms));
 
 exports.moveVideoToArchivedSeries = async (video, archivedSeriesId) => {
     try {
-        if (isVideoAlreadyInArchivedSeries(video, archivedSeriesId)) {
+        if (isVideoInArchivedSeries(video, archivedSeriesId)) {
             return {
                 status: 500,
                 statusText: 'video already in archived series skipping to next one'
@@ -148,8 +148,15 @@ exports.moveVideoToArchivedSeries = async (video, archivedSeriesId) => {
     }
 };
 
-exports.deleteVideo = async (video) => {
+exports.deleteVideo = async (video, archivedSeriesId) => {
     try {
+        if (!isVideoInArchivedSeries(video, archivedSeriesId)) {
+            return {
+                status: 500,
+                statusText: 'video is not in archived series skipping to next one'
+            };
+        }
+
         const activeTransaction = await checkForEventActiveTransactionStatus(video);
         if (hasEventActiveTransaction(activeTransaction)) {
             return {
