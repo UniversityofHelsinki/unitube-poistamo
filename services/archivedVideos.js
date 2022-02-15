@@ -32,9 +32,13 @@ const archiveVideos = async(archivedVideos) => {
             // call api service to move video to archived series
             const archiveResponse = await apiService.moveVideoToArchivedSeries(eventResponse.data, archivedSeriesId);
             if (archiveResponse.status !== 200) {
-                if (archiveResponse.status === 500) {
+                if (archiveResponse.status === 405) {
                     // video was already in archived series so update videos actual_archived_date
                     await databaseService.updateVideosTableArchivedStatus(videoId);
+                }
+                if (archiveResponse.status === 500) {
+                    // something went wrong in opencast archiving, mark error date in video
+                    await databaseService.updateVideoErrorDate(videoId);
                 }
                 // insert into video_logs table for error in operation
                 await databaseService.insertIntoVideoLogs(archiveResponse.status, `error archiving video: ${archiveResponse.statusText}`, videoId,  videoTitle, originalSeriesId, originalSeriesName, archivedSeriesId );
