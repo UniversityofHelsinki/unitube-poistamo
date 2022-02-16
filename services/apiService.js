@@ -55,11 +55,15 @@ const updateEventMetadata = async(video, archivedSeriesId) => {
             'Content-Length': bodyFormData.getLengthSync()
         };
         // update event metadata
-        await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
+        const response = await security.opencastBase.put(videoMetaDataUrl, bodyFormData, {headers});
 
-        // get media package to republish query
-        const mediaPackageResponse = await security.opencastBase.get(mediaPackageUrl);
-        return mediaPackageResponse;
+        if (response.status === 204) {
+            // get media package to republish query
+            const mediaPackageResponse = await security.opencastBase.get(mediaPackageUrl);
+            return mediaPackageResponse;
+        } else {
+            return response;
+        }
     } catch (error) {
         throw error;
     }
@@ -128,7 +132,7 @@ exports.moveVideoToArchivedSeries = async (video, archivedSeriesId) => {
     try {
         if (isVideoInArchivedSeries(video, archivedSeriesId)) {
             return {
-                status: 500,
+                status: 405,
                 statusText: 'video already in archived series skipping to next one'
             };
         }
@@ -140,9 +144,13 @@ exports.moveVideoToArchivedSeries = async (video, archivedSeriesId) => {
             };
         }
         const mediaPackageResponse = await updateEventMetadata(video, archivedSeriesId);
-        await timer(60000) // wait for 1 minute before republish call
-        const response = await republishEventMetadata(mediaPackageResponse);
-        return response;
+        if (mediaPackageResponse.status === 200) {
+            await timer(60000) // wait for 1 minute before republish call
+            const response = await republishEventMetadata(mediaPackageResponse);
+            return response;
+        } else {
+            return mediaPackageResponse;
+        }
     } catch (error) {
         throw error;
     }
@@ -152,7 +160,7 @@ exports.deleteVideo = async (video, archivedSeriesId) => {
     try {
         if (!isVideoInArchivedSeries(video, archivedSeriesId)) {
             return {
-                status: 500,
+                status: 405,
                 statusText: 'video is not in archived series skipping to next one'
             };
         }

@@ -49,11 +49,19 @@ const restoreVideoStateToBeArchived = async(videoId) => {
     return updatedVideoEntry.rowCount;
 };
 
+const updateVideoErrorDate = async(videoId) => {
+    const now = new Date();
+    const updateVideoErrorDateSQL = fs.readFileSync(path.resolve(__dirname, "../sql/updateVideosErrorDate.sql"), "utf8");
+    const updatedVideoEntry = await database.pool.query(updateVideoErrorDateSQL, [now, videoId]);
+    return updatedVideoEntry.rowCount;
+};
+
 module.exports = {
     selectedVideosWithArchivedDates : selectedVideosWithArchivedDates,
     insertIntoVideoLogs : insertIntoVideoLogs,
     updateVideosTableArchivedStatus: updateVideosTableArchivedStatus,
     selectedVideosToBeDeleted: selectedVideosToBeDeleted,
     updateVideosTableDeletedStatus: updateVideosTableDeletedStatus,
-    restoreVideoStateToBeArchived: restoreVideoStateToBeArchived
+    restoreVideoStateToBeArchived: restoreVideoStateToBeArchived,
+    updateVideoErrorDate: updateVideoErrorDate
 };
