@@ -111,7 +111,7 @@ deploy_test:
     - oc set env dc/poistamo-test POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_TEST
     - oc set env dc/poistamo-test POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_TEST
     # cronjob variable
-    - oc set env dc/poistamo-test CRON_START_TIME=$CRON_START_TIME_TEST
+    - oc set env dc/poistamo-test CRON_START_TIME="0 0 * * *"
     - oc start-build poistamo-test --from-dir=. --follow
     # patch openshift buildConfig file
     - oc patch bc/poistamo-test --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
@@ -155,7 +155,7 @@ deploy_prod:
     - oc set env dc/poistamo-prod POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_PROD
     - oc set env dc/poistamo-prod POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_PROD
     # cronjob variable
-    - oc set env dc/poistamo-prod CRON_START_TIME=$CRON_START_TIME_PROD
+    - oc set env dc/poistamo-prod CRON_START_TIME="0 0 * * *"
     - oc start-build poistamo-prod --from-dir=. --follow
     # patch openshift buildConfig file
     - oc patch bc/poistamo-prod --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
