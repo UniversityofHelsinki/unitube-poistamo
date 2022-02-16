@@ -67,7 +67,7 @@ deploy_dev:
     - oc set env dc/poistamo-dev POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_DEV
     - oc set env dc/poistamo-dev POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_DEV
     # cronjob variable
-    - oc set env dc/poistamo-dev CRON_START_TIME=$CRON_START_TIME_DEV
+    - oc set env dc/poistamo-dev CRON_START_TIME="0 0 * * *"
     # start build process in OpenShift
     - oc start-build poistamo-dev --from-dir=. --follow
     # patch openshift buildConfig file
