@@ -42,8 +42,7 @@ deploy_dev:
     - curl -fsSLO --compressed "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz";
     - tar xvzf openshift-client-linux.tar.gz -C /usr/local/bin
     # before any action, I connect to the OpenShift server with the appropriate credentials
-    # this parameter: `--insecure-skip-tls-verify` is important because we use a certificate signed by an unknown authority
-    - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST --insecure-skip-tls-verify
+    - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST
     - oc project poistamo
     # add secrets here
     - oc delete secret generic poistamo-dev-password --ignore-not-found
@@ -87,8 +86,7 @@ deploy_test:
     - curl -fsSLO --compressed "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz";
     - tar xvzf openshift-client-linux.tar.gz -C /usr/local/bin
     # before any action, I connect to the OpenShift server with the appropriate credentials
-    # this parameter: `--insecure-skip-tls-verify` is important because we use a certificate signed by an unknown authority
-    - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST --insecure-skip-tls-verify
+    - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST
     - oc project poistamo
     # add secrets here
     - oc delete secret generic poistamo-test-password --ignore-not-found
@@ -131,8 +129,7 @@ deploy_prod:
     - curl -fsSLO --compressed "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz";
     - tar xvzf openshift-client-linux.tar.gz -C /usr/local/bin
     # before any action, I connect to the OpenShift server with the appropriate credentials
-    # this parameter: `--insecure-skip-tls-verify` is important because we use a certificate signed by an unknown authority
-    - oc login https://$OPENSHIFT_ADDR_PROD:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_PROD --insecure-skip-tls-verify
+    - oc login https://$OPENSHIFT_ADDR_PROD:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_PROD
     - oc project poistamo
     # add secrets here
     - oc delete secret generic poistamo-prod-password --ignore-not-found
