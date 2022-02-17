@@ -8,6 +8,7 @@ PORT = 5432
 HOST = localhost  
 DATABASE= expired_videos  
 
+CRON_START_TIME=0 0 * * *
 
 POISTAMO_OPENCAST_HOST (OpenCast development url)
 POISTAMO_OPENCAST_USER (found in keepass)
