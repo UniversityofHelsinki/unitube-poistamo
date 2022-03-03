@@ -1,8 +1,7 @@
 // Postgres client setup
 const Pool = require("pg-pool");
 
-module.exports = {
-    pool : new Pool({
+    const pool = new Pool({
         user: process.env.POSTGRES_USER,
         host: process.env.HOST,
         database: process.env.DATABASE,
@@ -10,4 +9,7 @@ module.exports = {
         port: process.env.PORT,
         ssl: process.env.SSL ? true : false
     })
+
+module.exports.query = (text, values) => {
+    return pool.query(text, values);
 };

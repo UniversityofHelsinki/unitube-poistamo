@@ -33,6 +33,9 @@ app.listen(port, ipaddress, () => {
     console.log( 'Listening on ' + ipaddress + ', port ' + port );
 });
 
+// for the tests
+module.exports = app;
+
 (async () => {
     // START CRONJOB
     await cron.cronJob;
