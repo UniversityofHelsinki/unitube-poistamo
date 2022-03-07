@@ -1,5 +1,6 @@
 const apiService = require('../services/apiService');
 const archivedVideos = require('../services/archivedVideos');
+const timer = require('../services/timer');
 const path = require("path");
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 let app;
@@ -55,11 +56,13 @@ const videosToArchive =
         archived_date: '2021-02-11T22:00:00.000Z' }];
 
 jest.mock('../services/apiService');
+jest.mock('../services/timer');
 
 it('archives a video which is not in archived series', async () => {
 
     await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date, actual_archived_date) VALUES (\'e8a86433-0245-44b8-b0d7-69f6578bac6f\', \'2018-01-01\'::date, \'2008-01-01\'::date, \'2020-01-01\'::date)');
 
+    await timer.getTimer.mockResolvedValue(0);
 
     apiService.getEvent.mockResolvedValue( {
         status: 200,
@@ -86,13 +89,13 @@ it('archives a video which is not in archived series', async () => {
      expect(video_logs.rows).toHaveLength(1);
 });
 
-xit('doesnt archive a video which is not found from opencast', async () => {
+it('doesnt archive a video which is not found from opencast', async () => {
     apiService.getEvent.mockResolvedValue({
         status: 200
     });
 });
 
-xit('doesnt archive a video if series is not found', async () => {
+it('doesnt archive a video if series is not found', async () => {
     apiService.getEvent.mockResolvedValue( {
         status: 200,
         data: {
@@ -105,7 +108,7 @@ xit('doesnt archive a video if series is not found', async () => {
 
 });
 
-xit('doesnt archive a video which is already in archived series', async() => {
+it('doesnt archive a video which is already in archived series', async() => {
     apiService.getEvent.mockResolvedValue( {
         status: 200,
         data: {
@@ -118,7 +121,7 @@ xit('doesnt archive a video which is already in archived series', async() => {
     });
 });
 
-xit('error in opencast archiving', async () => {
+it('error in opencast archiving', async () => {
     apiService.getEvent.mockResolvedValue( {
         status: 200,
         data: {
