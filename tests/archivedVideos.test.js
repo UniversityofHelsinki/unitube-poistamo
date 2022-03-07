@@ -58,6 +58,9 @@ jest.mock('../services/apiService');
 
 it('archives a video which is not in archived series', async () => {
 
+    await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date, actual_archived_date) VALUES (\'e8a86433-0245-44b8-b0d7-69f6578bac6f\', \'2018-01-01\'::date, \'2008-01-01\'::date, \'2020-01-01\'::date)');
+
+
     apiService.getEvent.mockResolvedValue( {
         status: 200,
             data: {
@@ -76,14 +79,18 @@ it('archives a video which is not in archived series', async () => {
         statusText: 'OK'
     });
 
-    const archiveVideos = await archivedVideos.archiveVideos(videosToArchive);
+     await archivedVideos.archiveVideos(videosToArchive);
+     const videos = await client.query('SELECT * FROM videos');
+     expect(videos.rows).toHaveLength(1);
+     const video_logs = await client.query('SELECT * FROM video_logs');
+     expect(video_logs.rows).toHaveLength(1);
 });
 
 xit('doesnt archive a video which is not found from opencast', async () => {
     apiService.getEvent.mockResolvedValue({
         status: 200
     });
-} )
+});
 
 xit('doesnt archive a video if series is not found', async () => {
     apiService.getEvent.mockResolvedValue( {
@@ -96,7 +103,7 @@ xit('doesnt archive a video if series is not found', async () => {
         status: 400
     });
 
-})
+});
 
 xit('doesnt archive a video which is already in archived series', async() => {
     apiService.getEvent.mockResolvedValue( {
@@ -109,7 +116,7 @@ xit('doesnt archive a video which is already in archived series', async() => {
         status: 405,
         statusText: 'video already in archived series skipping to next one'
     });
-})
+});
 
 xit('error in opencast archiving', async () => {
     apiService.getEvent.mockResolvedValue( {
@@ -122,6 +129,7 @@ xit('error in opencast archiving', async () => {
         status: 500,
         statusText: 'opencast error'
     });
+});
 
-})
+
 
