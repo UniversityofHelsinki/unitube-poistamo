@@ -48,157 +48,159 @@ jest.mock('../services/timer');
 
 const videosToArchive = [{video_id: 'e8a86433-0245-44b8-b0d7-69f6578bac6f'}];
 
+describe('Video archiving tests', () => {
 
-it('archives a video which is not in archived series', async () => {
+    it('archives a video which is not in archived series', async () => {
 
-    apiService.getEvent.mockResolvedValue({
-        status: 200,
-        data: {
-            identifier: 'e8a86433-0245-44b8-b0d7-69f6578bac6f',
-            is_part_of: '0345f162-9bbe-48fe-bd6f-f061a3300485',
-            title: 'pienivideo.mp4',
-        }
-    });
-    apiService.getSeries.mockResolvedValue({
-        status: 200,
-        data: {
-            identifier: '379fb94c-f194-422a-be6e-fc24f9507b95',
-            title: 'joku sarja',
-        }
-    });
-    apiService.moveVideoToArchivedSeries.mockResolvedValue({
-        status: 200,
-        statusText: 'OK'
-    });
+        apiService.getEvent.mockResolvedValue({
+            status: 200,
+            data: {
+                identifier: 'e8a86433-0245-44b8-b0d7-69f6578bac6f',
+                is_part_of: '0345f162-9bbe-48fe-bd6f-f061a3300485',
+                title: 'pienivideo.mp4',
+            }
+        });
+        apiService.getSeries.mockResolvedValue({
+            status: 200,
+            data: {
+                identifier: '379fb94c-f194-422a-be6e-fc24f9507b95',
+                title: 'joku sarja',
+            }
+        });
+        apiService.moveVideoToArchivedSeries.mockResolvedValue({
+            status: 200,
+            statusText: 'OK'
+        });
 
-    let videos = await client.query('SELECT * FROM videos');
-    expect(videos.rows[0].actual_archive_date).toBeUndefined();
-    let video_logs = await client.query('SELECT * FROM video_logs');
-    expect(video_logs.rows).toEqual([]);
+        let videos = await client.query('SELECT * FROM videos');
+        expect(videos.rows[0].actual_archive_date).toBeUndefined();
+        let video_logs = await client.query('SELECT * FROM video_logs');
+        expect(video_logs.rows).toEqual([]);
 
-    await archivedVideos.archiveVideos(videosToArchive);
+        await archivedVideos.archiveVideos(videosToArchive);
 
-    video_logs = await client.query('SELECT * FROM video_logs');
-    expect(video_logs.rows).toHaveLength(1);
-    expect(video_logs.rows[0].oc_messages).toEqual('successfully archived video');
-    expect(video_logs.rows[0].archived_series_id).toEqual(process.env.POISTAMO_OPENCAST_ARCHIVED_SERIES)
+        video_logs = await client.query('SELECT * FROM video_logs');
+        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows[0].oc_messages).toEqual('successfully archived video');
+        expect(video_logs.rows[0].archived_series_id).toEqual(process.env.POISTAMO_OPENCAST_ARCHIVED_SERIES)
 
-    videos = await client.query('SELECT * FROM videos');
-    expect(videos.rows).toHaveLength(1);
-    expect(videos.rows[0].actual_archived_date).not.toBeNull();
-    expect(videos.rows[0].error_date).toBeNull();
-});
-
-
-it('marks a video deleted if it\'s not found from opencast', async () => {
-
-    apiService.getEvent.mockResolvedValue({
-        status: 404
+        videos = await client.query('SELECT * FROM videos');
+        expect(videos.rows).toHaveLength(1);
+        expect(videos.rows[0].actual_archived_date).not.toBeNull();
+        expect(videos.rows[0].error_date).toBeNull();
     });
 
-    await archivedVideos.archiveVideos(videosToArchive);
 
-    const video_logs = await client.query('SELECT * FROM video_logs');
-    expect(video_logs.rows).toHaveLength(1);
-    expect(video_logs.rows[0].oc_messages).toEqual('error archiving video, no video found for this id');
-    expect(video_logs.rows[0].archived_series_id).toBeNull();
+    it('marks a video deleted if it\'s not found from opencast', async () => {
 
-    const videos = await client.query('SELECT * FROM videos');
-    expect(videos.rows).toHaveLength(1);
-    expect(videos.rows[0].actual_archived_date).not.toBeNull();
-    expect(videos.rows[0].deletion_date).not.toBeNull();
-    expect(videos.rows[0].error_date).toBeNull();
-});
+        apiService.getEvent.mockResolvedValue({
+            status: 404
+        });
 
+        await archivedVideos.archiveVideos(videosToArchive);
 
-it('doesnt archive a video if series is not found', async () => {
+        const video_logs = await client.query('SELECT * FROM video_logs');
+        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows[0].oc_messages).toEqual('error archiving video, no video found for this id');
+        expect(video_logs.rows[0].archived_series_id).toBeNull();
 
-    apiService.getEvent.mockResolvedValue({
-        status: 200,
-        data: {
-            is_part_of: '0345f162-9bbe-48fe-bd6f-f061a3300485',
-            title: 'pienivideo.mp4',
-        }
-    });
-    apiService.getSeries.mockResolvedValue({
-        status: 400
+        const videos = await client.query('SELECT * FROM videos');
+        expect(videos.rows).toHaveLength(1);
+        expect(videos.rows[0].actual_archived_date).not.toBeNull();
+        expect(videos.rows[0].deletion_date).not.toBeNull();
+        expect(videos.rows[0].error_date).toBeNull();
     });
 
-    await archivedVideos.archiveVideos(videosToArchive);
 
-    const video_logs = await client.query('SELECT * FROM video_logs');
-    expect(video_logs.rows).toHaveLength(1);
-    expect(video_logs.rows[0].oc_messages).toEqual('error no series found for series id');
-    expect(video_logs.rows[0].archived_series_id).toBeNull();
+    it('doesnt archive a video if series is not found', async () => {
 
-    const videos = await client.query('SELECT * FROM videos');
-    expect(videos.rows).toHaveLength(1);
-    expect(videos.rows[0].actual_archived_date).toBeNull();
-    expect(videos.rows[0].deletion_date).toBeNull();
-    expect(videos.rows[0].error_date).toBeNull();
-});
+        apiService.getEvent.mockResolvedValue({
+            status: 200,
+            data: {
+                is_part_of: '0345f162-9bbe-48fe-bd6f-f061a3300485',
+                title: 'pienivideo.mp4',
+            }
+        });
+        apiService.getSeries.mockResolvedValue({
+            status: 400
+        });
 
+        await archivedVideos.archiveVideos(videosToArchive);
 
-it('doesnt archive a video which is already in archived series', async () => {
+        const video_logs = await client.query('SELECT * FROM video_logs');
+        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows[0].oc_messages).toEqual('error no series found for series id');
+        expect(video_logs.rows[0].archived_series_id).toBeNull();
 
-    apiService.getEvent.mockResolvedValue({
-        status: 200,
-        data: {
-            is_part_of: '0345f162-9bbe-48fe-bd6f-f061a3300485',
-            title: 'pienivideo.mp4',
-        }
-    });
-    apiService.getSeries.mockResolvedValue({
-        status: 200,
-        data: {
-            identifier: '379fb94c-f194-422a-be6e-fc24f9507b95',
-            title: 'joku sarja',
-        }
+        const videos = await client.query('SELECT * FROM videos');
+        expect(videos.rows).toHaveLength(1);
+        expect(videos.rows[0].actual_archived_date).toBeNull();
+        expect(videos.rows[0].deletion_date).toBeNull();
+        expect(videos.rows[0].error_date).toBeNull();
     });
 
-    apiService.moveVideoToArchivedSeries.mockResolvedValue({
-        status: 405,
-        statusText: 'video already in archived series skipping to next one'
+
+    it('doesnt archive a video which is already in archived series', async () => {
+
+        apiService.getEvent.mockResolvedValue({
+            status: 200,
+            data: {
+                is_part_of: '0345f162-9bbe-48fe-bd6f-f061a3300485',
+                title: 'pienivideo.mp4',
+            }
+        });
+        apiService.getSeries.mockResolvedValue({
+            status: 200,
+            data: {
+                identifier: '379fb94c-f194-422a-be6e-fc24f9507b95',
+                title: 'joku sarja',
+            }
+        });
+
+        apiService.moveVideoToArchivedSeries.mockResolvedValue({
+            status: 405,
+            statusText: 'video already in archived series skipping to next one'
+        });
+
+        await archivedVideos.archiveVideos(videosToArchive);
+
+        const videos = await client.query('SELECT * FROM videos');
+        expect(videos.rows[0].actual_archived_date).not.toBeNull();
+        expect(videos.rows[0].deletion_date).toBeNull();
+        expect(videos.rows[0].error_date).toBeNull();
+
+        const video_logs = await client.query('SELECT * FROM video_logs');
+        expect(video_logs.rows[0].oc_messages).toEqual('error archiving video: video already in archived series skipping to next one');
+        expect(video_logs.rows[0].archived_series_id).toEqual(process.env.POISTAMO_OPENCAST_ARCHIVED_SERIES)
+
+
     });
 
-    await archivedVideos.archiveVideos(videosToArchive);
+    it('error in opencast archiving', async () => {
+        apiService.getEvent.mockResolvedValue({
+            status: 200,
+            data: {
+                is_part_of: '0345f162-9bbe-48fe-bd6f-f061a3300485',
+                title: 'pienivideo.mp4',
+            }
+        });
+        apiService.moveVideoToArchivedSeries.mockResolvedValue({
+            status: 500,
+            statusText: 'opencast error'
+        });
 
-    const videos = await client.query('SELECT * FROM videos');
-    expect(videos.rows[0].actual_archived_date).not.toBeNull();
-    expect(videos.rows[0].deletion_date).toBeNull();
-    expect(videos.rows[0].error_date).toBeNull();
+        await archivedVideos.archiveVideos(videosToArchive);
 
-    const video_logs = await client.query('SELECT * FROM video_logs');
-    expect(video_logs.rows[0].oc_messages).toEqual('error archiving video: video already in archived series skipping to next one');
-    expect(video_logs.rows[0].archived_series_id).toEqual(process.env.POISTAMO_OPENCAST_ARCHIVED_SERIES)
+        const videos = await client.query('SELECT * FROM videos');
+        expect(videos.rows[0].actual_archived_date).toBeNull();
+        expect(videos.rows[0].deletion_date).toBeNull();
+        expect(videos.rows[0].error_date).not.toBeNull();
 
+        const video_logs = await client.query('SELECT * FROM video_logs');
+        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows[0].oc_messages).toEqual('error archiving video: opencast error');
 
-});
-
-it('error in opencast archiving', async () => {
-    apiService.getEvent.mockResolvedValue({
-        status: 200,
-        data: {
-            is_part_of: '0345f162-9bbe-48fe-bd6f-f061a3300485',
-            title: 'pienivideo.mp4',
-        }
     });
-    apiService.moveVideoToArchivedSeries.mockResolvedValue({
-        status: 500,
-        statusText: 'opencast error'
-    });
-
-    await archivedVideos.archiveVideos(videosToArchive);
-
-    const videos = await client.query('SELECT * FROM videos');
-    expect(videos.rows[0].actual_archived_date).toBeNull();
-    expect(videos.rows[0].deletion_date).toBeNull();
-    expect(videos.rows[0].error_date).not.toBeNull();
-
-    const video_logs = await client.query('SELECT * FROM video_logs');
-    expect(video_logs.rows).toHaveLength(1);
-    expect(video_logs.rows[0].oc_messages).toEqual('error archiving video: opencast error');
-
 });
 
 
