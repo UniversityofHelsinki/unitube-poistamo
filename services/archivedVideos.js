@@ -37,6 +37,7 @@ const archiveVideos = async(archivedVideos) => {
                     await databaseService.updateVideosTableArchivedStatus(videoId);
                 }
                 if (archiveResponse.status === 500) {
+                    console.log('archive 500');
                     // something went wrong in opencast archiving, mark error date in video
                     await databaseService.updateVideoErrorDate(videoId);
                 }
