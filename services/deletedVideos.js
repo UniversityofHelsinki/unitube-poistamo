@@ -1,8 +1,7 @@
 const apiService = require('./apiService');
 const databaseService = require('./databaseService');
+const timer = require('./timer');
 
-// Returns a Promise that resolves after "ms" Milliseconds
-const timer = ms => new Promise(res => setTimeout(res, ms));
 
 const deleteVideos = async(selectedVideosToBeDeleted) => {
     for (const videoForDeletion of selectedVideosToBeDeleted) {
@@ -51,7 +50,7 @@ const deleteVideos = async(selectedVideosToBeDeleted) => {
             await databaseService.insertIntoVideoLogs(500, error.message, videoId, null, null, null, null);
 
         }
-        await timer(60000); // wait for 1 minute before next api call
+        await timer.getTimer(60000); // wait for 1 minute before next api call
     }
 };
 
