@@ -5,6 +5,7 @@ const path = require("path");
 require('dotenv').config({path: path.resolve(__dirname, '../.env')});
 const client = require('../services/database');
 const Pool = require('pg-pool');
+var format = require('date-format');
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -47,6 +48,7 @@ jest.mock('../services/apiService');
 jest.mock('../services/timer');
 
 const videosToArchive = [{video_id: 'e8a86433-0245-44b8-b0d7-69f6578bac6f'}];
+const today = format.asString('dd.MM.yyyy', new Date());
 
 describe('Video archiving tests', () => {
 
@@ -84,9 +86,10 @@ describe('Video archiving tests', () => {
         expect(video_logs.rows[0].oc_messages).toEqual('successfully archived video');
         expect(video_logs.rows[0].archived_series_id).toEqual(process.env.POISTAMO_OPENCAST_ARCHIVED_SERIES)
 
-        videos = await client.query('SELECT * FROM videos');
+        videos = await client.query('SELECT video_id, error_date, to_char(actual_archived_date, \'DD.MM.YYYY\') as actual_archived_date FROM videos');
         expect(videos.rows).toHaveLength(1);
         expect(videos.rows[0].actual_archived_date).not.toBeNull();
+        expect(videos.rows[0].actual_archived_date).toEqual(today);
         expect(videos.rows[0].error_date).toBeNull();
     });
 
@@ -104,10 +107,10 @@ describe('Video archiving tests', () => {
         expect(video_logs.rows[0].oc_messages).toEqual('error archiving video, no video found for this id');
         expect(video_logs.rows[0].archived_series_id).toBeNull();
 
-        const videos = await client.query('SELECT * FROM videos');
+        videos = await client.query('SELECT video_id, to_char(actual_archived_date, \'DD.MM.YYYY\') as actual_archived_date, error_date, to_char(deletion_date, \'DD.MM.YYYY\') as deletion_date FROM videos');
         expect(videos.rows).toHaveLength(1);
-        expect(videos.rows[0].actual_archived_date).not.toBeNull();
-        expect(videos.rows[0].deletion_date).not.toBeNull();
+        expect(videos.rows[0].actual_archived_date).toEqual(today);
+        expect(videos.rows[0].deletion_date).toEqual(today);
         expect(videos.rows[0].error_date).toBeNull();
     });
 
@@ -164,8 +167,8 @@ describe('Video archiving tests', () => {
 
         await archivedVideos.archiveVideos(videosToArchive);
 
-        const videos = await client.query('SELECT * FROM videos');
-        expect(videos.rows[0].actual_archived_date).not.toBeNull();
+        const videos = await client.query('SELECT video_id, deletion_date, error_date, to_char(actual_archived_date, \'DD.MM.YYYY\') as actual_archived_date FROM videos');
+        expect(videos.rows[0].actual_archived_date).toEqual(today);
         expect(videos.rows[0].deletion_date).toBeNull();
         expect(videos.rows[0].error_date).toBeNull();
 
@@ -191,10 +194,10 @@ describe('Video archiving tests', () => {
 
         await archivedVideos.archiveVideos(videosToArchive);
 
-        const videos = await client.query('SELECT * FROM videos');
+        videos = await client.query('SELECT actual_archived_date, deletion_date, to_char(error_date, \'DD.MM.YYYY\') as error_date FROM videos');
         expect(videos.rows[0].actual_archived_date).toBeNull();
         expect(videos.rows[0].deletion_date).toBeNull();
-        expect(videos.rows[0].error_date).not.toBeNull();
+        expect(videos.rows[0].error_date).toEqual(today);
 
         const video_logs = await client.query('SELECT * FROM video_logs');
         expect(video_logs.rows).toHaveLength(1);
