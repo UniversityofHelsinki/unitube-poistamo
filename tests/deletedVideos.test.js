@@ -5,6 +5,8 @@ const path = require("path");
 require('dotenv').config({path: path.resolve(__dirname, '../.env')});
 const client = require('../services/database');
 const Pool = require('pg-pool');
+var format = require('date-format');
+const Constants = require("../utils/constants");
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -47,39 +49,107 @@ jest.mock('../services/apiService');
 jest.mock('../services/timer');
 
 const videosToDelete = [{video_id: 'e8a86433-0245-44b8-b0d7-69f6578bac6f'}];
+const today = format.asString('dd.MM.yyyy', new Date());
+const archivedDate = () => {
+    let d = new Date();
+    d.setFullYear(d.getFullYear() + Constants.DEFAULT_VIDEO_ARCHIVED_YEAR_AMOUNT);
+    return format.asString('dd.MM.yyyy', d);
+}
 
 describe('Video deleting', () => {
 
-it('deletes a video', async () => {
-    apiService.getEvent.mockResolvedValue({
-        status: 200,
-        data: {
-            identifier: 'e8a86433-0245-44b8-b0d7-69f6578bac6f',
-            is_part_of: '0345f162-9bbe-48fe-bd6f-f061a3300485',
-            title: 'video.mp4',
-        }
-    });
-    apiService.getSeries.mockResolvedValue({
-        status: 200,
-        data: {
-            identifier: '379fb94c-f194-422a-be6e-fc24f9507b95',
-            title: 'Great series',
-        }
-    });
-    apiService.deleteVideo.mockResolvedValue({
-        status: 200,
-        statustext: 'OK'
+    it('Deletes a video', async () => {
+        apiService.getEvent.mockResolvedValue({
+            status: 200,
+            data: {
+                is_part_of: '0345f162-9bbe-48fe-bd6f-f061a3300485',
+                title: 'video.mp4',
+            }
+        });
+        apiService.getSeries.mockResolvedValue({ status: 200 });
+        apiService.deleteVideo.mockResolvedValue({
+            status: 200,
+            statustext: 'OK'
+        });
+
+        await deletedVideos.deleteVideos(videosToDelete);
+
+        const video_logs = await client.query('SELECT * FROM video_logs');
+        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows[0].oc_messages).toEqual('successfully deleted video');
+        expect(video_logs.rows[0].archived_series_id).toBeNull();
+
+        const videos = await client.query('SELECT to_char(deletion_date, \'DD.MM.YYYY\') as deletion_date FROM videos');
+        expect(videos.rows).toHaveLength(1);
+        expect(videos.rows[0].deletion_date).not.toBeNull();
+        expect(videos.rows[0].deletion_date).toEqual(today);
     });
 
-    await deletedVideos.deleteVideos(videosToDelete);
+    it('Updates deletion date if series is not found', async() => {
+        apiService.getEvent.mockResolvedValue({
+            status: 200,
+            data: {
+                is_part_of: '0345f162-9bbe-48fe-bd6f-f061a3300485',
+                title: 'video.mp4',
+            }
+        });
+        apiService.getSeries.mockResolvedValue({ status: 400 });
 
-    const video_logs = await client.query('SELECT * FROM video_logs');
-    expect(video_logs.rows).toHaveLength(1);
-    expect(video_logs.rows[0].oc_messages).toEqual('successfully deleted video');
-    expect(video_logs.rows[0].archived_series_id).toBeNull();
+        await deletedVideos.deleteVideos(videosToDelete);
 
-    const videos = await client.query('SELECT * FROM videos');
-    expect(videos.rows).toHaveLength(1);
-    expect(videos.rows[0].deletion_date).not.toBeNull();
-});
+        const video_logs = await client.query('SELECT * FROM video_logs');
+        expect(video_logs.rows).toHaveLength(1);
+
+        const videos = await client.query('SELECT to_char(deletion_date, \'DD.MM.YYYY\') as deletion_date FROM videos');
+        expect(videos.rows).toHaveLength(1);
+        expect(videos.rows[0].deletion_date).toEqual(today);
+    });
+
+
+    it('Updates deletion date if video is not found', async() => {
+        apiService.getEvent.mockResolvedValue({ status: 404 });
+
+        await deletedVideos.deleteVideos(videosToDelete);
+
+        const video_logs = await client.query('SELECT * FROM video_logs');
+        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows[0].oc_messages).toEqual('error deleting video, no video found for this id');
+
+        const videos = await client.query('SELECT to_char(deletion_date, \'DD.MM.YYYY\') as deletion_date FROM videos');
+        expect(videos.rows).toHaveLength(1);
+        expect(videos.rows[0].deletion_date).toEqual(today);
+    });
+
+
+    it('Video not in archived series', async() => {
+        apiService.getEvent.mockResolvedValue({
+            status: 200,
+            data: {
+                is_part_of: '0345f162-9bbe-48fe-bd6f-f061a3300485',
+                title: 'video.mp4',
+            }
+        });
+        apiService.getSeries.mockResolvedValue({status: 200});
+        apiService.deleteVideo.mockResolvedValue({
+            status: 405,
+            statusText: 'video is not in archived series skipping to next one'
+        });
+
+        await deletedVideos.deleteVideos(videosToDelete);
+
+        const video_logs = await client.query('SELECT * FROM video_logs');
+        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows[0].status_code).toEqual('405');
+
+        const videos = await client.query('SELECT deletion_date, actual_archived_date, to_char(archived_date, \'DD.MM.YYYY\') as archived_date FROM videos');
+        expect(videos.rows).toHaveLength(1);
+        expect(videos.rows[0].archived_date).toEqual(archivedDate());
+        expect(videos.rows[0].deletion_date).toBeNull();
+        expect(videos.rows[0].actual_archived_date).toBeNull();
+    });
+
+    it('Error in opencast', async () => {
+        expect(true);
+    })
+
 });
