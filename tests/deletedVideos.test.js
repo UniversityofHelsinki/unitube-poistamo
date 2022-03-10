@@ -105,7 +105,6 @@ describe('Video deleting', () => {
         expect(videos.rows[0].deletion_date).toEqual(today);
     });
 
-
     it('Updates deletion date if video is not found', async() => {
         apiService.getEvent.mockResolvedValue({ status: 404 });
 
@@ -120,8 +119,7 @@ describe('Video deleting', () => {
         expect(videos.rows[0].deletion_date).toEqual(today);
     });
 
-
-    it('Video not in archived series', async() => {
+    it('Empty actual archive date and deletion date if video is not in archived series', async() => {
         apiService.getEvent.mockResolvedValue({
             status: 200,
             data: {
@@ -149,7 +147,25 @@ describe('Video deleting', () => {
     });
 
     it('Error in opencast', async () => {
-        expect(true);
+        apiService.getEvent.mockResolvedValue({
+            status: 200,
+            data: {
+                is_part_of: '0345f162-9bbe-48fe-bd6f-f061a3300485',
+                title: 'video.mp4',
+            }
+        });
+        apiService.getSeries.mockResolvedValue({status: 200});
+        apiService.deleteVideo.mockResolvedValue({
+            status: 500,
+            statusText: 'Opencast error'
+        });
+
+        await deletedVideos.deleteVideos(videosToDelete);
+
+        const video_logs = await client.query('SELECT * FROM video_logs');
+        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows[0].status_code).toEqual('500');
+
     })
 
 });
