@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "coverage": "nyc --reporter=lcov --reporter=text npm run test -- --coverage",
+    "coverage": "jest --coverage",
     "start": "node index.js"
   },
   "author": "",

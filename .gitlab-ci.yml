@@ -29,7 +29,7 @@ setup:
   tags:
     - ohtu-build-1
   script:
-    - npm ci 
+    - npm ci
   extends: .dependencies_cache
   cache:
     policy: pull-push
