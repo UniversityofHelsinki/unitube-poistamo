@@ -71,7 +71,6 @@ deploy_dev:
   script:
     # set home path for openshift 1001 user
     - export HOME=/home/1001
-    - mv nginx_dev.conf nginx.conf
     # before any action, I connect to the OpenShift server with the appropriate credentials
     - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST
     - oc project poistamo
@@ -116,7 +115,6 @@ deploy_test:
   script:
     # set home path for openshift 1001 user
     - export HOME=/home/1001
-    - mv nginx_dev.conf nginx.conf
     # before any action, I connect to the OpenShift server with the appropriate credentials
     - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST
     - oc project poistamo
@@ -160,7 +158,6 @@ deploy_prod:
   script:
     # set home path for openshift 1001 user
     - export HOME=/home/1001
-    - mv nginx_dev.conf nginx.conf
     # before any action, I connect to the OpenShift server with the appropriate credentials
     - oc login https://$OPENSHIFT_ADDR_PROD:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_PROD
     - oc project poistamo
