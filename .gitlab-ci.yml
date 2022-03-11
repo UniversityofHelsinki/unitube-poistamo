@@ -27,7 +27,7 @@ stages:
 setup:
   stage: setup
   tags:
-    - shared-openshift
+    - ohtu-build-1
   script:
     - npm ci
   extends: .dependencies_cache
@@ -50,7 +50,7 @@ test:
     POSTGRES_PASSWORD: ${PASSWORD}
     POSTGRES_HOST_AUTH_METHOD: trust
   tags:
-    - shared-openshift
+    - ohtu-build-1
   script:
     - npm run coverage
   coverage: /All files\s*\|\s*([\d\.]+)/
@@ -60,7 +60,7 @@ test:
 deploy_dev:
   stage: deploy
   tags:
-    - shared-openshift
+    - ohtu-build-1
   environment:
     name: development
   only:
@@ -69,8 +69,7 @@ deploy_dev:
     # Skip deploy when scheduled npm audit and outdated scans are executed.
     - schedules
   script:
-    # set home path for openshift 1001 user
-    - export HOME=/home/1001
+
     # before any action, I connect to the OpenShift server with the appropriate credentials
     - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST
     - oc project poistamo
@@ -107,14 +106,12 @@ deploy_dev:
 deploy_test:
   stage: deploy
   tags:
-    - shared-openshift
+    - ohtu-build-1
   environment:
     name: test
   only:
     - test
   script:
-    # set home path for openshift 1001 user
-    - export HOME=/home/1001
     # before any action, I connect to the OpenShift server with the appropriate credentials
     - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST
     - oc project poistamo
@@ -149,15 +146,13 @@ deploy_test:
 deploy_prod:
   stage: deploy
   tags:
-    - shared-openshift
+    - ohtu-build-1
   environment:
     name: prod
   only:
     - prod
   when: manual
   script:
-    # set home path for openshift 1001 user
-    - export HOME=/home/1001
     # before any action, I connect to the OpenShift server with the appropriate credentials
     - oc login https://$OPENSHIFT_ADDR_PROD:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_PROD
     - oc project poistamo
@@ -192,7 +187,7 @@ deploy_prod:
 dependency scanning:
   stage: audit_scan
   tags:
-    - shared-openshift
+    - ohtu-build-1
   allow_failure: true
   only:
     - schedules
