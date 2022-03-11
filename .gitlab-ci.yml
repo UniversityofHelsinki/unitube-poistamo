@@ -69,7 +69,8 @@ deploy_dev:
     # Skip deploy when scheduled npm audit and outdated scans are executed.
     - schedules
   script:
-
+    # set home path for openshift 1001 user
+    - export HOME=/home/1001
     # before any action, I connect to the OpenShift server with the appropriate credentials
     - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST
     - oc project poistamo
@@ -112,6 +113,8 @@ deploy_test:
   only:
     - test
   script:
+    - # set home path for openshift 1001 user
+    - export HOME=/home/1001
     # before any action, I connect to the OpenShift server with the appropriate credentials
     - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST
     - oc project poistamo
@@ -153,6 +156,8 @@ deploy_prod:
     - prod
   when: manual
   script:
+    # set home path for openshift 1001 user
+    - export HOME=/home/1001
     # before any action, I connect to the OpenShift server with the appropriate credentials
     - oc login https://$OPENSHIFT_ADDR_PROD:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_PROD
     - oc project poistamo
