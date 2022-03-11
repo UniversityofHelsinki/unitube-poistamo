@@ -1,17 +1,23 @@
-image: frolvlad/alpine-glibc
+image: quay.io/tike/alpine-oc-node
 
-before_script:
-  - apk update && apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python3 curl nodejs npm tar
+variables:
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
 
-  # Cache node modules - speeds up future builds
-cache:
-  key: ${CI_COMMIT_REF_SLUG}
-  paths:
-    - node_modules
+# Define a hidden job to be used with extends
+# Better than default to avoid activating cache for all jobs
+.dependencies_cache:
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm
+    policy: pull
 
 # Define the stages
 stages:
   - setup
+  - test
   - audit_scan
   - deploy
 
@@ -23,7 +29,31 @@ setup:
   tags:
     - ohtu-build-1
   script:
-    - npm ci --production
+    - npm ci
+  extends: .dependencies_cache
+  cache:
+    policy: pull-push
+  artifacts:
+    expire_in: 1h
+    paths:
+      - node_modules
+
+
+# Define the process for test stage
+test:
+  stage: test
+  services:
+    - postgres:12.2-alpine
+  variables:
+    POSTGRES_DB: ${DATABASE}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${PASSWORD}
+    POSTGRES_HOST_AUTH_METHOD: trust
+  tags:
+    - ohtu-build-1
+  script:
+    - npm run coverage
+  coverage: /All files\s*\|\s*([\d\.]+)/
 
 # Define the process for deploy stage to development environment
 # Development environment uses https://ocast-devel-a1.it.helsinki.fi (OpenCast test environment)
@@ -39,8 +69,8 @@ deploy_dev:
     # Skip deploy when scheduled npm audit and outdated scans are executed.
     - schedules
   script:
-    - curl -fsSLO --compressed "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz";
-    - tar xvzf openshift-client-linux.tar.gz -C /usr/local/bin
+    # set home path for openshift 1001 user
+    - export HOME=/home/1001
     # before any action, I connect to the OpenShift server with the appropriate credentials
     - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST
     - oc project poistamo
@@ -83,8 +113,8 @@ deploy_test:
   only:
     - test
   script:
-    - curl -fsSLO --compressed "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz";
-    - tar xvzf openshift-client-linux.tar.gz -C /usr/local/bin
+    # set home path for openshift 1001 user
+    - export HOME=/home/1001
     # before any action, I connect to the OpenShift server with the appropriate credentials
     - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST
     - oc project poistamo
@@ -126,8 +156,8 @@ deploy_prod:
     - prod
   when: manual
   script:
-    - curl -fsSLO --compressed "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz";
-    - tar xvzf openshift-client-linux.tar.gz -C /usr/local/bin
+    # set home path for openshift 1001 user
+    - export HOME=/home/1001
     # before any action, I connect to the OpenShift server with the appropriate credentials
     - oc login https://$OPENSHIFT_ADDR_PROD:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_PROD
     - oc project poistamo
