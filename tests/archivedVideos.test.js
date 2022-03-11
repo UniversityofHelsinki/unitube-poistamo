@@ -5,7 +5,7 @@ const path = require("path");
 require('dotenv').config({path: path.resolve(__dirname, '../.env')});
 const client = require('../services/database');
 const Pool = require('pg-pool');
-var format = require('date-format');
+const format = require('date-format');
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -32,7 +32,7 @@ beforeEach(async () => {
     await wait(100);
     await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date) VALUES (\'e8a86433-0245-44b8-b0d7-69f6578bac6f\', \'2018-01-01\'::date, \'2008-01-01\'::date)');
     await timer.getTimer.mockResolvedValue(0);
-},);
+});
 
 afterEach(async () => {
     await wait(100);
@@ -84,7 +84,7 @@ describe('Video archiving tests', () => {
         video_logs = await client.query('SELECT * FROM video_logs');
         expect(video_logs.rows).toHaveLength(1);
         expect(video_logs.rows[0].oc_messages).toEqual('successfully archived video');
-        expect(video_logs.rows[0].archived_series_id).toEqual(process.env.POISTAMO_OPENCAST_ARCHIVED_SERIES)
+        expect(video_logs.rows[0].archived_series_id).toEqual(process.env.POISTAMO_OPENCAST_ARCHIVED_SERIES);
 
         videos = await client.query('SELECT video_id, error_date, to_char(actual_archived_date, \'DD.MM.YYYY\') as actual_archived_date FROM videos');
         expect(videos.rows).toHaveLength(1);
@@ -174,9 +174,7 @@ describe('Video archiving tests', () => {
 
         const video_logs = await client.query('SELECT * FROM video_logs');
         expect(video_logs.rows[0].oc_messages).toEqual('error archiving video: video already in archived series skipping to next one');
-        expect(video_logs.rows[0].archived_series_id).toEqual(process.env.POISTAMO_OPENCAST_ARCHIVED_SERIES)
-
-
+        expect(video_logs.rows[0].archived_series_id).toEqual(process.env.POISTAMO_OPENCAST_ARCHIVED_SERIES);
     });
 
     it('error in opencast archiving', async () => {
@@ -202,7 +200,6 @@ describe('Video archiving tests', () => {
         const video_logs = await client.query('SELECT * FROM video_logs');
         expect(video_logs.rows).toHaveLength(1);
         expect(video_logs.rows[0].oc_messages).toEqual('error archiving video: opencast error');
-
     });
 });
 
