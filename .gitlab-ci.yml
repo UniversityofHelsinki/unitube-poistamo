@@ -27,7 +27,7 @@ stages:
 setup:
   stage: setup
   tags:
-    - shared-runner
+    - shared-openshift
   script:
     - npm ci
   extends: .dependencies_cache
@@ -50,7 +50,7 @@ test:
     POSTGRES_PASSWORD: ${PASSWORD}
     POSTGRES_HOST_AUTH_METHOD: trust
   tags:
-    - shared-runner
+    - shared-openshift
   script:
     - npm run coverage
   coverage: /All files\s*\|\s*([\d\.]+)/
@@ -60,7 +60,7 @@ test:
 deploy_dev:
   stage: deploy
   tags:
-    - shared-runner
+    - shared-openshift
   environment:
     name: development
   only:
@@ -107,7 +107,7 @@ deploy_dev:
 deploy_test:
   stage: deploy
   tags:
-    - shared-runner
+    - shared-openshift
   environment:
     name: test
   only:
@@ -149,7 +149,7 @@ deploy_test:
 deploy_prod:
   stage: deploy
   tags:
-    - shared-runner
+    - shared-openshift
   environment:
     name: prod
   only:
@@ -192,7 +192,7 @@ deploy_prod:
 dependency scanning:
   stage: audit_scan
   tags:
-    - shared-runner
+    - shared-openshift
   allow_failure: true
   only:
     - schedules
