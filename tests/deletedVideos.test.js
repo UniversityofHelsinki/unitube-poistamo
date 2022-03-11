@@ -5,7 +5,7 @@ const path = require("path");
 require('dotenv').config({path: path.resolve(__dirname, '../.env')});
 const client = require('../services/database');
 const Pool = require('pg-pool');
-var format = require('date-format');
+const format = require('date-format');
 const Constants = require("../utils/constants");
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -166,6 +166,6 @@ describe('Video deleting', () => {
         expect(video_logs.rows).toHaveLength(1);
         expect(video_logs.rows[0].status_code).toEqual('500');
 
-    })
+    });
 
 });
