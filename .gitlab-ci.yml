@@ -12,6 +12,7 @@ cache:
 # Define the stages
 stages:
   - setup
+  - test
   - audit_scan
   - deploy
 
@@ -24,6 +25,23 @@ setup:
     - ohtu-build-1
   script:
     - npm ci --production
+
+
+# Define the process for test stage
+test:
+  stage: test
+  services:
+    - postgres:12.2-alpine
+  variables:
+    POSTGRES_DB: ${DATABASE}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${PASSWORD}
+    POSTGRES_HOST_AUTH_METHOD: trust
+  tags:
+    - ohtu-build-1
+  script:
+    - npm run coverage
+  coverage: /All files\s*\|\s*([\d\.]+)/
 
 # Define the process for deploy stage to development environment
 # Development environment uses https://ocast-devel-a1.it.helsinki.fi (OpenCast test environment)
