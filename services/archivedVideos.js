@@ -1,8 +1,8 @@
 const apiService = require('./apiService');
 const databaseService = require('./databaseService');
+const timer = require('./timer');
 
-// Returns a Promise that resolves after "ms" Milliseconds
-const timer = ms => new Promise(res => setTimeout(res, ms));
+
 
 const archiveVideos = async(archivedVideos) => {
     for (const archivedVideo of archivedVideos) {
@@ -55,9 +55,12 @@ const archiveVideos = async(archivedVideos) => {
             await databaseService.insertIntoVideoLogs(500, error.message, videoId, null, null, null, null);
 
         }
-        await timer(60000); // wait for 1 minute before next api call
+        await timer.getTimer(60000); // wait for 1 minute before next api call
     }
 };
 
 
 module.exports.archiveVideos = archiveVideos;
+
+
+

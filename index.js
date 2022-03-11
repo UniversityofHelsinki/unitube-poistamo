@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 // CREATE TABLES
 const createTables = fs.readFileSync(path.resolve(__dirname, "./sql/createTables.sql"), "utf8");
 
-database.pool.query(createTables);
+database.query(createTables);
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
@@ -32,6 +32,9 @@ app.get('/', (req, res) => {
 app.listen(port, ipaddress, () => {
     console.log( 'Listening on ' + ipaddress + ', port ' + port );
 });
+
+// for the tests
+module.exports = app;
 
 (async () => {
     // START CRONJOB
