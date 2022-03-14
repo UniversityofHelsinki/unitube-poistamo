@@ -16,7 +16,7 @@ POISTAMO_OPENCAST_PASS (found in keepass)
 POISTAMO_OPENCAST_ARCHIVED_SERIES = (archived series unique identifier)
 
 ## Start postgres as Docker container
-docker run --name exp-videos-postgres -p 5432:5432  -e POSTGRES_DB=expired_videos -e POSTGRES_PASSWORD=xxxxxx -d onjin/alpine-postgres
+docker run --name exp_videos_postgres -p 5432:5432 -e POSTGRES_PASSWORD=xxxxxxx -e POSTGRES_DB=expired_videos -d postgres:14-alpine
 
 ## Install application dependencies
 npm install

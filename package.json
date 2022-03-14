@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
+    "coverage": "jest --coverage",
     "start": "node index.js"
   },
   "author": "",
@@ -18,7 +19,12 @@
     "form-data": "^4.0.0",
     "helmet": "^4.6.0",
     "node-cron": "^3.0.0",
+    "nyc": "^15.1.0",
     "pg": "^8.7.1",
     "pg-pool": "^3.4.1"
+  },
+  "devDependencies": {
+    "date-format": "^4.0.4",
+    "jest": "^27.5.1"
   }
 }

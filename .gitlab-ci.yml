@@ -1,17 +1,23 @@
-image: frolvlad/alpine-glibc
+image: quay.io/tike/alpine-oc-node
 
-before_script:
-  - apk update && apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python3 curl nodejs npm tar
+variables:
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
 
-  # Cache node modules - speeds up future builds
-cache:
-  key: ${CI_COMMIT_REF_SLUG}
-  paths:
-    - node_modules
+# Define a hidden job to be used with extends
+# Better than default to avoid activating cache for all jobs
+.dependencies_cache:
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm
+    policy: pull
 
 # Define the stages
 stages:
   - setup
+  - test
   - audit_scan
   - deploy
 
@@ -23,7 +29,31 @@ setup:
   tags:
     - ohtu-build-1
   script:
-    - npm ci --production
+    - npm ci
+  extends: .dependencies_cache
+  cache:
+    policy: pull-push
+  artifacts:
+    expire_in: 1h
+    paths:
+      - node_modules
+
+
+# Define the process for test stage
+test:
+  stage: test
+  services:
+    - postgres:12.2-alpine
+  variables:
+    POSTGRES_DB: ${DATABASE}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${PASSWORD}
+    POSTGRES_HOST_AUTH_METHOD: trust
+  tags:
+    - ohtu-build-1
+  script:
+    - npm run coverage
+  coverage: /All files\s*\|\s*([\d\.]+)/
 
 # Define the process for deploy stage to development environment
 # Development environment uses https://ocast-devel-a1.it.helsinki.fi (OpenCast test environment)
@@ -39,11 +69,10 @@ deploy_dev:
     # Skip deploy when scheduled npm audit and outdated scans are executed.
     - schedules
   script:
-    - curl -fsSLO --compressed "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz";
-    - tar xvzf openshift-client-linux.tar.gz -C /usr/local/bin
+    # set home path for openshift 1001 user
+    - export HOME=/home/1001
     # before any action, I connect to the OpenShift server with the appropriate credentials
-    # this parameter: `--insecure-skip-tls-verify` is important because we use a certificate signed by an unknown authority
-    - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST --insecure-skip-tls-verify
+    - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST
     - oc project poistamo
     # add secrets here
     - oc delete secret generic poistamo-dev-password --ignore-not-found
@@ -67,7 +96,7 @@ deploy_dev:
     - oc set env dc/poistamo-dev POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_DEV
     - oc set env dc/poistamo-dev POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_DEV
     # cronjob variable
-    - oc set env dc/poistamo-dev CRON_START_TIME="0 0 * * *"
+    - oc set env dc/poistamo-dev CRON_START_TIME="30 0 * * *"
     # start build process in OpenShift
     - oc start-build poistamo-dev --from-dir=. --follow
     # patch openshift buildConfig file
@@ -84,11 +113,10 @@ deploy_test:
   only:
     - test
   script:
-    - curl -fsSLO --compressed "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz";
-    - tar xvzf openshift-client-linux.tar.gz -C /usr/local/bin
+    # set home path for openshift 1001 user
+    - export HOME=/home/1001
     # before any action, I connect to the OpenShift server with the appropriate credentials
-    # this parameter: `--insecure-skip-tls-verify` is important because we use a certificate signed by an unknown authority
-    - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST --insecure-skip-tls-verify
+    - oc login https://$OPENSHIFT_ADDR_TEST:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_TEST
     - oc project poistamo
     # add secrets here
     - oc delete secret generic poistamo-test-password --ignore-not-found
@@ -111,7 +139,7 @@ deploy_test:
     - oc set env dc/poistamo-test POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_TEST
     - oc set env dc/poistamo-test POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_TEST
     # cronjob variable
-    - oc set env dc/poistamo-test CRON_START_TIME="0 0 * * *"
+    - oc set env dc/poistamo-test CRON_START_TIME="30 0 * * *"
     - oc start-build poistamo-test --from-dir=. --follow
     # patch openshift buildConfig file
     - oc patch bc/poistamo-test --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
@@ -128,11 +156,10 @@ deploy_prod:
     - prod
   when: manual
   script:
-    - curl -fsSLO --compressed "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz";
-    - tar xvzf openshift-client-linux.tar.gz -C /usr/local/bin
+    # set home path for openshift 1001 user
+    - export HOME=/home/1001
     # before any action, I connect to the OpenShift server with the appropriate credentials
-    # this parameter: `--insecure-skip-tls-verify` is important because we use a certificate signed by an unknown authority
-    - oc login https://$OPENSHIFT_ADDR_PROD:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_PROD --insecure-skip-tls-verify
+    - oc login https://$OPENSHIFT_ADDR_PROD:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_PROD
     - oc project poistamo
     # add secrets here
     - oc delete secret generic poistamo-prod-password --ignore-not-found
@@ -155,7 +182,7 @@ deploy_prod:
     - oc set env dc/poistamo-prod POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_PROD
     - oc set env dc/poistamo-prod POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_PROD
     # cronjob variable
-    - oc set env dc/poistamo-prod CRON_START_TIME="0 0 * * *"
+    - oc set env dc/poistamo-prod CRON_START_TIME="30 0 * * *"
     - oc start-build poistamo-prod --from-dir=. --follow
     # patch openshift buildConfig file
     - oc patch bc/poistamo-prod --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
