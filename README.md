@@ -1,28 +1,35 @@
 ## Local Development Environment
 
 ## Environment variables
-Create and add environment variables in .env file:  
-POSTGRES_USER = postgres  
-PASSWORD = xxxxxx  
-PORT = 5432  
-HOST = localhost  
-DATABASE= expired_videos  
+Create an .env file to the project's root directory and add the values below.
+Note the instructions for certain values marked with <>.
 
-CRON_START_TIME=0 0 * * *
+*POSTGRES_USER = postgres*
+*PASSWORD = __<define a custom password for local development>__*
+*PORT = 5432*
+*HOST = localhost*  
+*DATABASE= expired_videos*
 
-POISTAMO_OPENCAST_HOST (OpenCast development url)
-POISTAMO_OPENCAST_USER (found in keepass)
-POISTAMO_OPENCAST_PASS (found in keepass)
-POISTAMO_OPENCAST_ARCHIVED_SERIES = (archived series unique identifier)
+_CRON_START_TIME=0 0 * * *_
+
+*POISTAMO_OPENCAST_HOST = __<OpenCast development url, see values below (locally http&#65279;://localhost:8080)>__*
+*POISTAMO_OPENCAST_USER = __<insert value from Keepass>__*
+*POISTAMO_OPENCAST_PASS = __<insert value from Keepass>__*
+*POISTAMO_OPENCAST_ARCHIVED_SERIES = __<insert the unique identifier of the 'archived' series created in OpenCast>__*
 
 ## Start postgres as Docker container
-docker run --name exp_videos_postgres -p 5432:5432 -e POSTGRES_PASSWORD=xxxxxxx -e POSTGRES_DB=expired_videos -d postgres:14-alpine
+
+_docker run --name exp_videos_postgres -p 5432:5432 -e POSTGRES_PASSWORD=xxxxxxx -e POSTGRES_DB=expired_videos -d postgres:14-alpine_
+
+(note: use the same POSTGRES_PASSWORD as defined in the previous step!)
 
 ## Install application dependencies
-npm install
+Run the following command:
+_npm install_
 
 ## Start application:
-node index.js
+Run the following command:
+_node index.js_
 
 
 ## Environments and deployments
