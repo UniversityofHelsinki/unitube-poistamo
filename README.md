@@ -1,21 +1,21 @@
 ## Local Development Environment
 
 ## Environment variables
-Create an .env file to the project's root directory and add the values below.
-Note the instructions for certain values marked with <>.
+Create an .env file to the project's root directory and add the values below. <br>
+Note the instructions for certain values marked with parenthesis.
 
-*POSTGRES_USER = postgres*
-*PASSWORD = __<define a custom password for local development>__*
-*PORT = 5432*
-*HOST = localhost*  
+*POSTGRES_USER = postgres* <br>
+*PASSWORD = __(define a custom password for local development)__* <br>
+*PORT = 5432* <br>
+*HOST = localhost* <br>
 *DATABASE= expired_videos*
 
 _CRON_START_TIME=0 0 * * *_
 
-*POISTAMO_OPENCAST_HOST = __<OpenCast development url, see values below (locally http&#65279;://localhost:8080)>__*
-*POISTAMO_OPENCAST_USER = __<insert value from Keepass>__*
-*POISTAMO_OPENCAST_PASS = __<insert value from Keepass>__*
-*POISTAMO_OPENCAST_ARCHIVED_SERIES = __<insert the unique identifier of the 'archived' series created in OpenCast>__*
+*POISTAMO_OPENCAST_HOST = __(OpenCast development url, for example http&#65279;://localhost:8080)__* <br>
+*POISTAMO_OPENCAST_USER = __(insert value from Keepass)__* <br>
+*POISTAMO_OPENCAST_PASS = __(insert value from Keepass)__* <br>
+*POISTAMO_OPENCAST_ARCHIVED_SERIES = __(insert the unique identifier of the 'archived' series created in OpenCast)__* <br>
 
 ## Start postgres as Docker container
 
