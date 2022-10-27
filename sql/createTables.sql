@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS videos(
                        informed_date date,
                        video_creation_date date,
                        error_date date,
+                       notification_sent_at timestamp,
                        PRIMARY KEY(video_id)
 );
 
