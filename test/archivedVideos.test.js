@@ -21,6 +21,10 @@ beforeAll(async () => {
         idleTimeoutMillis: 0 // Disable auto-disconnection of idle clients to make sure we always hit the same temporal schema
     });
 
+    client.end = () => {
+        return pool.end();
+    };
+
     client.query = (text, values) => {
         return pool.query(text, values);
     };
@@ -201,6 +205,11 @@ describe('Video archiving tests', () => {
         expect(video_logs.rows).toHaveLength(1);
         expect(video_logs.rows[0].oc_messages).toEqual('error archiving video: opencast error');
     });
+
+    afterAll( done => {
+        client.end().then(done());
+    });
+    
 });
 
 
