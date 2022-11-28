@@ -27,4 +27,23 @@ CREATE TABLE IF NOT EXISTS video_logs(
                         REFERENCES videos(video_id)
 );
 
+CREATE TABLE IF NOT EXISTS email_templates(
+    id SERIAL NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(255),
+    header_fi TEXT,
+    footer_fi TEXT,
+    header_sv TEXT,
+    footer_sv TEXT,
+    header_en TEXT,
+    footer_en TEXT,
+    modified TIMESTAMP,
+    PRIMARY KEY(id)
+    );
 
+INSERT INTO email_templates (name, description, header_fi, footer_fi) VALUES
+    ('Header', 'Viestin alkuosa', 'Hei!Saat tämän viestin, koska olet Helsingin yliopiston Unitube-palvelussa yhden tai useamman vanhenevan videotallenteen hallinnoija.
+Seuraavan tai seuraavien Unitube-tallenteiden voimassaolo on päättymässä pian:Olet tallenteen hallinnoija silloin, jos olet itse lisännyt ja julkaissut videon jossakin Unitube-videosarjassa. Voit olla hallinnoija myös siinä tapauksessa, että joku muu on merkinnyt sinut tai ryhmän, johon kuulut, hallinnoijaksi johonkin tallennesarjaan Unitube-lataamopalvelussa.[Tunnuksesi on lisätty Unitubessa hallinnoijaksi seuraaviin ryhmiin: ',
+     'Kaikilla Unitube-tallenteilla on voimassaoloaika, jonka jälkeen ne poistuvat palvelusta. Voimassaoloaika on aina korkeintaan kolme vuotta kerrallaan. Jos haluat, voit jatkaa itse hallinnoimiesi tallenteiden voimassaoloa Unitube-lataamossa osoitteessa https://lataamo.helsinki.fi.
+Voit lajitella hallinnoimasi tallenteet Unitube-lataamon voimassaolon mukaan. Pian vanhenevat videot on korostettu listanäkymässä värin ja kuvakkeen avulla. Klikkaamalla tallennetta pääset muokkaamaan sen asetuksia kuten voimassaolopäivää. Voit myös asettaa kerralla saman voimassaolopäivän kaikille yhden hallinnoimasi videosarjasi tallenteille sarjavälilehdeltä.Lisää ohjeita ja yhteystietoja:
+https://helpdesk.it.helsinki.fi/help/10654"');
