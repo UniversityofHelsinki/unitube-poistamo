@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS video_logs(
 
 CREATE TABLE IF NOT EXISTS email_templates(
     id SERIAL NOT NULL,
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(255) UNIQUE NOT NULL,
     description VARCHAR(255),
     header_fi TEXT,
     footer_fi TEXT,
