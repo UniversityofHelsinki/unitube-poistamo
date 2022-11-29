@@ -22,6 +22,10 @@ beforeAll(async () => {
         idleTimeoutMillis: 0 // Disable auto-disconnection of idle clients to make sure we always hit the same temporal schema
     });
 
+    client.end = () => {
+        return pool.end();
+    };
+
     client.query = (text, values) => {
         return pool.query(text, values);
     };
@@ -166,6 +170,10 @@ describe('Video deleting', () => {
         expect(video_logs.rows).toHaveLength(1);
         expect(video_logs.rows[0].status_code).toEqual('500');
 
+    });
+
+    afterAll( done => {
+        client.end().then(done());
     });
 
 });
