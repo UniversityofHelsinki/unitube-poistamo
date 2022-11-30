@@ -204,7 +204,7 @@ dependency scanning:
     - touch $RESULT_FILE
     # Write to the result file
     - echo " ************ POISTAMO NPM AUDIT RESULT ************ " >> $RESULT_FILE
-    - echo "https://version.helsinki.fi/tike-ohtu/expired-videos-service" >> $RESULT_FILE
+    - echo "https://version.helsinki.fi/tike-ohtu/unitube-poistamo" >> $RESULT_FILE
     - echo "" >> $RESULT_FILE
     - echo "=== npm audit security report ===" >> $RESULT_FILE
     - echo "" >> $RESULT_FILE
