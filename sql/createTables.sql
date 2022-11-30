@@ -47,4 +47,5 @@ INSERT INTO email_templates (name, description, subject, header_fi, footer_fi) V
 Seuraavan tai seuraavien Unitube-tallenteiden voimassaolo on päättymässä pian:Olet tallenteen hallinnoija silloin, jos olet itse lisännyt ja julkaissut videon jossakin Unitube-videosarjassa. Voit olla hallinnoija myös siinä tapauksessa, että joku muu on merkinnyt sinut tai ryhmän, johon kuulut, hallinnoijaksi johonkin tallennesarjaan Unitube-lataamopalvelussa.[Tunnuksesi on lisätty Unitubessa hallinnoijaksi seuraaviin ryhmiin: ',
      'Kaikilla Unitube-tallenteilla on voimassaoloaika, jonka jälkeen ne poistuvat palvelusta. Voimassaoloaika on aina korkeintaan kolme vuotta kerrallaan. Jos haluat, voit jatkaa itse hallinnoimiesi tallenteiden voimassaoloa Unitube-lataamossa osoitteessa https://lataamo.helsinki.fi.
 Voit lajitella hallinnoimasi tallenteet Unitube-lataamon voimassaolon mukaan. Pian vanhenevat videot on korostettu listanäkymässä värin ja kuvakkeen avulla. Klikkaamalla tallennetta pääset muokkaamaan sen asetuksia kuten voimassaolopäivää. Voit myös asettaa kerralla saman voimassaolopäivän kaikille yhden hallinnoimasi videosarjasi tallenteille sarjavälilehdeltä.Lisää ohjeita ja yhteystietoja:
-https://helpdesk.it.helsinki.fi/help/10654"');
+https://helpdesk.it.helsinki.fi/help/10654"')
+ON CONFLICT DO NOTHING;
