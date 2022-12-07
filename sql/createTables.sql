@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS email_templates(
     PRIMARY KEY(id)
     );
 
-INSERT INTO email_templates (name, description, subject, header_fi, footer_fi) VALUES
+INSERT INTO email_templates (name, description, subject, header_fi, footer_fi, header_sv, footer_sv, header_en, footer_en) VALUES
     ('Vanhenemisviesti', 'Viesti tallenteiden vanhenemisesta', 'Unitube: sinulla on vanhenevia tallenteita / you have expiring videos / du har videon som föråldras', 'Hei!
 
 Saat tämän viestin, koska olet Helsingin yliopiston Unitube-palvelussa yhden tai useamman vanhenevan videotallenteen hallinnoija.
@@ -54,5 +54,7 @@ Seuraavan tai seuraavien Unitube-tallenteiden voimassaolo on päättymässä pia
 
 Voit lajitella hallinnoimasi tallenteet Unitube-lataamossa voimassaolon mukaan. Klikkaamalla tallennetta pääset muokkaamaan sen asetuksia kuten voimassaolopäivää. Voit myös asettaa kerralla saman voimassaolopäivän kaikille yhden hallinnoimasi videosarjasi tallenteille sarjavälilehdeltä.
 
-Lisää ohjeita ja yhteystietoja: https://helpdesk.it.helsinki.fi/help/10654')
+Lisää ohjeita ja yhteystietoja: https://helpdesk.it.helsinki.fi/help/10654',
+     'Header på svenska', 'Footer på svenska',
+     'Header in english', 'Footer in english')
 ON CONFLICT DO NOTHING;
