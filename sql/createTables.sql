@@ -43,7 +43,9 @@ CREATE TABLE IF NOT EXISTS email_templates(
     );
 
 INSERT INTO email_templates (name, description, subject, header_fi, footer_fi, header_sv, footer_sv, header_en, footer_en) VALUES
-    ('Vanhenemisviesti', 'Viesti tallenteiden vanhenemisesta', 'Unitube: sinulla on vanhenevia tallenteita / you have expiring videos / du har videon som föråldras', 'Hei!
+    ('Vanhenemisviesti', 'Viesti tallenteiden vanhenemisesta', 'Unitube: sinulla on vanhenevia tallenteita / you have expiring videos / du har videon som föråldras
+
+Scroll down for English / För svenska, se nedan', 'Hei!
 
 Saat tämän viestin, koska olet Helsingin yliopiston Unitube-palvelussa yhden tai useamman vanhenevan videotallenteen hallinnoija.
 
@@ -52,9 +54,22 @@ Olet tallenteen hallinnoija silloin, jos olet itse lisännyt ja julkaissut video
 Seuraavan tai seuraavien Unitube-tallenteiden voimassaolo on päättymässä pian:',
      'Kaikilla Unitube-tallenteilla on voimassaoloaika, jonka jälkeen ne poistuvat palvelusta. Voimassaoloaika on aina korkeintaan kolme vuotta kerrallaan. Jos haluat, voit jatkaa itse hallinnoimiesi tallenteiden voimassaoloa Unitube-lataamossa osoitteessa https://lataamo.helsinki.fi.
 
-Voit lajitella hallinnoimasi tallenteet Unitube-lataamossa voimassaolon mukaan. Klikkaamalla tallennetta pääset muokkaamaan sen asetuksia kuten voimassaolopäivää. Voit myös asettaa kerralla saman voimassaolopäivän kaikille yhden hallinnoimasi videosarjasi tallenteille sarjavälilehdeltä.
+Voit lajitella hallinnoimasi tallenteet Unitube-lataamon voimassaolon mukaan. Klikkaamalla tallennetta pääset muokkaamaan sen asetuksia kuten voimassaolopäivää. Voit myös asettaa kerralla saman voimassaolopäivän kaikille yhden hallinnoimasi videosarjasi tallenteille sarjavälilehdeltä.
 
-Lisää ohjeita ja yhteystietoja: https://helpdesk.it.helsinki.fi/help/10654',
+Lisää ohjeita ja yhteystietoja:
+https://helpdesk.it.helsinki.fi/help/10654
+',
      'Header på svenska', 'Footer på svenska',
-     'Header in english', 'Footer in english')
+     'Hello!
+
+You are the recipient of this message because you are the administrator of one or more expiring video recordings in the University of Helsinki Unitube service.
+
+You are an administrator of a video if you have added and published a video in a Unitube video series. You may also be an administrator if someone else has added you or a group you belong to as the administrator of a series of recordings in the Unitube Uploader service.
+
+The following Unitube recording(s) are about to expire soon:', 'All Unitube recordings have an expiration date, after which they will be removed from the service. The validity period can be up to three years at a time. If you wish, you can extend the validity of your managed recordings in the Unitube Uploader service at https://lataamo.helsinki.fi.
+
+You can sort your records according to their expiry date in the Unitube Uploader. By clicking on a recording, you can edit its settings, such as the expiry date. You can also set the same expiry date for all the recordings in a single video series from within the Series tab.
+
+More instructions and contact details:
+https://helpdesk.it.helsinki.fi/help/10654')
 ON CONFLICT DO NOTHING;
