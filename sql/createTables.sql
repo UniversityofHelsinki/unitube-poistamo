@@ -74,7 +74,7 @@ Följande Unitube-inspelning(ar) går snart ut:', 'Alla Unitube-inspelningar har
 
 Du kan sortera dina inspelningar enligt deras utgångsdatum på Unitube-uppladdningssajten. Genom att klicka på en inspelning kan du redigera dess inställningar, till exempel utgångsdatumet. Du kan också ställa in samma utgångsdatum för alla inspelningar i en enskild videoserie på fliken Mina serier.
 
-Fler instruktioner och kontaktuppgifter:set
+Fler instruktioner och kontaktuppgifter:
 https://helpdesk.it.helsinki.fi/sv/help/10654
 
 Med vänlig hälsning
