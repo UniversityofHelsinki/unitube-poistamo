@@ -72,7 +72,7 @@ Du är administratör för en inspelning om du har lagt till och publicerat en v
 
 Följande Unitube-inspelning(ar) går snart ut:', 'Alla Unitube-inspelningar har ett utgångsdatum efter vilket de tas bort från tjänsten. Giltighetstiden kan vara upp till tre år åt gången. Om du vill kan du förlänga giltighetstiden för dina hanterade inspelningar på Unitube-uppladdningssajten på https://lataamo.helsinki.fi.
 
-Du kan sortera dina inspelningar enligt deras utgångsdatum på Unitube-uppladdningssajten. Genom att klicka på en inspelning kan du redigera dess inställningar, till exempel utgångsdatumet. Du kan också ställa in samma utgångsdatum för alla inspelningar i en enskild videoserie på fliken Mina serier.
+Du kan sortera dina inspelningar enligt deras utgångsdatum på Unitube-uppladdningssajten. Genom att klicka på en inspelning kan du redigera dess inställningar, till exempel utgångsdatumet. Du kan också ange samma utgångsdatum för alla inspelningar i en enskild videoserie på fliken Mina serier.
 
 Fler instruktioner och kontaktuppgifter:
 https://helpdesk.it.helsinki.fi/sv/help/10654
