@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS email_templates(
     );
 
 INSERT INTO email_templates (name, description, subject, header_fi, footer_fi, header_sv, footer_sv, header_en, footer_en) VALUES
-    ('Vanhenemisviesti', 'Viesti tallenteiden vanhenemisesta', 'Unitube: sinulla on vanhenevia tallenteita / you have expiring videos / du har videor som går ut', 'För svenska, se nedan / Scroll down for English
+    ('Vanhenemisviesti', 'Viesti tallenteiden vanhenemisesta', 'Unitube: sinulla on vanhenevia videoita / you have expiring videos / du har videor som går ut', 'För svenska, se nedan / Scroll down for English
 
 Hei!
 
