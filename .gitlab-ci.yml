@@ -102,6 +102,8 @@ deploy_dev:
     # patch openshift buildConfig file
     - oc patch bc/poistamo-dev --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
     - oc patch bc/poistamo-dev --patch '{"spec":{"failedBuildsHistoryLimit":1}}'
+    # set pod memory quota to 100 MB and limit to 500 MB
+    - oc set resources dc/poistamo-dev --limits=memory=500Mi --requests=memory=100Mi
 
 # Test environment uses https://ocast-a1-test.it.helsinki.fi (OpenCast devel environment, used for Version Switching)
 deploy_test:
@@ -144,6 +146,8 @@ deploy_test:
     # patch openshift buildConfig file
     - oc patch bc/poistamo-test --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
     - oc patch bc/poistamo-test --patch '{"spec":{"failedBuildsHistoryLimit":1}}'
+    # set pod memory quota to 100 MB and limit to 500 MB
+    - oc set resources dc/poistamo-test --limits=memory=500Mi --requests=memory=100Mi
 
 # Test environment uses https://webcast.it.helsinki.fi (OpenCast production environment)
 deploy_prod:
@@ -187,6 +191,8 @@ deploy_prod:
     # patch openshift buildConfig file
     - oc patch bc/poistamo-prod --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
     - oc patch bc/poistamo-prod --patch '{"spec":{"failedBuildsHistoryLimit":1}}'
+    # set pod memory quota to 100 MB and limit to 500 MB
+    - oc set resources dc/poistamo-prod --limits=memory=500Mi --requests=memory=100Mi
 
 # Rules for the scheduled npm audit and outdated scans
 dependency scanning:
