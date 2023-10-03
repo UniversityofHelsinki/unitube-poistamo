@@ -105,7 +105,7 @@ deploy_dev:
     # set pod memory quota to 100 MB and limit to 500 MB
     - oc set resources dc/poistamo-dev --limits=memory=500Mi --requests=memory=100Mi
 
-# Test environment uses https://ocast-a1-test.it.helsinki.fi (OpenCast devel environment, used for Version Switching)
+# Test environment uses https://webcast-dev.it.helsinki.fi (OpenCast devel environment, used for Version Switching)
 deploy_test:
   stage: deploy
   tags:
