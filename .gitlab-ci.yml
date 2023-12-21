@@ -27,7 +27,7 @@ stages:
 setup:
   stage: setup
   tags:
-    - ohtu-build-1
+    - ohtu-build-3
   script:
     - npm ci
   extends: .dependencies_cache
@@ -60,7 +60,7 @@ test:
 deploy_dev:
   stage: deploy
   tags:
-    - ohtu-build-1
+    - ohtu-build-3
   environment:
     name: development
   only:
@@ -107,7 +107,7 @@ deploy_dev:
 deploy_test:
   stage: deploy
   tags:
-    - ohtu-build-1
+    - ohtu-build-3
   environment:
     name: test
   only:
@@ -149,7 +149,7 @@ deploy_test:
 deploy_prod:
   stage: deploy
   tags:
-    - ohtu-build-1
+    - ohtu-build-3
   environment:
     name: prod
   only:
@@ -192,7 +192,7 @@ deploy_prod:
 dependency scanning:
   stage: audit_scan
   tags:
-    - ohtu-build-1
+    - ohtu-build-3
   allow_failure: true
   only:
     - schedules
