@@ -50,7 +50,7 @@ test:
     POSTGRES_PASSWORD: ${PASSWORD}
     POSTGRES_HOST_AUTH_METHOD: trust
   tags:
-    - ohtu-build-1
+    - ohtu-build-3
   script:
     - npm run coverage
   coverage: /All files\s*\|\s*([\d\.]+)/
