@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:18-alpine
 RUN apk update && \
     apk add --no-cache tzdata
 RUN adduser node root
@@ -8,7 +8,8 @@ RUN chown -R node:node /home/node/app
 
 WORKDIR /home/node/app
 
-RUN npm install
+# added this config because of bug in node18 alpine image https://github.com/nodejs/docker-node/issues/1749
+ENV npm_config_cache /tmp/npm
 
 # EXPOSE PORT 8080
 EXPOSE 8080

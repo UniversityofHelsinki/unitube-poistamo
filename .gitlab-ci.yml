@@ -27,7 +27,7 @@ stages:
 setup:
   stage: setup
   tags:
-    - ohtu-build-4
+    - ohtu-build-3
   script:
     - npm ci
   extends: .dependencies_cache
@@ -50,7 +50,7 @@ test:
     POSTGRES_PASSWORD: ${PASSWORD}
     POSTGRES_HOST_AUTH_METHOD: trust
   tags:
-    - ohtu-build-4
+    - ohtu-build-3
   script:
     - npm run coverage
   coverage: /All files\s*\|\s*([\d\.]+)/
@@ -60,7 +60,7 @@ test:
 deploy_dev:
   stage: deploy
   tags:
-    - ohtu-build-4
+    - ohtu-build-3
   environment:
     name: development
   only:
@@ -102,14 +102,12 @@ deploy_dev:
     # patch openshift buildConfig file
     - oc patch bc/poistamo-dev --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
     - oc patch bc/poistamo-dev --patch '{"spec":{"failedBuildsHistoryLimit":1}}'
-    # set pod memory quota to 100 MB and limit to 500 MB
-    - oc set resources dc/poistamo-dev --limits=memory=500Mi --requests=memory=100Mi
 
-# Test environment uses https://webcast-dev.it.helsinki.fi (OpenCast devel environment, used for Version Switching)
+# Test environment uses https://ocast-a1-test.it.helsinki.fi (OpenCast devel environment, used for Version Switching)
 deploy_test:
   stage: deploy
   tags:
-    - ohtu-build-4
+    - ohtu-build-3
   environment:
     name: test
   only:
@@ -146,14 +144,12 @@ deploy_test:
     # patch openshift buildConfig file
     - oc patch bc/poistamo-test --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
     - oc patch bc/poistamo-test --patch '{"spec":{"failedBuildsHistoryLimit":1}}'
-    # set pod memory quota to 100 MB and limit to 500 MB
-    - oc set resources dc/poistamo-test --limits=memory=500Mi --requests=memory=100Mi
 
 # Test environment uses https://webcast.it.helsinki.fi (OpenCast production environment)
 deploy_prod:
   stage: deploy
   tags:
-    - ohtu-build-4
+    - ohtu-build-3
   environment:
     name: prod
   only:
@@ -191,14 +187,12 @@ deploy_prod:
     # patch openshift buildConfig file
     - oc patch bc/poistamo-prod --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
     - oc patch bc/poistamo-prod --patch '{"spec":{"failedBuildsHistoryLimit":1}}'
-    # set pod memory quota to 100 MB and limit to 500 MB
-    - oc set resources dc/poistamo-prod --limits=memory=500Mi --requests=memory=100Mi
 
 # Rules for the scheduled npm audit and outdated scans
 dependency scanning:
   stage: audit_scan
   tags:
-    - ohtu-build-4
+    - ohtu-build-3
   allow_failure: true
   only:
     - schedules
