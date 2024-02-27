@@ -56,7 +56,7 @@ test:
   coverage: /All files\s*\|\s*([\d\.]+)/
 
 # Define the process for deploy stage to development environment
-# Development environment uses https://ocast-devel-a1.it.helsinki.fi (OpenCast test environment)
+# Development environment uses https://webcast-test.it.helsinki.fi (OpenCast test environment)
 deploy_dev:
   stage: deploy
   tags:
@@ -103,7 +103,7 @@ deploy_dev:
     - oc patch bc/poistamo-dev --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
     - oc patch bc/poistamo-dev --patch '{"spec":{"failedBuildsHistoryLimit":1}}'
 
-# Test environment uses https://ocast-a1-test.it.helsinki.fi (OpenCast devel environment, used for Version Switching)
+# Test environment uses https://webcast-dev.it.helsinki.fi (OpenCast devel environment, used for Version Switching)
 deploy_test:
   stage: deploy
   tags:
