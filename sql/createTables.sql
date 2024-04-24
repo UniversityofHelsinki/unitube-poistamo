@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS email_templates(
     PRIMARY KEY(id)
     );
 
-CREATE TABLE thumbnails (
+CREATE TABLE NOT EXISTS  thumbnails (
     video_id VARCHAR(255) NOT NULL,
     thumbnail BYTEA,
     PRIMARY KEY(video_id),
