@@ -42,6 +42,15 @@ CREATE TABLE IF NOT EXISTS email_templates(
     PRIMARY KEY(id)
     );
 
+CREATE TABLE thumbnails (
+    video_id VARCHAR(255) NOT NULL,
+    thumbnail BYTEA,
+    PRIMARY KEY(video_id),
+    CONSTRAINT fk_video_id
+        FOREIGN KEY(video_id)
+            REFERENCES videos(video_id)
+);
+
 INSERT INTO email_templates (name, description, subject, header_fi, footer_fi, header_sv, footer_sv, header_en, footer_en) VALUES
     ('Vanhenemisviesti', 'Viesti tallenteiden vanhenemisesta', 'Unitube: sinulla on vanhenevia videoita / you have expiring videos / du har videor som går ut', 'För svenska, se nedan / Scroll down for English
 
