@@ -81,22 +81,22 @@ deploy_dev:
     - oc create secret generic poistamo-opencast-dev-password --from-literal=POISTAMO_OPENCAST_PASS=$POISTAMO_OPENCAST_PASS_DEV
     # list environment variables here
     # postgres environment variables
-    - oc set env --from=secret/poistamo-dev-password dc/poistamo-dev
-    - oc set env dc/poistamo-dev OPENSHIFT_NODEJS_IP=$OPENSHIFT_NODEJS_IP
-    - oc set env dc/poistamo-dev OPENSHIFT_NODEJS_PORT=$OPENSHIFT_NODEJS_PORT
-    - oc set env dc/poistamo-dev POSTGRES_USER=$POISTAMO_DEV_USER_NAME
-    - oc set env dc/poistamo-dev PORT=$POISTAMO_DEV_PORT
-    - oc set env dc/poistamo-dev HOST=$POISTAMO_DEV_HOST
-    - oc set env dc/poistamo-dev DATABASE=$POISTAMO_DEV_DATABASE
-    - oc set env dc/poistamo-dev SSL=$POISTAMO_DEV_SSL
-    - oc set env dc/poistamo-dev TZ="Europe/Helsinki"
+    - oc set env --from=secret/poistamo-dev-password deploy/poistamo-dev
+    - oc set env deploy/poistamo-dev OPENSHIFT_NODEJS_IP=$OPENSHIFT_NODEJS_IP
+    - oc set env deploy/poistamo-dev OPENSHIFT_NODEJS_PORT=$OPENSHIFT_NODEJS_PORT
+    - oc set env deploy/poistamo-dev POSTGRES_USER=$POISTAMO_DEV_USER_NAME
+    - oc set env deploy/poistamo-dev PORT=$POISTAMO_DEV_PORT
+    - oc set env deploy/poistamo-dev HOST=$POISTAMO_DEV_HOST
+    - oc set env deploy/poistamo-dev DATABASE=$POISTAMO_DEV_DATABASE
+    - oc set env deploy/poistamo-dev SSL=$POISTAMO_DEV_SSL
+    - oc set env deploy/poistamo-dev TZ="Europe/Helsinki"
     # opencast environment variables
-    - oc set env --from=secret/poistamo-opencast-dev-password dc/poistamo-dev
-    - oc set env dc/poistamo-dev POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_DEV
-    - oc set env dc/poistamo-dev POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_DEV
-    - oc set env dc/poistamo-dev POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_DEV
+    - oc set env --from=secret/poistamo-opencast-dev-password deploy/poistamo-dev
+    - oc set env deploy/poistamo-dev POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_DEV
+    - oc set env deploy/poistamo-dev POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_DEV
+    - oc set env deploy/poistamo-dev POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_DEV
     # cronjob variable
-    - oc set env dc/poistamo-dev CRON_START_TIME="30 0 * * *"
+    - oc set env deploy/poistamo-dev CRON_START_TIME="30 0 * * *"
     # start build process in OpenShift
     - oc start-build poistamo-dev --from-dir=. --follow
     # patch openshift buildConfig file
@@ -124,22 +124,22 @@ deploy_test:
     - oc delete secret generic poistamo-opencast-test-password --ignore-not-found
     - oc create secret generic poistamo-opencast-test-password --from-literal=POISTAMO_OPENCAST_PASS=$POISTAMO_OPENCAST_PASS_TEST
     # list environment variables here
-    - oc set env --from=secret/poistamo-test-password dc/poistamo-test
-    - oc set env dc/poistamo-test OPENSHIFT_NODEJS_IP=$OPENSHIFT_NODEJS_IP
-    - oc set env dc/poistamo-test OPENSHIFT_NODEJS_PORT=$OPENSHIFT_NODEJS_PORT
-    - oc set env dc/poistamo-test POSTGRES_USER=$POISTAMO_TEST_USER_NAME
-    - oc set env dc/poistamo-test PORT=$POISTAMO_TEST_PORT
-    - oc set env dc/poistamo-test HOST=$POISTAMO_TEST_HOST
-    - oc set env dc/poistamo-test DATABASE=$POISTAMO_TEST_DATABASE
-    - oc set env dc/poistamo-test SSL=$POISTAMO_TEST_SSL
-    - oc set env dc/poistamo-test TZ="Europe/Helsinki"
+    - oc set env --from=secret/poistamo-test-password deploy/poistamo-test
+    - oc set env deploy/poistamo-test OPENSHIFT_NODEJS_IP=$OPENSHIFT_NODEJS_IP
+    - oc set env deploy/poistamo-test OPENSHIFT_NODEJS_PORT=$OPENSHIFT_NODEJS_PORT
+    - oc set env deploy/poistamo-test POSTGRES_USER=$POISTAMO_TEST_USER_NAME
+    - oc set env deploy/poistamo-test PORT=$POISTAMO_TEST_PORT
+    - oc set env deploy/poistamo-test HOST=$POISTAMO_TEST_HOST
+    - oc set env deploy/poistamo-test DATABASE=$POISTAMO_TEST_DATABASE
+    - oc set env deploy/poistamo-test SSL=$POISTAMO_TEST_SSL
+    - oc set env deploy/poistamo-test TZ="Europe/Helsinki"
     # opencast environment variables
-    - oc set env --from=secret/poistamo-opencast-test-password dc/poistamo-test
-    - oc set env dc/poistamo-test POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_TEST
-    - oc set env dc/poistamo-test POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_TEST
-    - oc set env dc/poistamo-test POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_TEST
+    - oc set env --from=secret/poistamo-opencast-test-password deploy/poistamo-test
+    - oc set env deploy/poistamo-test POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_TEST
+    - oc set env deploy/poistamo-test POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_TEST
+    - oc set env deploy/poistamo-test POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_TEST
     # cronjob variable
-    - oc set env dc/poistamo-test CRON_START_TIME="30 0 * * *"
+    - oc set env deploy/poistamo-test CRON_START_TIME="30 0 * * *"
     - oc start-build poistamo-test --from-dir=. --follow
     # patch openshift buildConfig file
     - oc patch bc/poistamo-test --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
@@ -167,22 +167,22 @@ deploy_prod:
     - oc delete secret generic poistamo-opencast-prod-password --ignore-not-found
     - oc create secret generic poistamo-opencast-prod-password --from-literal=POISTAMO_OPENCAST_PASS=$POISTAMO_OPENCAST_PASS_PROD
     # list any environment variables here
-    - oc set env --from=secret/poistamo-prod-password dc/poistamo-prod
-    - oc set env dc/poistamo-prod OPENSHIFT_NODEJS_IP=$OPENSHIFT_NODEJS_IP
-    - oc set env dc/poistamo-prod OPENSHIFT_NODEJS_PORT=$OPENSHIFT_NODEJS_PORT
-    - oc set env dc/poistamo-prod POSTGRES_USER=$POISTAMO_PROD_USER_NAME
-    - oc set env dc/poistamo-prod PORT=$POISTAMO_PROD_PORT
-    - oc set env dc/poistamo-prod HOST=$POISTAMO_PROD_HOST
-    - oc set env dc/poistamo-prod DATABASE=$POISTAMO_PROD_DATABASE
-    - oc set env dc/poistamo-prod SSL=$POISTAMO_PROD_SSL
-    - oc set env dc/poistamo-prod TZ="Europe/Helsinki"
+    - oc set env --from=secret/poistamo-prod-password deploy/poistamo-prod
+    - oc set env deploy/poistamo-prod OPENSHIFT_NODEJS_IP=$OPENSHIFT_NODEJS_IP
+    - oc set env deploy/poistamo-prod OPENSHIFT_NODEJS_PORT=$OPENSHIFT_NODEJS_PORT
+    - oc set env deploy/poistamo-prod POSTGRES_USER=$POISTAMO_PROD_USER_NAME
+    - oc set env deploy/poistamo-prod PORT=$POISTAMO_PROD_PORT
+    - oc set env deploy/poistamo-prod HOST=$POISTAMO_PROD_HOST
+    - oc set env deploy/poistamo-prod DATABASE=$POISTAMO_PROD_DATABASE
+    - oc set env deploy/poistamo-prod SSL=$POISTAMO_PROD_SSL
+    - oc set env deploy/poistamo-prod TZ="Europe/Helsinki"
     # opencast environment variables
-    - oc set env --from=secret/poistamo-opencast-prod-password dc/poistamo-prod
-    - oc set env dc/poistamo-prod POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_PROD
-    - oc set env dc/poistamo-prod POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_PROD
-    - oc set env dc/poistamo-prod POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_PROD
+    - oc set env --from=secret/poistamo-opencast-prod-password deploy/poistamo-prod
+    - oc set env deploy/poistamo-prod POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_PROD
+    - oc set env deploy/poistamo-prod POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_PROD
+    - oc set env deploy/poistamo-prod POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_PROD
     # cronjob variable
-    - oc set env dc/poistamo-prod CRON_START_TIME="30 0 * * *"
+    - oc set env deploy/poistamo-prod CRON_START_TIME="30 0 * * *"
     - oc start-build poistamo-prod --from-dir=. --follow
     # patch openshift buildConfig file
     - oc patch bc/poistamo-prod --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
