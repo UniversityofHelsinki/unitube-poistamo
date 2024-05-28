@@ -44,6 +44,8 @@ const deleteVideos = async(selectedVideosToBeDeleted) => {
                 await databaseService.insertIntoVideoLogs(deletionResponse.status, `successfully deleted video`, videoId, null, null, null, null);
                 // update videos table actual_archived_date field to current date
                 await databaseService.updateVideosTableDeletedStatus(videoId);
+                // remove thumbnail image from thumbnails table
+                await databaseService.removeThumbnailImage(videoId);
             }
         } catch (error) {
             // insert into video_logs table for error  logs
