@@ -61,6 +61,7 @@ const removeThumbnailImage = async(videoId) => {
     if (foundThumbnailImage.rowCount > 0) {
         const removeThumbnailImageSQL = fs.readFileSync(path.resolve(__dirname, "../sql/removeThumbnailImage.sql"), "utf-8");
         await database.query(removeThumbnailImageSQL, [videoId]);
+        await insertIntoVideoLogs('200', 'successfully deleted thumbnail', videoId, '', '', '', '');
     }
 };
 
