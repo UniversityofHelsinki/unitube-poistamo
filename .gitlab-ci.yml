@@ -82,6 +82,8 @@ sonarqube-check:
 
 dependency-check:
   stage: dependency-check
+  only:
+    - main
   tags:
     - ohtu-build-3
   image:
