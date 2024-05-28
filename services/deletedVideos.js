@@ -48,6 +48,7 @@ const deleteVideos = async(selectedVideosToBeDeleted) => {
                 await databaseService.removeThumbnailImage(videoId);
             }
         } catch (error) {
+            console.log(error);
             // insert into video_logs table for error  logs
             await databaseService.insertIntoVideoLogs(500, error.message, videoId, null, null, null, null);
 
