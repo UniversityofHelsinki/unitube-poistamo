@@ -7,6 +7,7 @@ const client = require('../services/database');
 const Pool = require('pg-pool');
 const format = require('date-format');
 const Constants = require("../utils/constants");
+const crypto = require('crypto');
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -42,6 +43,10 @@ beforeEach(async () => {
         '            REFERENCES videos(video_id))')
     await wait(100);
     await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date) VALUES (\'e8a86433-0245-44b8-b0d7-69f6578bac6f\', \'2018-01-01\'::date, \'2008-01-01\'::date)');
+    const buffer = crypto.randomBytes(128);
+    // Convert the buffer to its hexadecimal representation
+    const hex = buffer.toString('hex');
+    await client.query(`INSERT INTO THUMBNAILS(video_id, thumbnail) VALUES ($1, E'\\\\x${hex}')`, ['e8a86433-0245-44b8-b0d7-69f6578bac6f']);
     await timer.getTimer.mockResolvedValue(0);
 },);
 
@@ -86,9 +91,10 @@ describe('Video deleting', () => {
         await deletedVideos.deleteVideos(videosToDelete);
 
         const video_logs = await client.query('SELECT * FROM video_logs');
-        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows).toHaveLength(2);
         expect(video_logs.rows[0].oc_messages).toEqual('successfully deleted video');
         expect(video_logs.rows[0].archived_series_id).toBeNull();
+        expect(video_logs.rows[1].oc_messages).toEqual('successfully deleted thumbnail');
 
         const videos = await client.query('SELECT to_char(deletion_date, \'DD.MM.YYYY\') as deletion_date FROM videos');
         expect(videos.rows).toHaveLength(1);
