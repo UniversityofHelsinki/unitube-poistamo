@@ -7,6 +7,7 @@ const client = require('../services/database');
 const Pool = require('pg-pool');
 const format = require('date-format');
 const Constants = require("../utils/constants");
+const crypto = require('crypto');
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -34,13 +35,24 @@ beforeAll(async () => {
 beforeEach(async () => {
     await client.query('CREATE TEMPORARY TABLE video_logs(video_log_id SERIAL NOT NULL, status_code VARCHAR(255) NOT NULL, oc_messages VARCHAR(255) NOT NULL, video_id VARCHAR(255) NOT NULL, video_name VARCHAR(255), original_series_id VARCHAR(255), original_series_name VARCHAR(255), archived_series_id varchar(255), PRIMARY KEY(video_log_id))');
     await client.query('CREATE TEMPORARY TABLE videos(video_id VARCHAR(255) NOT NULL, archived_date date, actual_archived_date date, deletion_date date, video_creation_date date, error_date date, PRIMARY KEY(video_id))');
+    await client.query('CREATE TEMPORARY TABLE THUMBNAILS(video_id VARCHAR(255) NOT NULL,\n' +
+        '    thumbnail BYTEA,\n' +
+        '    PRIMARY KEY(video_id),\n' +
+        '    CONSTRAINT fk_video_id\n' +
+        '        FOREIGN KEY(video_id)\n' +
+        '            REFERENCES videos(video_id))')
     await wait(100);
     await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date) VALUES (\'e8a86433-0245-44b8-b0d7-69f6578bac6f\', \'2018-01-01\'::date, \'2008-01-01\'::date)');
+    const buffer = crypto.randomBytes(128);
+    // Convert the buffer to its hexadecimal representation
+    const hex = buffer.toString('hex');
+    await client.query(`INSERT INTO THUMBNAILS(video_id, thumbnail) VALUES ($1, E'\\\\x${hex}')`, ['e8a86433-0245-44b8-b0d7-69f6578bac6f']);
     await timer.getTimer.mockResolvedValue(0);
 },);
 
 afterEach(async () => {
     await wait(100);
+    await client.query('DROP TABLE IF EXISTS pg_temp.thumbnails');
     await client.query('DROP TABLE IF EXISTS pg_temp.videos');
     await client.query('DROP TABLE IF EXISTS pg_temp.video_logs');
 });
@@ -79,9 +91,10 @@ describe('Video deleting', () => {
         await deletedVideos.deleteVideos(videosToDelete);
 
         const video_logs = await client.query('SELECT * FROM video_logs');
-        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows).toHaveLength(2);
         expect(video_logs.rows[0].oc_messages).toEqual('successfully deleted video');
         expect(video_logs.rows[0].archived_series_id).toBeNull();
+        expect(video_logs.rows[1].oc_messages).toEqual('successfully deleted thumbnail');
 
         const videos = await client.query('SELECT to_char(deletion_date, \'DD.MM.YYYY\') as deletion_date FROM videos');
         expect(videos.rows).toHaveLength(1);

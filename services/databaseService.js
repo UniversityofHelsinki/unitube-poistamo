@@ -3,7 +3,6 @@ const path = require("path");
 const database = require("./database");
 const Constants = require('../utils/constants');
 
-
 const selectedVideosWithArchivedDates = async() => {
     const selectedVideosWithArchivedDatesSQL = fs.readFileSync(path.resolve(__dirname, "../sql/getSelectedVideosToBeArchived.sql"), "utf8");
     const selectedVideos = await database.query(selectedVideosWithArchivedDatesSQL);
@@ -56,6 +55,16 @@ const updateVideoErrorDate = async(videoId) => {
     return updatedVideoEntry.rowCount;
 };
 
+const removeThumbnailImage = async(videoId) => {
+    const getThumbnailImageSQL = fs.readFileSync(path.resolve(__dirname, "../sql/getThumbnailImage.sql"), "utf8");
+    const foundThumbnailImage = await database.query(getThumbnailImageSQL, [videoId]);
+    if (foundThumbnailImage.rowCount > 0) {
+        const removeThumbnailImageSQL = fs.readFileSync(path.resolve(__dirname, "../sql/removeThumbnailImage.sql"), "utf-8");
+        await database.query(removeThumbnailImageSQL, [videoId]);
+        await insertIntoVideoLogs('200', 'successfully deleted thumbnail', videoId, '', '', '', '');
+    }
+};
+
 module.exports = {
     selectedVideosWithArchivedDates : selectedVideosWithArchivedDates,
     insertIntoVideoLogs : insertIntoVideoLogs,
@@ -63,5 +72,6 @@ module.exports = {
     selectedVideosToBeDeleted: selectedVideosToBeDeleted,
     updateVideosTableDeletedStatus: updateVideosTableDeletedStatus,
     restoreVideoStateToBeArchived: restoreVideoStateToBeArchived,
-    updateVideoErrorDate: updateVideoErrorDate
+    updateVideoErrorDate: updateVideoErrorDate,
+    removeThumbnailImage : removeThumbnailImage
 };
