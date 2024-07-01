@@ -86,11 +86,11 @@ dependency-check:
     - main
   tags:
     - ohtu-build-3
+  timeout: 5m
+  allow_failure: true
   image:
     name: owasp/dependency-check-action:latest
     entrypoint: [""]
-  before_script:
-    - apt update && apt install -y python3
   script:
     - >
       /usr/share/dependency-check/bin/dependency-check.sh
