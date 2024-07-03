@@ -95,12 +95,11 @@ dependency-check:
     - >
       /usr/share/dependency-check/bin/dependency-check.sh
       --project Projectname --scan . --enableExperimental
-      --format HTML --format JSON
+      --format JSON -nvdApiKey $NVD_API_KEY
   artifacts:
     when: always
     expire_in: 1 week
     paths:
-      - dependency-check-report.html
       - dependency-check-report.json
 
 # Define the process for deploy stage to development environment
