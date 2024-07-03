@@ -79,6 +79,8 @@ sonarqube-check:
   needs:
     - job: dependency-check
       artifacts: true
+    - job: test
+      artifacts: true
 
 dependency-check:
   stage: dependency-check
