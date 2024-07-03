@@ -196,7 +196,7 @@ describe('Video archiving tests', () => {
 
         await archivedVideos.archiveVideos(videosToArchive);
 
-        videos = await client.query('SELECT actual_archived_date, deletion_date, to_char(error_date, \'DD.MM.YYYY\') as error_date FROM videos');
+        const videos = await client.query('SELECT actual_archived_date, deletion_date, to_char(error_date, \'DD.MM.YYYY\') as error_date FROM videos');
         expect(videos.rows[0].actual_archived_date).toBeNull();
         expect(videos.rows[0].deletion_date).toBeNull();
         expect(videos.rows[0].error_date).toEqual(today);
@@ -209,7 +209,7 @@ describe('Video archiving tests', () => {
     afterAll( done => {
         client.end().then(done());
     });
-    
+
 });
 
 
