@@ -56,6 +56,11 @@ test:
   script:
     - npm run coverage
   coverage: /All files\s*\|\s*([\d\.]+)/
+  artifacts:
+    name: lataamo-poistamo-coverage
+    paths:
+      - coverage
+    expire_in: 1 hour
 
 sonarqube-check:
   stage: sonarqube-check
