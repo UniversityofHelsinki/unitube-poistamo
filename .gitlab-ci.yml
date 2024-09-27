@@ -78,13 +78,10 @@ sonarqube-check:
       - .sonar/cache
   script:
     - sonar-scanner
-  allow_failure: true
   only:
     - main
   needs:
     - job: dependency-check
-      artifacts: true
-    - job: test
       artifacts: true
 
 dependency-check:
@@ -93,21 +90,20 @@ dependency-check:
     - main
   tags:
     - ohtu-build-3
-  timeout: 5m
-  allow_failure: true
   image:
     name: owasp/dependency-check-action:latest
     entrypoint: [""]
   script:
     - >
       /usr/share/dependency-check/bin/dependency-check.sh
-      --project Projectname --scan . --enableExperimental
-      --format JSON -nvdApiKey $NVD_API_KEY
+      --project unitube-poistamo --scan .
+      --format JSON --format HTML -nvdApiKey $NVD_API_KEY
   artifacts:
     when: always
     expire_in: 1 week
     paths:
       - dependency-check-report.json
+      - dependency-check-report.html
 
 # Define the process for deploy stage to development environment
 # Development environment uses https://webcast-test.it.helsinki.fi (OpenCast test environment)
