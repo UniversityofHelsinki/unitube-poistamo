@@ -158,6 +158,9 @@ deploy_test:
   stage: deploy
   tags:
     - ohtu-build-3
+  except:
+    # Skip deploy when scheduled npm audit and outdated scans are executed.
+    - schedules
   environment:
     name: test
   only:
@@ -200,6 +203,9 @@ deploy_prod:
   stage: deploy
   tags:
     - ohtu-build-3
+  except:
+    # Skip deploy when scheduled npm audit and outdated scans are executed.
+    - schedules
   environment:
     name: prod
   only:
