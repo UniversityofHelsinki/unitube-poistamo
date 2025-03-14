@@ -58,12 +58,12 @@ Hei!
 
 Saat tämän viestin, koska olet Helsingin yliopiston Unitube-palvelussa yhden tai useamman vanhenevan videotallenteen hallinnoija.
 
-Olet tallenteen hallinnoija silloin, jos olet itse lisännyt ja julkaissut videon jossakin Unitube-tallennesarjassa. Voit olla hallinnoija myös siinä tapauksessa, että joku muu on merkinnyt sinut tai ryhmän, johon kuulut, hallinnoijaksi johonkin tallennesarjaan Unitube-lataamopalvelussa.
+Olet tallenteen hallinnoija silloin, jos olet itse lisännyt ja julkaissut videon jossakin Unitube-tallennekokoelmassa. Voit olla hallinnoija myös siinä tapauksessa, että joku muu on merkinnyt sinut tai ryhmän, johon kuulut, hallinnoijaksi johonkin tallennekokoelmaan Unitube-lataamopalvelussa.
 
 Seuraavan tai seuraavien Unitube-tallenteiden voimassaolo on päättymässä pian:',
      'Kaikilla Unitube-tallenteilla on voimassaoloaika, jonka jälkeen ne poistuvat palvelusta. Voimassaoloaika on aina korkeintaan kolme vuotta kerrallaan. Jos haluat, voit jatkaa itse hallinnoimiesi tallenteiden voimassaoloa Unitube-lataamossa osoitteessa https://lataamo.helsinki.fi.
 
-Voit lajitella hallinnoimasi tallenteet Unitube-lataamossa voimassaolon mukaan. Klikkaamalla tallennetta pääset muokkaamaan sen asetuksia kuten voimassaolopäivää. Voit myös asettaa kerralla saman voimassaolopäivän kaikille yhden hallinnoimasi videosarjan tallenteille sarjavälilehdeltä.
+Voit lajitella hallinnoimasi tallenteet Unitube-lataamossa voimassaolon mukaan. Klikkaamalla tallennetta pääset muokkaamaan sen asetuksia kuten voimassaolopäivää. Voit myös asettaa kerralla saman voimassaolopäivän kaikille yhden hallinnoimasi videokokoelman tallenteille kokoelmavälilehdeltä.
 
 Lisää ohjeita ja yhteystietoja:
 https://helpdesk.it.helsinki.fi/help/10654
@@ -77,11 +77,11 @@ Tietotekniikkakeskus
 
 Du får det här meddelandet eftersom du är administratör för en eller flera videoinspelningar som går ut i Helsingfors universitets Unitube-tjänst.
 
-Du är administratör för en inspelning om du har lagt till och publicerat en video i en Unitube-inspelningsserie. Du kan också vara administratör om någon annan har lagt till dig eller en grupp som du tillhör som administratör för en serie inspelningar på Unitube-uppladdningssajten.
+Du är administratör för en inspelning om du har lagt till och publicerat en video i en Unitube-inspelningssamling. Du kan också vara administratör om någon annan har lagt till dig eller en grupp som du tillhör som administratör för en samling inspelningar på Unitube-uppladdningssajten.
 
 Följande Unitube-inspelning(ar) går snart ut:', 'Alla Unitube-inspelningar har ett utgångsdatum efter vilket de tas bort från tjänsten. Giltighetstiden kan vara upp till tre år åt gången. Om du vill kan du förlänga giltighetstiden för dina hanterade inspelningar på Unitube-uppladdningssajten på https://lataamo.helsinki.fi.
 
-Du kan sortera dina inspelningar enligt deras utgångsdatum på Unitube-uppladdningssajten. Genom att klicka på en inspelning kan du redigera dess inställningar, till exempel utgångsdatumet. Du kan också ange samma utgångsdatum för alla inspelningar i en enskild videoserie på fliken Mina serier.
+Du kan sortera dina inspelningar enligt deras utgångsdatum på Unitube-uppladdningssajten. Genom att klicka på en inspelning kan du redigera dess inställningar, till exempel utgångsdatumet. Du kan också ange samma utgångsdatum för alla inspelningar i en enskild videosamling på fliken Mina Samlingar.
 
 Fler instruktioner och kontaktuppgifter:
 https://helpdesk.it.helsinki.fi/sv/help/10654
@@ -95,11 +95,11 @@ Center för informationsteknologi
 
 You are the recipient of this message because you are the administrator of one or more expiring video recordings in the University of Helsinki Unitube service.
 
-You are an administrator of a video if you have added and published a video in a Unitube video series. You may also be an administrator if someone else has added you or a group you belong to as the administrator of a series of recordings in the Unitube Uploader service.
+You are an administrator of a video if you have added and published a video in a Unitube video collection. You may also be an administrator if someone else has added you or a group you belong to as the administrator of a collection of recordings in the Unitube Uploader service.
 
 The following Unitube recording(s) are about to expire soon:', 'All Unitube recordings have an expiration date, after which they will be removed from the service. The validity period can be up to three years at a time. If you wish, you can extend the validity of your managed recordings in the Unitube Uploader service at https://lataamo.helsinki.fi.
 
-You can sort your recordings according to their expiry date in the Unitube Uploader. By clicking on a recording, you can edit its settings, such as the expiry date. You can also set the same expiry date for all the recordings in a single video series from within the My series tab.
+You can sort your recordings according to their expiry date in the Unitube Uploader. By clicking on a recording, you can edit its settings, such as the expiry date. You can also set the same expiry date for all the recordings in a single video collection from within the Collections tab.
 
 More instructions and contact details:
 https://helpdesk.it.helsinki.fi/en/help/10654
