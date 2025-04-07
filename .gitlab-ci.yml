@@ -151,6 +151,7 @@ deploy_dev:
     - oc set env --from=secret/poistamo-api-gw-key deploy/poistamo-dev
     # cronjob variable
     - oc set env deploy/poistamo-dev CRON_START_TIME="30 0 * * *"
+    - oc set env deploy/poistamo-dev CRON_START_TIME_ARHIVED_VIDEO_USERS="*/2 * * * *"
     # start build process in OpenShift
     - oc start-build poistamo-dev --from-dir=. --follow
     # patch openshift buildConfig file
@@ -201,6 +202,7 @@ deploy_test:
     - oc set env --from=secret/poistamo-api-gw-key deploy/poistamo-test
     # cronjob variable
     - oc set env deploy/poistamo-test CRON_START_TIME="30 0 * * *"
+    - oc set env deploy/poistamo-test CRON_START_TIME_ARHIVED_VIDEO_USERS="*/2 * * * *"
     - oc start-build poistamo-test --from-dir=. --follow
     # patch openshift buildConfig file
     - oc patch bc/poistamo-test --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
@@ -251,6 +253,7 @@ deploy_prod:
     - oc set env --from=secret/poistamo-api-gw-key deploy/poistamo-prod
     # cronjob variable
     - oc set env deploy/poistamo-prod CRON_START_TIME="30 0 * * *"
+    - oc set env deploy/poistamo-prod CRON_START_TIME_ARHIVED_VIDEO_USERS="*/2 * * * *"
     - oc start-build poistamo-prod --from-dir=. --follow
     # patch openshift buildConfig file
     - oc patch bc/poistamo-prod --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
