@@ -2,6 +2,7 @@ const cron = require("node-cron");
 const archivedVideos = require('./archivedVideos');
 const deletedVideos = require('./deletedVideos');
 const databaseService = require('./databaseService');
+const archivedVideoUsers = require("./archivedVideoUsers");
 
 // CRONJOB
 cronJob = cron.schedule(process.env.CRON_START_TIME, async() => {
@@ -16,4 +17,13 @@ cronJob = cron.schedule(process.env.CRON_START_TIME, async() => {
     }
 });
 
+// CRONJOB users of archived videos
+cronJobStoreAchivedVideoUsers = cron.schedule(process.env.CRON_START_TIME_ARHIVED_VIDEO_USERS, async() => {
+    const selectedVideosWithArchivedDates = await databaseService.selectedVideosWithArchivedDates();
+    if (selectedVideosWithArchivedDates && selectedVideosWithArchivedDates.rows && selectedVideosWithArchivedDates.rowCount > 0) {
+        await archivedVideoUsers.storeArchivedVideoUsers(selectedVideosWithArchivedDates);
+    }
+});
+
 module.exports.cronJob = cronJob;
+module.exports.cronJobStoreAchivedVideoUsers = cronJobStoreAchivedVideoUsers;

@@ -9,6 +9,23 @@ const selectedVideosWithArchivedDates = async() => {
     return selectedVideos;
 };
 
+const selectedArchivedVideoWithLogId = async(videoId) => {
+    try {
+        const selectedArchivedVideoWithLogIdSQL = fs.readFileSync(path.resolve(__dirname, "../sql/getArchivedVideo.sql"), "utf8");
+        const result = await database.query(selectedArchivedVideoWithLogIdSQL, [videoId]);
+        const videoLogId = result?.rows[0]?.video_log_id;
+        return videoLogId;
+    } catch (error) {
+        console.log(`${error}`);
+    }
+};
+
+const insertIntoArchivedVideoUsers = async(recipient, video) => {
+    const insertIntoAchivedVideoUsersSQL = fs.readFileSync(path.resolve(__dirname, "../sql/insertIntoAchivedVideoUsers.sql"), "utf8");
+    const newAchivedVideoUsersEntry = await database.query(insertIntoAchivedVideoUsersSQL, [video.videoId, recipient, video.videoLogId, video.archivedDate, new Date()]);
+    return newAchivedVideoUsersEntry.rowCount;
+};
+
 const insertIntoVideoLogs = async(statusCode, message, videoId, videoName, originalSeriesId, originalSeriesName, archivedSeriesId) => {
     const insertNewVideoLogEntrySQL = fs.readFileSync(path.resolve(__dirname, "../sql/insertIntoVideoLogs.sql"), "utf8");
     const newVideoLogEntry = await database.query(insertNewVideoLogEntrySQL, [statusCode, message, videoId, videoName, originalSeriesId, originalSeriesName, archivedSeriesId]);
@@ -67,6 +84,8 @@ const removeThumbnailImage = async(videoId) => {
 
 module.exports = {
     selectedVideosWithArchivedDates : selectedVideosWithArchivedDates,
+    selectedArchivedVideoWithLogId: selectedArchivedVideoWithLogId,
+    insertIntoArchivedVideoUsers: insertIntoArchivedVideoUsers,
     insertIntoVideoLogs : insertIntoVideoLogs,
     updateVideosTableArchivedStatus: updateVideosTableArchivedStatus,
     selectedVideosToBeDeleted: selectedVideosToBeDeleted,

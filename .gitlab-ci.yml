@@ -129,6 +129,7 @@ deploy_dev:
     - oc create secret generic poistamo-dev-password --from-literal=PASSWORD=$POISTAMO_DEV_PASSWORD
     - oc delete secret generic poistamo-opencast-dev-password --ignore-not-found
     - oc create secret generic poistamo-opencast-dev-password --from-literal=POISTAMO_OPENCAST_PASS=$POISTAMO_OPENCAST_PASS_DEV
+    - oc create secret generic poistamo-api-gw-key --from-literal=IAM_GROUPS_API_KEY=$IAM_GROUPS_API_KEY_TEST
     # list environment variables here
     # postgres environment variables
     - oc set env --from=secret/poistamo-dev-password deploy/poistamo-dev
@@ -145,6 +146,9 @@ deploy_dev:
     - oc set env deploy/poistamo-dev POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_DEV
     - oc set env deploy/poistamo-dev POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_DEV
     - oc set env deploy/poistamo-dev POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_DEV
+    # api-gateway environment variables
+    - oc set env deploy/poistamo-dev IAM_GROUPS_HOST=$IAM_GROUPS_HOST_TEST
+    - oc set env --from=secret/poistamo-api-gw-key deploy/poistamo-dev
     # cronjob variable
     - oc set env deploy/poistamo-dev CRON_START_TIME="30 0 * * *"
     # start build process in OpenShift
@@ -176,6 +180,7 @@ deploy_test:
     - oc create secret generic poistamo-test-password --from-literal=PASSWORD=$POISTAMO_TEST_PASSWORD
     - oc delete secret generic poistamo-opencast-test-password --ignore-not-found
     - oc create secret generic poistamo-opencast-test-password --from-literal=POISTAMO_OPENCAST_PASS=$POISTAMO_OPENCAST_PASS_TEST
+    - oc create secret generic poistamo-api-gw-key --from-literal=IAM_GROUPS_API_KEY=$IAM_GROUPS_API_KEY_TEST
     # list environment variables here
     - oc set env --from=secret/poistamo-test-password deploy/poistamo-test
     - oc set env deploy/poistamo-test OPENSHIFT_NODEJS_IP=$OPENSHIFT_NODEJS_IP
@@ -191,6 +196,9 @@ deploy_test:
     - oc set env deploy/poistamo-test POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_TEST
     - oc set env deploy/poistamo-test POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_TEST
     - oc set env deploy/poistamo-test POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_TEST
+    # api-gateway environment variables
+    - oc set env deploy/poistamo-test IAM_GROUPS_HOST=$IAM_GROUPS_HOST_TEST
+    - oc set env --from=secret/poistamo-api-gw-key deploy/poistamo-test
     # cronjob variable
     - oc set env deploy/poistamo-test CRON_START_TIME="30 0 * * *"
     - oc start-build poistamo-test --from-dir=. --follow
@@ -222,6 +230,7 @@ deploy_prod:
     - oc create secret generic poistamo-prod-password --from-literal=PASSWORD=$POISTAMO_PROD_PASSWORD
     - oc delete secret generic poistamo-opencast-prod-password --ignore-not-found
     - oc create secret generic poistamo-opencast-prod-password --from-literal=POISTAMO_OPENCAST_PASS=$POISTAMO_OPENCAST_PASS_PROD
+    - oc create secret generic poistamo-api-gw-key --from-literal=IAM_GROUPS_API_KEY=$IAM_GROUPS_API_KEY_PROD
     # list any environment variables here
     - oc set env --from=secret/poistamo-prod-password deploy/poistamo-prod
     - oc set env deploy/poistamo-prod OPENSHIFT_NODEJS_IP=$OPENSHIFT_NODEJS_IP
@@ -237,6 +246,9 @@ deploy_prod:
     - oc set env deploy/poistamo-prod POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_PROD
     - oc set env deploy/poistamo-prod POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_PROD
     - oc set env deploy/poistamo-prod POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_PROD
+    # api-gateway environment variables
+    - oc set env deploy/poistamo-prod IAM_GROUPS_HOST=$IAM_GROUPS_HOST_PROD
+    - oc set env --from=secret/poistamo-api-gw-key deploy/poistamo-prod
     # cronjob variable
     - oc set env deploy/poistamo-prod CRON_START_TIME="30 0 * * *"
     - oc start-build poistamo-prod --from-dir=. --follow
