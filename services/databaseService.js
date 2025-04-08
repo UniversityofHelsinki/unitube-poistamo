@@ -2,6 +2,8 @@ const fs = require("fs");
 const path = require("path");
 const database = require("./database");
 const Constants = require('../utils/constants');
+const { format, subMonths } = require('date-fns');
+const { toZonedTime} = require('date-fns-tz');
 
 const selectedVideosWithArchivedDates = async() => {
     const selectedVideosWithArchivedDatesSQL = fs.readFileSync(path.resolve(__dirname, "../sql/getSelectedVideosToBeArchived.sql"), "utf8");
@@ -65,6 +67,21 @@ const removeThumbnailImage = async(videoId) => {
     }
 };
 
+const deleteArchivedVideoUsers = async () => {
+    try {
+        let date = new Date();
+        let dateFourMonthsAgo = subMonths(date, 4);
+        let dateInFinland = toZonedTime(dateFourMonthsAgo, 'Europe/Helsinki');
+        let olderThanFourMonths = format(dateInFinland, 'yyyy-MM-dd HH:mm:ss');
+        //console.log('olderThanFourMonths:' + olderThanFourMonths);
+        const removeArchivedVideoUsersSQL = fs.readFileSync(path.resolve(__dirname, "../sql/removeArchivedVideoUsers.sql"), "utf-8");
+        const result = await database.query(removeArchivedVideoUsersSQL, [olderThanFourMonths]);
+        console.log("Removed rows ", result.rowCount);
+    } catch (error) {
+        throw error;
+    }
+}
+
 module.exports = {
     selectedVideosWithArchivedDates : selectedVideosWithArchivedDates,
     insertIntoVideoLogs : insertIntoVideoLogs,
@@ -73,5 +90,6 @@ module.exports = {
     updateVideosTableDeletedStatus: updateVideosTableDeletedStatus,
     restoreVideoStateToBeArchived: restoreVideoStateToBeArchived,
     updateVideoErrorDate: updateVideoErrorDate,
-    removeThumbnailImage : removeThumbnailImage
+    removeThumbnailImage : removeThumbnailImage,
+    deleteArchivedVideoUsers: deleteArchivedVideoUsers
 };

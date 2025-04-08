@@ -1,0 +1,1 @@
+DELETE FROM archived_videos_users WHERE created < $1;
