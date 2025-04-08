@@ -8,6 +8,11 @@
     "coverage": "jest --coverage",
     "start": "node index.js"
   },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!(date-fns)/)"
+    ]
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -15,7 +20,6 @@
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "date-fns": "^4.1.0",
-    "date-fns-tz": "^3.2.0",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "form-data": "^4.0.0",
@@ -26,7 +30,7 @@
     "pg-pool": "^3.4.1"
   },
   "devDependencies": {
-    "date-format": "^4.0.4",
-    "jest": "^27.5.1"
+    "jest": "^27.5.1",
+    "date-format": "^4.0.4"
   }
 }
