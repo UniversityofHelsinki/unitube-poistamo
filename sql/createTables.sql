@@ -37,19 +37,31 @@ CREATE TABLE IF NOT EXISTS video_logs(
 );
 
 CREATE TABLE IF NOT EXISTS email_templates(
-    id SERIAL NOT NULL,
-    name VARCHAR(255) UNIQUE NOT NULL,
-    description VARCHAR(255),
-    subject VARCHAR(255),
-    header_fi TEXT,
-    footer_fi TEXT,
-    header_sv TEXT,
-    footer_sv TEXT,
-    header_en TEXT,
-    footer_en TEXT,
-    modified TIMESTAMP,
-    PRIMARY KEY(id)
-    );
+                                              id SERIAL NOT NULL,
+                                              name VARCHAR(255) UNIQUE NOT NULL,
+                                              description VARCHAR(255),
+                                              subject VARCHAR(255),
+                                              header_fi TEXT,
+                                              footer_fi TEXT,
+                                              header_sv TEXT,
+                                              footer_sv TEXT,
+                                              header_en TEXT,
+                                              footer_en TEXT,
+                                              headingFI TEXT,
+                                              headingEN TEXT,
+                                              headingSV TEXT,
+                                              linkTextFI VARCHAR(255),
+                                              linkTextEN VARCHAR(255),
+                                              linkTextSV VARCHAR(255),
+                                              linkUrlFI VARCHAR(255),
+                                              linkUrlEN VARCHAR(255),
+                                              linkUrlSV VARCHAR(255),
+                                              messageFI TEXT,
+                                              messageEN TEXT,
+                                              messageSV TEXT,
+                                              modified TIMESTAMP,
+                                              PRIMARY KEY(id)
+);
 
 CREATE TABLE IF NOT EXISTS  thumbnails (
     video_id VARCHAR(255) NOT NULL,
@@ -60,7 +72,7 @@ CREATE TABLE IF NOT EXISTS  thumbnails (
             REFERENCES videos(video_id)
 );
 
-INSERT INTO email_templates (name, description, subject, header_fi, footer_fi, header_sv, footer_sv, header_en, footer_en) VALUES
+INSERT INTO email_templates (name, description, subject, header_fi, footer_fi, header_sv, footer_sv, header_en, footer_en, headingFI, headingEN, headingSV, linkTextFI, linkTextEN, linkTextSV, linkUrlFI, linkUrlEN, linkUrlSV, messageFI, messageEN, messageSV) VALUES
     ('Vanhenemisviesti', 'Viesti tallenteiden vanhenemisesta', 'Unitube: sinulla on vanhenevia videoita / you have expiring videos / du har videor som går ut', 'För svenska, se nedan / Scroll down for English
 
 Hei!
@@ -117,5 +129,18 @@ With kind regards,
 University of Helsinki
 Center for Information Technology
 
-***')
+***',
+     'Unitube: sinulla on vanhenevia videoita!',
+     'Unitube: you have expiring videos!',
+     'Unitube: du har videor som går ut!',
+     'https://lataamo.helsinki.fi',
+     'https://lataamo.helsinki.fi',
+     'https://lataamo.helsinki.fi',
+     'https://lataamo.helsinki.fi',
+     'https://lataamo.helsinki.fi',
+     'https://lataamo.helsinki.fi',
+     'Saat tämän viestin, koska olet Helsingin yliopiston Unitube-palvelussa yhden tai useamman vanhenevan videotallenteen hallinnoija. Seuraavan tai seuraavien Unitube-tallenteiden voimassaolo on päättymässä pian:',
+     'You are the recipient of this message because you are the administrator of one or more expiring video recordings in the University of Helsinki Unitube service. The following Unitube recording(s) are about to expire soon:',
+     'Du får det här meddelandet eftersom du är administratör för en eller flera videoinspelningar som går ut i Helsingfors universitets Unitube-tjänst. Följande Unitube-inspelning(ar) går snart ut:'
+    )
 ON CONFLICT DO NOTHING;
