@@ -20,6 +20,8 @@ stages:
   - test
   - dependency-check
   - sonarqube-check
+  - dependency-track-generate
+  - dependency-track-submit
   - audit_scan
   - deploy
 
@@ -104,6 +106,36 @@ dependency-check:
     paths:
       - dependency-check-report.json
       - dependency-check-report.html
+
+generate-sbom:
+  stage: dependency-track-generate
+  image: node:22-alpine
+  only:
+    - schedules
+  tags:
+    - ohtu-build-4
+  script:
+    - npm ci
+    - npx @cyclonedx/cyclonedx-npm --output-file sbom.xml
+  artifacts:
+    expire_in: 1h
+    paths:
+      - sbom.xml
+
+submit-sbom:
+  image: alpine:latest
+  stage: dependency-track-submit
+  only:
+    - schedules
+  tags:
+    - ohtu-build-4
+  dependencies:
+    - generate-sbom
+  before_script:
+    - apk add --no-cache curl
+  script:
+    - "curl -X POST ${DTRACK_API_URL} -H 'Content-Type: multipart/form-data' -H 'X-Api-Key: '${DTRACK_API_KEY} -F 'projectName='${PROJECT_NAME} -F 'autoCreate=true' -F 'projectVersion='${PROJECT_VERSION} -F 'bom=@sbom.xml'"
+
 
 # Define the process for deploy stage to development environment
 # Development environment uses https://webcast-test.it.helsinki.fi (OpenCast test environment)
