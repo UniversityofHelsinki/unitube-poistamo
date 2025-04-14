@@ -1,0 +1,1 @@
+SELECT VIDEO_LOG_ID FROM VIDEO_LOGS where VIDEO_ID =  $1 and OC_MESSAGES = 'successfully archived video';

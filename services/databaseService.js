@@ -5,8 +5,23 @@ const Constants = require('../utils/constants');
 
 const selectedVideosWithArchivedDates = async() => {
     const selectedVideosWithArchivedDatesSQL = fs.readFileSync(path.resolve(__dirname, "../sql/getSelectedVideosToBeArchived.sql"), "utf8");
-    const selectedVideos = await database.query(selectedVideosWithArchivedDatesSQL);
-    return selectedVideos;
+    return await database.query(selectedVideosWithArchivedDatesSQL);
+};
+
+const selectedArchivedVideoWithLogId = async(videoId) => {
+    try {
+        const selectedArchivedVideoWithLogIdSQL = fs.readFileSync(path.resolve(__dirname, "../sql/getArchivedVideo.sql"), "utf8");
+        const result = await database.query(selectedArchivedVideoWithLogIdSQL, [videoId]);
+        return result?.rows[0]?.video_log_id;
+    } catch (error) {
+        console.log(`${error}`);
+    }
+};
+
+const insertIntoArchivedVideoUsers = async(recipient, video) => {
+    const insertIntoArchivedVideoUsersSQL = fs.readFileSync(path.resolve(__dirname, "../sql/insertIntoArchivedVideoUsers.sql"), "utf8");
+    const newArchivedVideoUsersEntry = await database.query(insertIntoArchivedVideoUsersSQL, [video.videoId, recipient, video.videoLogId, video.archivedDate, new Date()]);
+    return newArchivedVideoUsersEntry.rowCount;
 };
 
 const insertIntoVideoLogs = async(statusCode, message, videoId, videoName, originalSeriesId, originalSeriesName, archivedSeriesId) => {
@@ -24,8 +39,7 @@ const updateVideosTableArchivedStatus = async(videoId) => {
 
 const selectedVideosToBeDeleted = async() => {
     const selectedVideosToBeDeletedSQL = fs.readFileSync(path.resolve(__dirname, "../sql/getSelectedVideosToBeDeleted.sql"), "utf8");
-    const selectedVideos = await database.query(selectedVideosToBeDeletedSQL);
-    return selectedVideos;
+    return await database.query(selectedVideosToBeDeletedSQL);
 };
 
 const updateVideosTableDeletedStatus = async(videoId) => {
@@ -67,6 +81,8 @@ const removeThumbnailImage = async(videoId) => {
 
 module.exports = {
     selectedVideosWithArchivedDates : selectedVideosWithArchivedDates,
+    selectedArchivedVideoWithLogId: selectedArchivedVideoWithLogId,
+    insertIntoArchivedVideoUsers: insertIntoArchivedVideoUsers,
     insertIntoVideoLogs : insertIntoVideoLogs,
     updateVideosTableArchivedStatus: updateVideosTableArchivedStatus,
     selectedVideosToBeDeleted: selectedVideosToBeDeleted,

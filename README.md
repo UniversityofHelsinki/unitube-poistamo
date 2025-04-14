@@ -11,11 +11,15 @@ Note the instructions for certain values marked with parenthesis.
 *DATABASE= expired_videos*
 
 _CRON_START_TIME=0 0 * * *_
+_CRON_START_TIME_ARHIVED_VIDEO_USERS= 0 2 * * *
 
 *POISTAMO_OPENCAST_HOST = __(OpenCast development url, for example http&#65279;://localhost:8080)__* <br>
 *POISTAMO_OPENCAST_USER = __(insert value from Keepass)__* <br>
 *POISTAMO_OPENCAST_PASS = __(insert value from Keepass)__* <br>
 *POISTAMO_OPENCAST_ARCHIVED_SERIES = __(insert the unique identifier of the 'archived' series created in OpenCast)__* <br>
+
+*IAM_GROUPS_HOST = https://gw-api-test.it.helsinki.fi
+*IAM_GROUPS_API_KEY = xxxxxxxxxxxxxxxxxxxx
 
 ## Start postgres as Docker container
 
