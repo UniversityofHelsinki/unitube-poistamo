@@ -161,6 +161,7 @@ deploy_dev:
     - oc create secret generic poistamo-dev-password --from-literal=PASSWORD=$POISTAMO_DEV_PASSWORD
     - oc delete secret generic poistamo-opencast-dev-password --ignore-not-found
     - oc create secret generic poistamo-opencast-dev-password --from-literal=POISTAMO_OPENCAST_PASS=$POISTAMO_OPENCAST_PASS_DEV
+    - oc delete secret generic poistamo-api-gw-key --ignore-not-found
     - oc create secret generic poistamo-api-gw-key --from-literal=IAM_GROUPS_API_KEY=$IAM_GROUPS_API_KEY_TEST
     # list environment variables here
     # postgres environment variables
@@ -214,6 +215,7 @@ deploy_test:
     - oc create secret generic poistamo-test-password --from-literal=PASSWORD=$POISTAMO_TEST_PASSWORD
     - oc delete secret generic poistamo-opencast-test-password --ignore-not-found
     - oc create secret generic poistamo-opencast-test-password --from-literal=POISTAMO_OPENCAST_PASS=$POISTAMO_OPENCAST_PASS_TEST
+    - oc delete secret generic poistamo-api-gw-key --ignore-not-found
     - oc create secret generic poistamo-api-gw-key --from-literal=IAM_GROUPS_API_KEY=$IAM_GROUPS_API_KEY_TEST
     # list environment variables here
     - oc set env --from=secret/poistamo-test-password deploy/poistamo-test
@@ -266,6 +268,7 @@ deploy_prod:
     - oc create secret generic poistamo-prod-password --from-literal=PASSWORD=$POISTAMO_PROD_PASSWORD
     - oc delete secret generic poistamo-opencast-prod-password --ignore-not-found
     - oc create secret generic poistamo-opencast-prod-password --from-literal=POISTAMO_OPENCAST_PASS=$POISTAMO_OPENCAST_PASS_PROD
+    - oc delete secret generic poistamo-api-gw-key --ignore-not-found
     - oc create secret generic poistamo-api-gw-key --from-literal=IAM_GROUPS_API_KEY=$IAM_GROUPS_API_KEY_PROD
     # list any environment variables here
     - oc set env --from=secret/poistamo-prod-password deploy/poistamo-prod
