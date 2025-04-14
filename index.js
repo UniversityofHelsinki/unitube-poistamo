@@ -40,4 +40,5 @@ module.exports = app;
     // START CRONJOB
     await cron.cronJob;
     await cron.cronJobStoreArchivedVideoUsers;
+    await cron.cronJobRemoveFourMonthsOlder;
 })();

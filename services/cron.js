@@ -25,5 +25,12 @@ const cronJobStoreArchivedVideoUsers = cron.schedule(process.env.CRON_START_TIME
     }
 });
 
+// cronJobRemoveOldRows
+cronJobRemoveFourMonthsOlder = cron.schedule(process.env.CRON_START_TIME_REMOVE_USERS, async() => {
+    console.log('Run cronJobRemoveOldRows once a week sunday morning 03:00');
+    await deletedVideos.deleteArchivedVideoUsers();
+});
+
 module.exports.cronJob = cronJob;
 module.exports.cronJobStoreArchivedVideoUsers = cronJobStoreArchivedVideoUsers;
+module.exports.cronJobRemoveFourMonthsOlder = cronJobRemoveFourMonthsOlder;

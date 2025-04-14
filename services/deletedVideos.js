@@ -2,7 +2,6 @@ const apiService = require('./apiService');
 const databaseService = require('./databaseService');
 const timer = require('./timer');
 
-
 const deleteVideos = async(selectedVideosToBeDeleted) => {
     for (const videoForDeletion of selectedVideosToBeDeleted) {
         const videoId = videoForDeletion.video_id;
@@ -57,5 +56,13 @@ const deleteVideos = async(selectedVideosToBeDeleted) => {
     }
 };
 
+const deleteArchivedVideoUsers = () => {
+    try {
+        databaseService.deleteArchivedVideoUsers();
+    } catch (error) {
+        console.log("Failed to delete old archived videos ", error);
+    }
+}
 
 module.exports.deleteVideos = deleteVideos;
+module.exports.deleteArchivedVideoUsers = deleteArchivedVideoUsers;
