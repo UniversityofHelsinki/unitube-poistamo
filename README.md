@@ -11,7 +11,7 @@ Note the instructions for certain values marked with parenthesis.
 *DATABASE= expired_videos*
 
 _CRON_START_TIME=0 0 * * *_
-_CRON_START_TIME_ARHIVED_VIDEO_USERS= 0 2 * * *
+_CRON_START_TIME_ARCHIVED_VIDEO_USERS= 0 2 * * *
 
 *POISTAMO_OPENCAST_HOST = __(OpenCast development url, for example http&#65279;://localhost:8080)__* <br>
 *POISTAMO_OPENCAST_USER = __(insert value from Keepass)__* <br>

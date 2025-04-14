@@ -18,7 +18,7 @@ const cronJob = cron.schedule(process.env.CRON_START_TIME, async() => {
 });
 
 // CRONJOB users of archived videos
-const cronJobStoreArchivedVideoUsers = cron.schedule(process.env.CRON_START_TIME_ARHIVED_VIDEO_USERS, async() => {
+const cronJobStoreArchivedVideoUsers = cron.schedule(process.env.CRON_START_TIME_ARCHIVED_VIDEO_USERS, async() => {
     const selectedVideosWithArchivedDates = await databaseService.selectedVideosWithArchivedDates();
     if (selectedVideosWithArchivedDates && selectedVideosWithArchivedDates.rows && selectedVideosWithArchivedDates.rowCount > 0) {
         await archivedVideoUsers.storeArchivedVideoUsers(selectedVideosWithArchivedDates);
