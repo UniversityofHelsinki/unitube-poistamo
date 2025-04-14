@@ -12,6 +12,15 @@ CREATE TABLE IF NOT EXISTS videos(
                        PRIMARY KEY(video_id)
 );
 
+CREATE TABLE IF NOT EXISTS archived_videos_users(
+                       video_id VARCHAR(255) NOT NULL,
+                       user_id VARCHAR(15) NOT NULL,
+                       video_log_id SERIAL NOT NULL,
+                       archived_date DATE,
+                       created TIMESTAMP,
+                       PRIMARY KEY(video_id, user_id)
+);
+
 CREATE TABLE IF NOT EXISTS video_logs(
                         video_log_id SERIAL NOT NULL,
                         status_code VARCHAR(255) NOT NULL,

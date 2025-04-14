@@ -3,24 +3,57 @@ const security = require('./security');
 const FormData = require('form-data');
 
 exports.getEvent = async (videoId) => {
-    try {
-        const eventsUrl = constants.OPENCAST_EVENTS_PATH + videoId;
-        const response = await security.opencastBase.get(eventsUrl);
-        return response;
-    } catch (error) {
-        throw error;
+    let retries = 0;
+    let maxRetries = 3;
+
+    while (retries < maxRetries) {
+        try {
+            const eventsUrl = constants.OPENCAST_EVENTS_PATH + videoId;
+            const response = await security.opencastBase.get(eventsUrl);
+            return response;
+        } catch (error) {
+            if (error.code === 'ECONNRESET') {
+                console.log('Connection reset, retrying...');
+                retries++;
+            } else {
+                throw error;
+            }
+        }
     }
+    throw new Error(`Failed to establish ${eventsUrl} connection after ${maxRetries} retries.`);
 };
 
 exports.getSeries = async (seriesId) => {
+    let retries = 0;
+    let maxRetries = 3;
+
+    while (retries < maxRetries) {
+        try {
+            const seriesUrl = constants.OPENCAST_SERIES_PATH + seriesId;
+            const response = await security.opencastBase.get(seriesUrl);
+            return response;
+        } catch (error) {
+            if (error.code === 'ECONNRESET') {
+                console.log('Connection reset, retrying...');
+                retries++;
+            } else {
+                throw error;
+            }
+        }
+    }
+    throw new Error(`Failed to establish ${seriesUrl} connection after ${maxRetries} retries.`);
+}
+
+exports.getRecipientsFromGroup = async (groupUid) => {
     try {
-        const seriesUrl = constants.OPENCAST_SERIES_PATH + seriesId;
-        const response = await security.opencastBase.get(seriesUrl);
+        const membersUrl = constants.IAM_GROUPS_PATH_PREFIX + groupUid + constants.IAM_GROUPS_PATH_POSTFIX;
+        const response = await security.iamGroupsBase(membersUrl);
         return response;
     } catch (error) {
+        console.log(error);
         throw error;
     }
-}
+};
 
 const modifyEventMetadataForOpencast = (archivedSeriesId) => {
     const metadataArray = [];
