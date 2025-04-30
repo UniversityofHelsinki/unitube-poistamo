@@ -12,10 +12,11 @@ const cronJob = cron.schedule(process.env.CRON_START_TIME, async() => {
         await archivedVideos.archiveVideos(selectedVideosWithArchivedDates.rows);
     }
 
-    if (selectedVideosWithArchivedDates && selectedVideosWithArchivedDates.rows && selectedVideosWithArchivedDates.rowCount > 0) {
-        await archivedVideoUsers.storeArchivedVideoUsers(selectedVideosWithArchivedDates);
-    }
     const selectedVideosToDelete = await databaseService.selectedVideosToBeDeleted();
+
+    if (selectedVideosToDelete && selectedVideosToDelete.rows && selectedVideosToDelete.rowCount > 0) {
+        await archivedVideoUsers.storeArchivedVideoUsers(selectedVideosToDelete);
+    }
     if (selectedVideosToDelete && selectedVideosToDelete.rows && selectedVideosToDelete.rowCount > 0) {
         await deletedVideos.deleteVideos(selectedVideosToDelete.rows);
     }
