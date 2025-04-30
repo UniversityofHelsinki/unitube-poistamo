@@ -11,17 +11,13 @@ const cronJob = cron.schedule(process.env.CRON_START_TIME, async() => {
     if (selectedVideosWithArchivedDates && selectedVideosWithArchivedDates.rows && selectedVideosWithArchivedDates.rowCount > 0) {
         await archivedVideos.archiveVideos(selectedVideosWithArchivedDates.rows);
     }
+
+    if (selectedVideosWithArchivedDates && selectedVideosWithArchivedDates.rows && selectedVideosWithArchivedDates.rowCount > 0) {
+        await archivedVideoUsers.storeArchivedVideoUsers(selectedVideosWithArchivedDates);
+    }
     const selectedVideosToDelete = await databaseService.selectedVideosToBeDeleted();
     if (selectedVideosToDelete && selectedVideosToDelete.rows && selectedVideosToDelete.rowCount > 0) {
         await deletedVideos.deleteVideos(selectedVideosToDelete.rows);
-    }
-});
-
-// CRONJOB users of archived videos
-const cronJobStoreArchivedVideoUsers = cron.schedule(process.env.CRON_START_TIME_ARCHIVED_VIDEO_USERS, async() => {
-    const selectedVideosWithArchivedDates = await databaseService.selectedVideosWithArchivedDates();
-    if (selectedVideosWithArchivedDates && selectedVideosWithArchivedDates.rows && selectedVideosWithArchivedDates.rowCount > 0) {
-        await archivedVideoUsers.storeArchivedVideoUsers(selectedVideosWithArchivedDates);
     }
 });
 
@@ -32,5 +28,4 @@ cronJobRemoveFourMonthsOlder = cron.schedule(process.env.CRON_START_TIME_REMOVE_
 });
 
 module.exports.cronJob = cronJob;
-module.exports.cronJobStoreArchivedVideoUsers = cronJobStoreArchivedVideoUsers;
 module.exports.cronJobRemoveFourMonthsOlder = cronJobRemoveFourMonthsOlder;
