@@ -10,16 +10,16 @@ const cronJob = cron.schedule(process.env.CRON_START_TIME, async() => {
     console.log('Run CronJob job daily at 00:00');
     const selectedVideosWithArchivedDates = await databaseService.selectedVideosWithArchivedDates();
     if (selectedVideosWithArchivedDates && selectedVideosWithArchivedDates.rows && selectedVideosWithArchivedDates.rowCount > 0) {
-        //await archivedVideos.archiveVideos(selectedVideosWithArchivedDates.rows);
+        await archivedVideos.archiveVideos(selectedVideosWithArchivedDates.rows);
     }
 
     const selectedVideosToDelete = await databaseService.selectedVideosToBeDeleted();
 
     if (selectedVideosToDelete && selectedVideosToDelete.rows && selectedVideosToDelete.rowCount > 0) {
-        //await archivedVideoUsers.storeArchivedVideoUsers(selectedVideosToDelete);
+        await archivedVideoUsers.storeArchivedVideoUsers(selectedVideosToDelete);
     }
     if (selectedVideosToDelete && selectedVideosToDelete.rows && selectedVideosToDelete.rowCount > 0) {
-        //await deletedVideos.deleteVideos(selectedVideosToDelete.rows);
+        await deletedVideos.deleteVideos(selectedVideosToDelete.rows);
     }
 
     const selectedVideosToBeCleanedUp = await databaseService.selectedVideosToBeCleanedUp();
