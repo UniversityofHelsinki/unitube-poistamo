@@ -218,3 +218,13 @@ exports.deleteVideo = async (video, archivedSeriesId) => {
         throw error;
     }
 };
+
+exports.cleanVideo = async (video) => {
+    try {
+        const eventsUrl = constants.OPENCAST_EVENTS_PATH + video.identifier;
+        const response = await security.opencastBase.delete(eventsUrl);
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};

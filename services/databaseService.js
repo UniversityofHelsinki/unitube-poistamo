@@ -43,9 +43,21 @@ const selectedVideosToBeDeleted = async() => {
     return await database.query(selectedVideosToBeDeletedSQL);
 };
 
+const selectedVideosToBeCleanedUp = async() => {
+    const selectedVideosToBeCleanedUpSQL = fs.readFileSync(path.resolve(__dirname, "../sql/getSelectedVideosToBeCleanedUp.sql"), "utf8");
+    return await database.query(selectedVideosToBeCleanedUpSQL);
+};
+
 const updateVideosTableDeletedStatus = async(videoId) => {
     const now = new Date();
     const updateVideoDeletedStatusSQL = fs.readFileSync(path.resolve(__dirname, "../sql/updateVideosTableDeletedStatus.sql"), "utf8");
+    const updatedVideoEntry = await database.query(updateVideoDeletedStatusSQL, [now, videoId]);
+    return updatedVideoEntry.rowCount;
+};
+
+const updateVideosTableCleanedStatus = async(videoId) => {
+    const now = new Date();
+    const updateVideoDeletedStatusSQL = fs.readFileSync(path.resolve(__dirname, "../sql/updateVideosTableCleanedStatus.sql"), "utf8");
     const updatedVideoEntry = await database.query(updateVideoDeletedStatusSQL, [now, videoId]);
     return updatedVideoEntry.rowCount;
 };
@@ -101,7 +113,9 @@ module.exports = {
     insertIntoVideoLogs : insertIntoVideoLogs,
     updateVideosTableArchivedStatus: updateVideosTableArchivedStatus,
     selectedVideosToBeDeleted: selectedVideosToBeDeleted,
+    selectedVideosToBeCleanedUp: selectedVideosToBeCleanedUp,
     updateVideosTableDeletedStatus: updateVideosTableDeletedStatus,
+    updateVideosTableCleanedStatus: updateVideosTableCleanedStatus,
     restoreVideoStateToBeArchived: restoreVideoStateToBeArchived,
     updateVideoErrorDate: updateVideoErrorDate,
     removeThumbnailImage : removeThumbnailImage,

@@ -56,9 +56,9 @@ const deleteVideos = async(selectedVideosToBeDeleted) => {
     }
 };
 
-const deleteArchivedVideoUsers = () => {
+const deleteArchivedVideoUsers = async() => {
     try {
-        databaseService.deleteArchivedVideoUsers();
+        await databaseService.deleteArchivedVideoUsers();
     } catch (error) {
         console.log("Failed to delete old archived videos ", error);
     }

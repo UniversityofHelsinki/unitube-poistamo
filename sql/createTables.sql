@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS videos(
                        second_notification_sent_at timestamp,
                        third_notification_sent_at timestamp,
                        skip_email boolean default false,
+                       cleanup_date date,
                        PRIMARY KEY(video_id)
 );
 
