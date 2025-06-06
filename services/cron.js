@@ -32,7 +32,7 @@ const cronJob = cron.schedule(process.env.CRON_START_TIME, async() => {
 });
 
 // cronJobRemoveOldRows
-cronJobRemoveFourMonthsOlder = cron.schedule(process.env.CRON_START_TIME_REMOVE_USERS, async() => {
+const cronJobRemoveFourMonthsOlder = cron.schedule(process.env.CRON_START_TIME_REMOVE_USERS, async() => {
     console.log('Run cronJobRemoveOldRows once a week sunday morning 03:00');
     await deletedVideos.deleteArchivedVideoUsers();
 });
