@@ -3,6 +3,7 @@ const archivedVideos = require('./archivedVideos');
 const deletedVideos = require('./deletedVideos');
 const databaseService = require('./databaseService');
 const archivedVideoUsers = require("./archivedVideoUsers");
+const cleanedVideos = require("./cleanedVideos");
 
 // CRONJOB
 const cronJob = cron.schedule(process.env.CRON_START_TIME, async() => {
@@ -20,10 +21,18 @@ const cronJob = cron.schedule(process.env.CRON_START_TIME, async() => {
     if (selectedVideosToDelete && selectedVideosToDelete.rows && selectedVideosToDelete.rowCount > 0) {
         await deletedVideos.deleteVideos(selectedVideosToDelete.rows);
     }
+
+    const selectedVideosToBeCleanedUp = await databaseService.selectedVideosToBeCleanedUp();
+
+    if (selectedVideosToBeCleanedUp && selectedVideosToBeCleanedUp.rows && selectedVideosToBeCleanedUp.rowCount > 0) {
+        await cleanedVideos.cleanVideos(selectedVideosToBeCleanedUp.rows);
+    }
+
+
 });
 
 // cronJobRemoveOldRows
-cronJobRemoveFourMonthsOlder = cron.schedule(process.env.CRON_START_TIME_REMOVE_USERS, async() => {
+const cronJobRemoveFourMonthsOlder = cron.schedule(process.env.CRON_START_TIME_REMOVE_USERS, async() => {
     console.log('Run cronJobRemoveOldRows once a week sunday morning 03:00');
     await deletedVideos.deleteArchivedVideoUsers();
 });
