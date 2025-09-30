@@ -242,7 +242,6 @@ deploy_test:
     - oc patch bc/poistamo-test --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
     - oc patch bc/poistamo-test --patch '{"spec":{"failedBuildsHistoryLimit":1}}'
 
-# Test environment uses https://webcast.it.helsinki.fi (OpenCast production environment)
 deploy_prod:
   stage: deploy
   tags:
@@ -255,6 +254,56 @@ deploy_prod:
   only:
     - prod
   when: manual
+  script:
+    # set home path for openshift 1001 user
+    - export HOME=/home/1001
+    # before any action, I connect to the OpenShift server with the appropriate credentials
+    - oc login https://$OPENSHIFT_ADDR_PROD:$OPENSHIFT_PORT --token=$OPENSHIFT_TOKEN_PROD
+    - oc project poistamo
+    # add secrets here
+    - oc delete secret generic poistamo-prod-password --ignore-not-found
+    - oc create secret generic poistamo-prod-password --from-literal=PASSWORD=$POISTAMO_PROD_PASSWORD
+    - oc delete secret generic poistamo-opencast-prod-password --ignore-not-found
+    - oc create secret generic poistamo-opencast-prod-password --from-literal=POISTAMO_OPENCAST_PASS=$POISTAMO_OPENCAST_PASS_PROD
+    - oc delete secret generic poistamo-api-gw-key --ignore-not-found
+    - oc create secret generic poistamo-api-gw-key --from-literal=IAM_GROUPS_API_KEY=$IAM_GROUPS_API_KEY_PROD
+    # list any environment variables here
+    - oc set env --from=secret/poistamo-prod-password deploy/poistamo-prod
+    - oc set env deploy/poistamo-prod OPENSHIFT_NODEJS_IP=$OPENSHIFT_NODEJS_IP
+    - oc set env deploy/poistamo-prod OPENSHIFT_NODEJS_PORT=$OPENSHIFT_NODEJS_PORT
+    - oc set env deploy/poistamo-prod POSTGRES_USER=$POISTAMO_PROD_USER_NAME
+    - oc set env deploy/poistamo-prod PORT=$POISTAMO_PROD_PORT
+    - oc set env deploy/poistamo-prod HOST=$POISTAMO_PROD_HOST
+    - oc set env deploy/poistamo-prod DATABASE=$POISTAMO_PROD_DATABASE
+    - oc set env deploy/poistamo-prod SSL=$POISTAMO_PROD_SSL
+    - oc set env deploy/poistamo-prod TZ="Europe/Helsinki"
+    # opencast environment variables
+    - oc set env --from=secret/poistamo-opencast-prod-password deploy/poistamo-prod
+    - oc set env deploy/poistamo-prod POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_PROD
+    - oc set env deploy/poistamo-prod POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_PROD
+    - oc set env deploy/poistamo-prod POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_PROD
+    # api-gateway environment variables
+    - oc set env deploy/poistamo-prod IAM_GROUPS_HOST=$IAM_GROUPS_HOST_PROD
+    - oc set env --from=secret/poistamo-api-gw-key deploy/poistamo-prod
+    # cronjob variable
+    - oc set env deploy/poistamo-prod CRON_START_TIME="30 0 * * *"
+    - oc set env deploy/poistamo-prod CRON_START_TIME_REMOVE_USERS="0 3 * * SUN"
+    - oc start-build poistamo-prod --from-dir=. --follow
+    # patch openshift buildConfig file
+    - oc patch bc/poistamo-prod --patch '{"spec":{"successfulBuildsHistoryLimit":1}}'
+    - oc patch bc/poistamo-prod --patch '{"spec":{"failedBuildsHistoryLimit":1}}'
+
+
+deploy_periodically_prod:
+  stage: deploy
+  tags:
+    - ohtu-build-3
+  environment:
+    name: prod
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH == "prod"'
+      when: always
+    - when: never
   script:
     # set home path for openshift 1001 user
     - export HOME=/home/1001
