@@ -95,9 +95,8 @@ const removeThumbnailImage = async(videoId) => {
 const deleteArchivedVideoUsers = async () => {
     try {
         let date = new Date();
-        let dateFourMonthsAgo = subMonths(date, 4);
-        let olderThanFourMonths = format(dateFourMonthsAgo, 'yyyy-MM-dd HH:mm:ss');
-        //console.log('olderThanFourMonths:' + olderThanFourMonths);
+        let dateSixMonthsAgo = subMonths(date, 6);
+        let olderThanFourMonths = format(dateSixMonthsAgo, 'yyyy-MM-dd HH:mm:ss');
         const removeArchivedVideoUsersSQL = fs.readFileSync(path.resolve(__dirname, "../sql/removeArchivedVideoUsers.sql"), "utf-8");
         const result = await database.query(removeArchivedVideoUsersSQL, [olderThanFourMonths]);
         console.log("Removed rows count ", result.rowCount);
