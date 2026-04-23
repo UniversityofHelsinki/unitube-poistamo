@@ -15,6 +15,10 @@ const IAM_GROUPS_PATH_PREFIX = '/iam/groups/group/';
 const IAM_GROUPS_PATH_POSTFIX = '/members';
 const IAM_ACCOUNT_EMAIL = '/iam/groups/account/emails';
 const TRASH = 'trash';
+const OPENCAST_ACL_PATH = '/acl';
+const OCAST_EVENT_MEDIA_PATH_PREFIX = '/admin-ng/event/';
+const OCAST_EVENT_MEDIA_PATH_SUFFIX = '/asset/media/media.json';
+const OCAST_EVENT_MEDIA_FILE_METADATA = '/asset/media/';
 
 // properties object for the republish query
 // Opencast instantiates a java.util.Properties from the value, so key=value pairs and \n as a delimeter.
@@ -23,6 +27,18 @@ const PROPERTIES_REPUBLISH_METADATA =
     'publishLive=false\nuploadedSearchPreview=true\npublishToOaiPmh=false\ncomment=false\npublishToMediaModule=true';
 
 const DEFAULT_VIDEO_ARCHIVED_YEAR_AMOUNT = 3;
+
+const ROLE_USER_UNLISTED = 'ROLE_USER_UNLISTED';
+const ROLE_ANONYMOUS = 'ROLE_ANONYMOUS';
+const ROLE_KATSOMO = 'ROLE_KATSOMO';
+
+const STATUS_UNLISTED = 'unlisted';
+const STATUS_PUBLISHED = 'published';
+const STATUS_PRIVATE = 'private';
+const STATUS_MOODLE = 'moodle';
+
+const MOODLE_ACL_INSTRUCTOR = 'instructor';
+const MOODLE_ACL_LEARNER = 'learner';
 
 module.exports = {
     ARCHIVED_SERIES,
@@ -42,5 +58,18 @@ module.exports = {
     IAM_ACCOUNT_EMAIL,
     TRASH,
     ARCHIVE_DELETE_WORKFLOW_DEFINITION,
-    DEFAULT_VIDEO_ARCHIVED_YEAR_AMOUNT
+    DEFAULT_VIDEO_ARCHIVED_YEAR_AMOUNT,
+    OPENCAST_ACL_PATH,
+    OCAST_EVENT_MEDIA_PATH_PREFIX,
+    OCAST_EVENT_MEDIA_PATH_SUFFIX,
+    OCAST_EVENT_MEDIA_FILE_METADATA,
+    ROLE_USER_UNLISTED,
+    ROLE_ANONYMOUS,
+    ROLE_KATSOMO,
+    STATUS_UNLISTED,
+    STATUS_PUBLISHED,
+    STATUS_PRIVATE,
+    STATUS_MOODLE,
+    MOODLE_ACL_INSTRUCTOR,
+    MOODLE_ACL_LEARNER
 }

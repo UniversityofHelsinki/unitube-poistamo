@@ -2,6 +2,27 @@ const constants = require('../utils/constants');
 const security = require('./security');
 const FormData = require('form-data');
 
+exports.getMediaPackage = async (videoId) => {
+    let retries = 0;
+    let maxRetries = 3;
+
+    while (retries < maxRetries) {
+        try {
+            const mediaPackageUrl = constants.OPENCAST_ASSETS_EPISODE_URL + videoId;
+            const response = await security.opencastBase.get(mediaPackageUrl);
+            return response;
+        } catch (error) {
+            if (error.code === 'ECONNRESET') {
+                console.log('Connection reset, retrying...');
+                retries++;
+            } else {
+                throw error;
+            }
+        }
+    }
+    throw new Error(`Failed to establish connection for mediapackage ${videoId} after ${maxRetries} retries.`);
+};
+
 exports.getEvent = async (videoId) => {
     let retries = 0;
     let maxRetries = 3;
@@ -228,3 +249,23 @@ exports.cleanVideo = async (video) => {
         throw error;
     }
 };
+
+exports.getEventAclsFromSeries = async (series) => {
+    const seriesId = series;
+    let seriesAclUrl = constants.OPENCAST_SERIES_PATH + seriesId + constants.OPENCAST_ACL_PATH;
+    const response = await security.opencastBase.get(seriesAclUrl);
+    return response.data;
+};
+
+exports.getMediaForEvent = async (event) => {
+    const mediaUrl = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + event.identifier + constants.OCAST_EVENT_MEDIA_PATH_SUFFIX;
+    const response = await security.opencastBase.get(mediaUrl);
+    return response.data;
+};
+
+exports.getMediaFileMetadataForEvent = async (eventId, mediaId) => {
+    const mediaFileMetadata = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + constants.OCAST_EVENT_MEDIA_FILE_METADATA + mediaId + '.json';
+    const response = await security.opencastBase.get(mediaFileMetadata);
+    return response.data;
+};
+

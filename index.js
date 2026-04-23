@@ -23,7 +23,13 @@ app.use(bodyParser.json());
 // CREATE TABLES
 const createTables = fs.readFileSync(path.resolve(__dirname, "./sql/createTables.sql"), "utf8");
 
-database.query(createTables);
+(async () => {
+    try {
+        await database.query(createTables);
+    } catch (error) {
+        console.error('Error initializing database:', error);
+    }
+})();
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
@@ -38,6 +44,7 @@ module.exports = app;
 
 (async () => {
     // START CRONJOB
-    await cron.cronJob;
-    await cron.cronJobRemoveArchivedVideoUsers;
+    //await cron.cronJob;
+    //await cron.cronJobRemoveArchivedVideoUsers;
+    await cron.getEventInfoCronJob;
 })();
