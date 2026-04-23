@@ -14,29 +14,23 @@ const getVideosFromVideosTable = async() => {
     return await database.query(getVideosFromVideosTable);
 };
 
-const insertMediaItemIfNotExists = async(mediaItem) => {
+const upsertMediaItem = async(mediaItem) => {
     const upsertMediaItemSQL = fs.readFileSync(path.resolve(__dirname, "../sql/upsertMediaItem.sql"), "utf8");
     const result = await database.query(upsertMediaItemSQL, [
         mediaItem.external_identifier,
         mediaItem.name,
         mediaItem.description,
         mediaItem.collection_id,
-        mediaItem.video_id,
         mediaItem.duration
     ]);
     if (result.rows.length > 0) {
         return result.rows[0].id;
-    } else {
-        // If DO NOTHING happened (though we changed it to DO UPDATE), or if for some reason returning failed
-        const findIdSQL = "SELECT id FROM mediaItem WHERE external_identifier = $1";
-        const findResult = await database.query(findIdSQL, [mediaItem.external_identifier]);
-        return findResult.rows[0].id;
     }
 };
 
-const insertFlavorIfNotExists = async(mediaItemId, flavor) => {
-    const insertFlavorIfNotExistsSQL = fs.readFileSync(path.resolve(__dirname, "../sql/insertFlavorIfNotExists.sql"), "utf8");
-    return await database.query(insertFlavorIfNotExistsSQL, [
+const upsertFlavor = async(mediaItemId, flavor) => {
+    const upsertFlavorSQL = fs.readFileSync(path.resolve(__dirname, "../sql/upsertFlavor.sql"), "utf8");
+    return await database.query(upsertFlavorSQL, [
         mediaItemId,
         flavor.mimetype,
         flavor.type,
@@ -44,7 +38,7 @@ const insertFlavorIfNotExists = async(mediaItemId, flavor) => {
     ]);
 };
 
-const insertCollectionIfNotExists = async(collection) => {
+const upsertCollection = async(collection) => {
     const upsertCollectionSQL = fs.readFileSync(path.resolve(__dirname, "../sql/upsertCollection.sql"), "utf8");
     return await database.query(upsertCollectionSQL, [
         collection.external_identifier,
@@ -56,17 +50,17 @@ const insertCollectionIfNotExists = async(collection) => {
     ]);
 };
 
-const insertOwnerIfNotExists = async(collectionId, owner) => {
-    const insertOwnerIfNotExistsSQL = fs.readFileSync(path.resolve(__dirname, "../sql/insertOwnerIfNotExists.sql"), "utf8");
-    return await database.query(insertOwnerIfNotExistsSQL, [
+const upsertOwner = async(collectionId, owner) => {
+    const upsertOwnerSQL = fs.readFileSync(path.resolve(__dirname, "../sql/upsertOwner.sql"), "utf8");
+    return await database.query(upsertOwnerSQL, [
         collectionId,
         owner
     ]);
 };
 
-const insertAccessRightsIfNotExists = async(collectionId, accessRights) => {
-    const insertAccessRightsIfNotExistsSQL = fs.readFileSync(path.resolve(__dirname, "../sql/insertAccessRightsIfNotExists.sql"), "utf8");
-    return await database.query(insertAccessRightsIfNotExistsSQL, [
+const upsertAccessRights = async(collectionId, accessRights) => {
+    const upsertAccessRightsSQL = fs.readFileSync(path.resolve(__dirname, "../sql/upsertAccessRights.sql"), "utf8");
+    return await database.query(upsertAccessRightsSQL, [
         collectionId,
         accessRights
     ]);
@@ -183,9 +177,9 @@ module.exports = {
     removeThumbnailImage : removeThumbnailImage,
     deleteArchivedVideoUsers: deleteArchivedVideoUsers,
     getVideosFromVideosTable: getVideosFromVideosTable,
-    insertMediaItemIfNotExists: insertMediaItemIfNotExists,
-    insertFlavorIfNotExists: insertFlavorIfNotExists,
-    insertCollectionIfNotExists: insertCollectionIfNotExists,
-    insertOwnerIfNotExists: insertOwnerIfNotExists,
-    insertAccessRightsIfNotExists: insertAccessRightsIfNotExists
+    upsertMediaItem: upsertMediaItem,
+    upsertFlavor: upsertFlavor,
+    upsertCollection: upsertCollection,
+    upsertOwner: upsertOwner,
+    upsertAccessRights: upsertAccessRights
 };

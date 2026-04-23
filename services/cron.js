@@ -63,7 +63,7 @@ const cronJobRemoveArchivedVideoUsers = cron.schedule(process.env.CRON_START_TIM
     await deletedVideos.deleteArchivedVideoUsers();
 });
 
-const getEventInfoCronJob = cron.schedule('* * * * *', async () => {
+const getEventInfoCronJob = async () => {
     console.log('Run getEventInfoCronJob every minute');
     try {
         const result = await databaseService.getVideosFromVideosTable();
@@ -81,11 +81,10 @@ const getEventInfoCronJob = cron.schedule('* * * * *', async () => {
                             name: event.data.title,
                             description: event.data.description || '',
                             collection_id: event.data.is_part_of || '',
-                            video_id: row.video_id,
                             duration: event.data.duration || 0
                         };
-                        console.log(`Inserting mediaItem for event ID: ${mediaItem.external_identifier} (if not exists)`);
-                        const mediaItemId = await databaseService.insertMediaItemIfNotExists(mediaItem);
+                        console.log(`Upserting mediaItem for event ID: ${mediaItem.external_identifier}`);
+                        const mediaItemId = await databaseService.upsertMediaItem(mediaItem);
 
                         // get media file
                         const media = await apiService.getMediaForEvent(event.data);
@@ -93,8 +92,8 @@ const getEventInfoCronJob = cron.schedule('* * * * *', async () => {
 
                         if (media && media.length > 0) {
                             for (const item of media) {
-                                console.log(`Inserting flavor for mediaItem ID: ${mediaItemId} (if not exists): ${item.type}`);
-                                await databaseService.insertFlavorIfNotExists(mediaItemId, item);
+                                console.log(`Upserting flavor for mediaItem ID: ${mediaItemId}: ${item.type}`);
+                                await databaseService.upsertFlavor(mediaItemId, item);
                             }
                         }
                     }
@@ -110,7 +109,7 @@ const getEventInfoCronJob = cron.schedule('* * * * *', async () => {
                             const seriesAcl = await apiService.getEventAclsFromSeries(series.data.identifier);
                             console.log('series acl data:', seriesAcl);
 
-                            const visibility = setVisibilityForSeries({ roles: seriesAcl || [] });
+                            const visibility = setVisibilityForSeries({roles: seriesAcl || []});
 
                             const collection = {
                                 external_identifier: series.data.identifier,
@@ -120,21 +119,21 @@ const getEventInfoCronJob = cron.schedule('* * * * *', async () => {
                                 license: series.data.license || '',
                                 opinfi: false
                             };
-                            console.log(`Inserting collection for series ID: ${collection.external_identifier} (if not exists)`);
-                            await databaseService.insertCollectionIfNotExists(collection);
+                            console.log(`Upserting collection for series ID: ${collection.external_identifier}`);
+                            await databaseService.upsertCollection(collection);
 
                             if (series.data.contributors) {
                                 for (const owner of series.data.contributors) {
-                                    console.log(`Inserting owner for series ID: ${series.data.identifier} (if not exists): ${owner}`);
-                                    await databaseService.insertOwnerIfNotExists(series.data.identifier, owner);
+                                    console.log(`Upserting owner for series ID: ${series.data.identifier}: ${owner}`);
+                                    await databaseService.upsertOwner(series.data.identifier, owner);
                                 }
                             }
 
                             if (seriesAcl) {
                                 for (const acl of seriesAcl) {
                                     const accessRight = acl?.role;
-                                    console.log(`Inserting accessRight for series ID: ${series.data.identifier} (if not exists): ${accessRight}`);
-                                    await databaseService.insertAccessRightsIfNotExists(series.data.identifier, accessRight);
+                                    console.log(`Upserting accessRight for series ID: ${series.data.identifier}: ${accessRight}`);
+                                    await databaseService.upsertAccessRights(series.data.identifier, accessRight);
                                 }
                             }
 
@@ -146,11 +145,12 @@ const getEventInfoCronJob = cron.schedule('* * * * *', async () => {
                     console.error(`Error processing video ID ${row.video_id}:`, error.message);
                 }
             }
+            console.log('All videos processed successfully.');
         }
     } catch (error) {
         console.error('Error in getEventInfoCronJob:', error.message);
     }
-    });
+}
 
 module.exports.cronJob = cronJob;
 module.exports.cronJobRemoveArchivedVideoUsers = cronJobRemoveArchivedVideoUsers;

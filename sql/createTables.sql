@@ -147,18 +147,17 @@ Center for Information Technology
 ON CONFLICT DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS mediaItem (
-                                         id SERIAL PRIMARY KEY,
-                                         external_identifier VARCHAR(255) UNIQUE NOT NULL, /* event_id */
+    id SERIAL PRIMARY KEY,
+    external_identifier VARCHAR(255) UNIQUE NOT NULL, /* event_id */
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
     collection_id VARCHAR(255) NOT NULL,
-    video_id VARCHAR(255) NOT NULL,
     duration bigint
     );
 
 CREATE TABLE IF NOT EXISTS collection (
-                                          id SERIAL PRIMARY KEY,
-                                          external_identifier VARCHAR(255) UNIQUE NOT NULL, /* series_id */
+    id SERIAL PRIMARY KEY,
+    external_identifier VARCHAR(255) UNIQUE NOT NULL, /* series_id */
     title VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
     visibility VARCHAR(255) NOT NULL /* public, private, unlisted */ ,
@@ -167,20 +166,20 @@ CREATE TABLE IF NOT EXISTS collection (
     );
 
 CREATE TABLE IF NOT EXISTS license (
-                                       id SERIAL PRIMARY KEY,
-                                       name VARCHAR(255) NOT NULL
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL
     );
 
 CREATE TABLE IF NOT EXISTS presenter (
-                                         id SERIAL PRIMARY KEY,
-                                         name VARCHAR(255) NOT NULL,
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
     phone VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL
     );
 
 CREATE TABLE IF NOT EXISTS owners (
-                                      id SERIAL PRIMARY KEY,
-                                      owner VARCHAR(255) NOT NULL /* group, person */,
+    id SERIAL PRIMARY KEY,
+    owner VARCHAR(255) NOT NULL /* group, person */,
     collection_id VARCHAR(255) NOT NULL,
     UNIQUE (collection_id, owner),
     CONSTRAINT fk_collection
@@ -189,8 +188,8 @@ CREATE TABLE IF NOT EXISTS owners (
     );
 
 CREATE TABLE IF NOT EXISTS access_rights (
-                                             id SERIAL PRIMARY KEY,
-                                             collection_id VARCHAR(255) NOT NULL,
+    id SERIAL PRIMARY KEY,
+    collection_id VARCHAR(255) NOT NULL,
     access_rights VARCHAR(255) NOT NULL /* acl */,
     UNIQUE (collection_id, access_rights)
     );
@@ -198,10 +197,10 @@ CREATE TABLE IF NOT EXISTS access_rights (
 CREATE TABLE IF NOT EXISTS flavor (
     id SERIAL PRIMARY KEY,
     media_item_id INTEGER NOT NULL,
-    flavor VARCHAR(255) NOT NULL,
     mimetype VARCHAR(255) NOT NULL,
     type VARCHAR(255) NOT NULL,
     url TEXT NOT NULL,
+    UNIQUE (media_item_id, type),
     CONSTRAINT fk_media_item
         FOREIGN KEY(media_item_id)
             REFERENCES mediaItem(id)

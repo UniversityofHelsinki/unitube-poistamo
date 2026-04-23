@@ -26,6 +26,7 @@ const createTables = fs.readFileSync(path.resolve(__dirname, "./sql/createTables
 (async () => {
     try {
         await database.query(createTables);
+        await cron.getEventInfoCronJob();
     } catch (error) {
         console.error('Error initializing database:', error);
     }
@@ -46,5 +47,5 @@ module.exports = app;
     // START CRONJOB
     //await cron.cronJob;
     //await cron.cronJobRemoveArchivedVideoUsers;
-    await cron.getEventInfoCronJob;
+    //await cron.getEventInfoCronJob;
 })();
