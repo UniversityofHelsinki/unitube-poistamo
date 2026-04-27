@@ -167,7 +167,12 @@ CREATE TABLE IF NOT EXISTS collection (
 
 CREATE TABLE IF NOT EXISTS license (
       id SERIAL PRIMARY KEY,
-      name VARCHAR(255) NOT NULL
+      name VARCHAR(255) NOT NULL,
+      media_item_id INTEGER NOT NULL,
+      UNIQUE (media_item_id),
+      CONSTRAINT fk_media_item
+        FOREIGN KEY(media_item_id)
+        REFERENCES mediaItem(id)
     );
 
 CREATE TABLE IF NOT EXISTS presenter (
