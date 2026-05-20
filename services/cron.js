@@ -96,7 +96,8 @@ const getEventInfoCronJob = async () => {
                             description: event.data.description || '',
                             collection_id: event.data.is_part_of || '',
                             duration: duration,
-                            created: event.data.created
+                            created: event.data.created,
+                            license: event.data.license
                         };
                         console.log(`Upserting mediaItem for event ID: ${mediaItem.external_identifier}`);
                         const mediaItemId = await databaseService.upsertMediaItem(mediaItem);
