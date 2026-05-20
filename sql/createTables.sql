@@ -153,7 +153,8 @@ CREATE TABLE IF NOT EXISTS mediaItem (
     description VARCHAR(255) NOT NULL,
     collection_id VARCHAR(255) NOT NULL,
     duration bigint,
-    created TIMESTAMP NOT NULL
+    created TIMESTAMP NOT NULL,
+    license VARCHAR(255) NOT NULL
     );
 
 CREATE TABLE IF NOT EXISTS collection (
