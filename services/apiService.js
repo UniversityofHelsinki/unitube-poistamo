@@ -1,6 +1,7 @@
 const constants = require('../utils/constants');
 const security = require('./security');
 const FormData = require('form-data');
+const commonService = require('./commonService');
 
 exports.getMediaPackage = async (videoId) => {
     let retries = 0;
@@ -261,6 +262,13 @@ exports.getMediaForEvent = async (event) => {
     const mediaUrl = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + event.identifier + constants.OCAST_EVENT_MEDIA_PATH_SUFFIX;
     const response = await security.opencastBase.get(mediaUrl);
     return response.data;
+};
+
+exports.getDurationFromMediaFileMetadataForEvent = (event) => {
+    return {
+        ...event,
+        duration: commonService.formatDuration(event.mediaFileMetadata.duration)
+    };
 };
 
 exports.getMediaFileMetadataForEvent = async (eventId, mediaId) => {

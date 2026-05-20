@@ -76,19 +76,30 @@ const getEventInfoCronJob = async () => {
                     console.log(`Successfully called getEvent for video ID: ${row.video_id}`);
 
                     if (event.data && event.data.identifier) {
+                        // get media file
+                        const media = await apiService.getMediaForEvent(event.data);
+                        console.log('media data:', media);
+
+                        let duration = event.data.duration || 0;
+
+                        if (media && media.length > 0) {
+                            const mediaFileMetadata = await apiService.getMediaFileMetadataForEvent(event.data.identifier, media[0].id);
+                            console.log('media file metadata:', mediaFileMetadata);
+                            if (mediaFileMetadata && mediaFileMetadata.duration) {
+                                duration = mediaFileMetadata.duration;
+                            }
+                        }
+
                         const mediaItem = {
                             external_identifier: event.data.identifier,
                             name: event.data.title,
                             description: event.data.description || '',
                             collection_id: event.data.is_part_of || '',
-                            duration: event.data.duration || 0
+                            duration: duration,
+                            created: event.data.created
                         };
                         console.log(`Upserting mediaItem for event ID: ${mediaItem.external_identifier}`);
                         const mediaItemId = await databaseService.upsertMediaItem(mediaItem);
-
-                        // get media file
-                        const media = await apiService.getMediaForEvent(event.data);
-                        console.log('media data:', media);
 
                         if (media && media.length > 0) {
                             for (const item of media) {
@@ -120,12 +131,12 @@ const getEventInfoCronJob = async () => {
                                 opinfi: false
                             };
                             console.log(`Upserting collection for series ID: ${collection.external_identifier}`);
-                            await databaseService.upsertCollection(collection);
+                            //await databaseService.upsertCollection(collection);
 
                             if (series.data.contributors) {
                                 for (const owner of series.data.contributors) {
                                     console.log(`Upserting owner for series ID: ${series.data.identifier}: ${owner}`);
-                                    await databaseService.upsertOwner(series.data.identifier, owner);
+                                    //await databaseService.upsertOwner(series.data.identifier, owner);
                                 }
                             }
 
@@ -133,7 +144,7 @@ const getEventInfoCronJob = async () => {
                                 for (const acl of seriesAcl) {
                                     const accessRight = acl?.role;
                                     console.log(`Upserting accessRight for series ID: ${series.data.identifier}: ${accessRight}`);
-                                    await databaseService.upsertAccessRights(series.data.identifier, accessRight);
+                                    //await databaseService.upsertAccessRights(series.data.identifier, accessRight);
                                 }
                             }
 

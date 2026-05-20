@@ -21,7 +21,8 @@ const upsertMediaItem = async(mediaItem) => {
         mediaItem.name,
         mediaItem.description,
         mediaItem.collection_id,
-        mediaItem.duration
+        mediaItem.duration,
+        mediaItem.created
     ]);
     if (result.rows.length > 0) {
         return result.rows[0].id;
