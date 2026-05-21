@@ -8,6 +8,7 @@ const apiService = require('./apiService');
 const {getMediaFileMetadataForEvent} = require("./apiService");
 const constants = require('../utils/constants');
 const commonService = require('./commonService');
+const {detectLanguage} = require("./languageDetectionService");
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -100,6 +101,13 @@ const getEventInfoCronJob = async () => {
                             license: event.data.license
                         };
                         console.log(`Upserting mediaItem for event ID: ${mediaItem.external_identifier}`);
+
+                        if (process.env.LANGUAGE_DETECTION_ENABLED === 'true') {
+                            console.log('detecting language')
+                            const detectedLanguage = await detectLanguage(mediaItem.name, mediaItem.description);
+                            console.log(`Detected language: ${detectedLanguage}`)
+                        }
+
                         const mediaItemId = await databaseService.upsertMediaItem(mediaItem);
 
                         if (media && media.length > 0) {
@@ -132,12 +140,12 @@ const getEventInfoCronJob = async () => {
                                 opinfi: false
                             };
                             console.log(`Upserting collection for series ID: ${collection.external_identifier}`);
-                            //await databaseService.upsertCollection(collection);
+                            await databaseService.upsertCollection(collection);
 
                             if (series.data.contributors) {
                                 for (const owner of series.data.contributors) {
                                     console.log(`Upserting owner for series ID: ${series.data.identifier}: ${owner}`);
-                                    //await databaseService.upsertOwner(series.data.identifier, owner);
+                                    await databaseService.upsertOwner(series.data.identifier, owner);
                                 }
                             }
 
@@ -145,7 +153,7 @@ const getEventInfoCronJob = async () => {
                                 for (const acl of seriesAcl) {
                                     const accessRight = acl?.role;
                                     console.log(`Upserting accessRight for series ID: ${series.data.identifier}: ${accessRight}`);
-                                    //await databaseService.upsertAccessRights(series.data.identifier, accessRight);
+                                    await databaseService.upsertAccessRights(series.data.identifier, accessRight);
                                 }
                             }
 

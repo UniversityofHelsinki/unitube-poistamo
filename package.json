@@ -30,7 +30,7 @@
     "pg-pool": "^3.4.1"
   },
   "devDependencies": {
-    "jest": "^27.5.1",
-    "date-format": "^4.0.4"
+    "date-format": "^4.0.4",
+    "jest": "^27.5.1"
   }
 }
