@@ -26,7 +26,7 @@ const createTables = fs.readFileSync(path.resolve(__dirname, "./sql/createTables
 (async () => {
     try {
         await database.query(createTables);
-        await cron.getEventInfoCronJob();
+        await cron.runImportScript();
     } catch (error) {
         console.error('Error initializing database:', error);
     }

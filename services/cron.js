@@ -64,114 +64,121 @@ const cronJobRemoveArchivedVideoUsers = cron.schedule(process.env.CRON_START_TIM
     await deletedVideos.deleteArchivedVideoUsers();
 });
 
-const getEventInfoCronJob = async () => {
-    console.log('Run getEventInfoCronJob every minute');
+const runImportScript = async () => {
+    console.log('Run runImportScript started');
     try {
         const result = await databaseService.getVideosFromVideosTable();
         if (result && result.rows && result.rowCount > 0) {
+            console.log(`Processing ${result.rowCount} videos...`);
+            let count = 0;
             for (const row of result.rows) {
                 try {
-                    //await delay(1000); // 1 second delay between processing each video
-                    console.log(`Calling getEvent for video ID: ${row.video_id}`);
-                    const event = await apiService.getEvent(row.video_id);
-                    console.log(`Successfully called getEvent for video ID: ${row.video_id}`);
-
-                    if (event.data && event.data.identifier) {
-                        // get media file
-                        const media = await apiService.getMediaForEvent(event.data);
-                        console.log('media data:', media);
-
-                        let duration = event.data.duration || 0;
-
-                        if (media && media.length > 0) {
-                            const mediaFileMetadata = await apiService.getMediaFileMetadataForEvent(event.data.identifier, media[0].id);
-                            console.log('media file metadata:', mediaFileMetadata);
-                            if (mediaFileMetadata && mediaFileMetadata.duration) {
-                                duration = mediaFileMetadata.duration;
-                            }
-                        }
-
-                        const mediaItem = {
-                            external_identifier: event.data.identifier,
-                            name: event.data.title,
-                            description: event.data.description || '',
-                            collection_id: event.data.is_part_of || '',
-                            duration: duration,
-                            created: event.data.created,
-                            license: event.data.license
-                        };
-                        console.log(`Upserting mediaItem for event ID: ${mediaItem.external_identifier}`);
-
-                        if (process.env.LANGUAGE_DETECTION_ENABLED === 'true') {
-                            console.log('detecting language')
-                            const detectedLanguage = await detectLanguage(mediaItem.name, mediaItem.description);
-                            console.log(`Detected language: ${detectedLanguage}`)
-                        }
-
-                        const mediaItemId = await databaseService.upsertMediaItem(mediaItem);
-
-                        if (media && media.length > 0) {
-                            for (const item of media) {
-                                console.log(`Upserting flavor for mediaItem ID: ${mediaItemId}: ${item.type}`);
-                                await databaseService.upsertFlavor(mediaItemId, item);
-                            }
-                        }
-                    }
-
-                    if (event.data && event.data.is_part_of) {
-                        const seriesId = event.data.is_part_of;
-                        console.log(`Calling getSeries for series ID: ${seriesId}`);
-                        const series = await apiService.getSeries(seriesId);
-                        console.log(`Successfully called getSeries for series ID: ${seriesId}`);
-
-                        if (series.data) {
-                            // get acl
-                            const seriesAcl = await apiService.getEventAclsFromSeries(series.data.identifier);
-                            console.log('series acl data:', seriesAcl);
-
-                            const visibility = setVisibilityForSeries({roles: seriesAcl || []});
-
-                            const collection = {
-                                external_identifier: series.data.identifier,
-                                title: series.data.title,
-                                description: series.data.description || '',
-                                visibility: visibility.join(','),
-                                license: series.data.license || '',
-                                opinfi: false
-                            };
-                            console.log(`Upserting collection for series ID: ${collection.external_identifier}`);
-                            await databaseService.upsertCollection(collection);
-
-                            if (series.data.contributors) {
-                                for (const owner of series.data.contributors) {
-                                    console.log(`Upserting owner for series ID: ${series.data.identifier}: ${owner}`);
-                                    await databaseService.upsertOwner(series.data.identifier, owner);
-                                }
-                            }
-
-                            if (seriesAcl) {
-                                for (const acl of seriesAcl) {
-                                    const accessRight = acl?.role;
-                                    console.log(`Upserting accessRight for series ID: ${series.data.identifier}: ${accessRight}`);
-                                    await databaseService.upsertAccessRights(series.data.identifier, accessRight);
-                                }
-                            }
-
-                        }
-                    } else {
-                        console.log(`No series found for video ID: ${row.video_id}`);
+                    await processVideoRow(row);
+                    count++;
+                    if (count % 10 === 0 || count === result.rowCount) {
+                        console.log(`Processed ${count}/${result.rowCount} videos`);
                     }
                 } catch (error) {
                     console.error(`Error processing video ID ${row.video_id}:`, error.message);
                 }
             }
             console.log('All videos processed successfully.');
+        } else {
+            console.log('No videos found to process.');
         }
     } catch (error) {
-        console.error('Error in getEventInfoCronJob:', error.message);
+        console.error('Error in runImportScript:', error.message);
     }
 }
 
+const processVideoRow = async (row) => {
+    const event = await apiService.getEvent(row.video_id);
+
+    let visibility = [];
+    if (event.data && event.data.is_part_of) {
+        visibility = await processSeries(event.data.is_part_of);
+    } else {
+        console.log(`No series found for video ID: ${row.video_id}`);
+    }
+
+    if (event.data && event.data.identifier) {
+        await processMediaItem(event.data, visibility);
+    }
+};
+
+const processMediaItem = async (eventData, visibility = []) => {
+    const media = await apiService.getMediaForEvent(eventData);
+    let duration = eventData.duration || 0;
+
+    if (media && media.length > 0) {
+        const mediaFileMetadata = await apiService.getMediaFileMetadataForEvent(eventData.identifier, media[0].id);
+        if (mediaFileMetadata && mediaFileMetadata.duration) {
+            duration = mediaFileMetadata.duration;
+        }
+    }
+
+    const mediaItem = {
+        external_identifier: eventData.identifier,
+        name: eventData.title,
+        description: eventData.description || '',
+        collection_id: eventData.is_part_of || '',
+        duration: duration,
+        created: eventData.created,
+        license: eventData.license,
+        language: null
+    };
+
+    if (process.env.LANGUAGE_DETECTION_ENABLED === 'true' && visibility.includes(constants.STATUS_PUBLISHED)) {
+        const detectedLanguage = await detectLanguage(mediaItem.name, mediaItem.description);
+        mediaItem.language = detectedLanguage;
+        console.log(`Added language: ${detectedLanguage} to video: ${mediaItem.external_identifier}`);
+    }
+
+    const mediaItemId = await databaseService.upsertMediaItem(mediaItem);
+
+    if (media && media.length > 0) {
+        for (const item of media) {
+            await databaseService.upsertFlavor(mediaItemId, item);
+        }
+    }
+};
+
+const processSeries = async (seriesId) => {
+    const series = await apiService.getSeries(seriesId);
+
+    if (series.data) {
+        const seriesAcl = await apiService.getEventAclsFromSeries(series.data.identifier);
+
+        const visibility = setVisibilityForSeries({roles: seriesAcl || []});
+
+        const collection = {
+            external_identifier: series.data.identifier,
+            title: series.data.title,
+            description: series.data.description || '',
+            visibility: visibility.join(','),
+            license: series.data.license || '',
+            opinfi: false
+        };
+
+        await databaseService.upsertCollection(collection);
+
+        if (series.data.contributors) {
+            for (const owner of series.data.contributors) {
+                await databaseService.upsertOwner(series.data.identifier, owner);
+            }
+        }
+
+        if (seriesAcl) {
+            for (const acl of seriesAcl) {
+                const accessRight = acl?.role;
+                await databaseService.upsertAccessRights(series.data.identifier, accessRight);
+            }
+        }
+        return visibility;
+    }
+    return [];
+};
+
 module.exports.cronJob = cronJob;
 module.exports.cronJobRemoveArchivedVideoUsers = cronJobRemoveArchivedVideoUsers;
-module.exports.getEventInfoCronJob = getEventInfoCronJob;
+module.exports.runImportScript = runImportScript;

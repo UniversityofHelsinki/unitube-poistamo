@@ -23,7 +23,8 @@ const upsertMediaItem = async(mediaItem) => {
         mediaItem.collection_id,
         mediaItem.duration,
         mediaItem.created,
-        mediaItem.license
+        mediaItem.license,
+        mediaItem.language
     ]);
     if (result.rows.length > 0) {
         return result.rows[0].id;

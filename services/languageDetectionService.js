@@ -1,5 +1,5 @@
 const detectLanguage = async (title, description) => {
-    const text = `Title: ${title}\nDescription: ${description}`.trim();
+    const text = `${title}\n ${description}`.trim();
 
     // Default to Finnish if text is too short or empty
     if (text.length < 10) {
@@ -7,7 +7,6 @@ const detectLanguage = async (title, description) => {
     }
 
     if (!process.env.OPENAI_API_KEY) {
-        console.error('OPENAI_API_KEY is not set.');
         return 'fi';
     }
 
