@@ -56,12 +56,16 @@ const cronJob = cron.schedule(process.env.CRON_START_TIME, async() => {
     }
 
 
+}, {
+    scheduled: false // This prevents it from starting immediately
 });
 
 // cronJobRemoveOldRows
 const cronJobRemoveArchivedVideoUsers = cron.schedule(process.env.CRON_START_TIME_REMOVE_USERS, async() => {
     console.log('Run cronJobRemoveOldRows once a week sunday morning 03:00');
     await deletedVideos.deleteArchivedVideoUsers();
+}, {
+    scheduled: false // This prevents it from starting immediately
 });
 
 const runImportScript = async () => {
