@@ -150,7 +150,7 @@ CREATE TABLE IF NOT EXISTS mediaItem (
     id SERIAL PRIMARY KEY,
     external_identifier VARCHAR(255) UNIQUE NOT NULL, /* event_id */
     name VARCHAR(255) NOT NULL,
-    description VARCHAR(255) NOT NULL,
+    description VARCHAR(3000) NOT NULL,
     collection_id VARCHAR(255) NOT NULL,
     duration bigint,
     created TIMESTAMP,
