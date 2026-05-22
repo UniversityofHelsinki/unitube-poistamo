@@ -150,7 +150,7 @@ const processMediaItem = async (eventData, visibility = []) => {
         description: eventData.description || '',
         collection_id: eventData.is_part_of || '',
         duration: duration,
-        created: eventData.created,
+        created: eventData.created || null,
         license: eventData.license,
         language: null
     };
