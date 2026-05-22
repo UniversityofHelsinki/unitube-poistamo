@@ -65,29 +65,56 @@ const cronJobRemoveArchivedVideoUsers = cron.schedule(process.env.CRON_START_TIM
 });
 
 const runImportScript = async () => {
+    const startTime = Date.now();
     console.log('Run runImportScript started');
+    let successCount = 0;
+    let errorCount = 0;
     try {
         const result = await databaseService.getVideosFromVideosTable();
         if (result && result.rows && result.rowCount > 0) {
             console.log(`Processing ${result.rowCount} videos...`);
-            let count = 0;
             for (const row of result.rows) {
                 try {
                     await processVideoRow(row);
-                    count++;
-                    if (count % 10 === 0 || count === result.rowCount) {
-                        console.log(`Processed ${count}/${result.rowCount} videos`);
+                    successCount++;
+                    if (successCount % 10 === 0 || successCount === result.rowCount) {
+                        const currentTime = Date.now();
+                        const elapsedMs = currentTime - startTime;
+                        const avgMsPerVideo = elapsedMs / successCount;
+                        const remainingVideos = result.rowCount - successCount;
+                        const estimatedRemainingMs = remainingVideos * avgMsPerVideo;
+
+                        const remMinutes = Math.floor(estimatedRemainingMs / 60000);
+                        const remSeconds = Math.floor((estimatedRemainingMs % 60000) / 1000);
+
+                        let progressMsg = `Processed ${successCount}/${result.rowCount} videos`;
+                        if (remainingVideos > 0) {
+                            progressMsg += ` (Estimated time remaining: ${remMinutes}m ${remSeconds}s)`;
+                        }
+                        console.log(progressMsg);
                     }
                 } catch (error) {
+                    errorCount++;
                     console.error(`Error processing video ID ${row.video_id}:`, error.message);
                 }
             }
-            console.log('All videos processed successfully.');
+            console.log('All videos processed.');
         } else {
             console.log('No videos found to process.');
         }
     } catch (error) {
         console.error('Error in runImportScript:', error.message);
+    } finally {
+        const endTime = Date.now();
+        const durationSeconds = Math.floor((endTime - startTime) / 1000);
+        const minutes = Math.floor(durationSeconds / 60);
+        const seconds = durationSeconds % 60;
+
+        console.log('--- Import Report ---');
+        console.log(`Total time: ${minutes}m ${seconds}s`);
+        console.log(`Successfully processed: ${successCount}`);
+        console.log(`Errors encountered: ${errorCount}`);
+        console.log('----------------------');
     }
 }
 
