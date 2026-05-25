@@ -211,5 +211,18 @@ CREATE TABLE IF NOT EXISTS flavor (
     UNIQUE (media_item_id, type),
     CONSTRAINT fk_media_item
         FOREIGN KEY(media_item_id)
-            REFERENCES mediaItem(id)
+        REFERENCES mediaItem(id)
+);
+
+CREATE TABLE IF NOT EXISTS chapters (
+    id SERIAL PRIMARY KEY,
+    media_item_id INTEGER NOT NULL,
+    language VARCHAR(10) NOT NULL,
+    vtt_content TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (media_item_id, language),
+    CONSTRAINT fk_media_item
+        FOREIGN KEY(media_item_id)
+        REFERENCES mediaItem(id)
 );

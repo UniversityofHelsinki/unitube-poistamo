@@ -9,6 +9,7 @@ const {getMediaFileMetadataForEvent} = require("./apiService");
 const constants = require('../utils/constants');
 const commonService = require('./commonService');
 const {detectLanguage} = require("./languageDetectionService");
+const chapterGeneratorService = require('./chapterGeneratorService');
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -166,6 +167,28 @@ const processMediaItem = async (eventData, visibility = []) => {
     }
 
     const mediaItemId = await databaseService.upsertMediaItem(mediaItem);
+
+    if (process.env.CHAPTER_DETECTION_ENABLED === 'true' && visibility.includes(constants.STATUS_PUBLISHED)) {
+        const VTTFiles = await apiService.getVTTFilesForEvent(eventData);
+        if (VTTFiles && VTTFiles.length > 0) {
+            for (const vttFile of VTTFiles) {
+                const tags = vttFile.tags || [];
+                const langTag = tags.find(tag => tag.startsWith('lang:'));
+                const lang = langTag ? langTag.split(':')[1] : 'und';
+
+                try {
+                    const vttContent = await apiService.getVTTFileContent(vttFile.uri);
+                    const chapters = await chapterGeneratorService.generateChapters(vttContent);
+                    if (chapters) {
+                        await databaseService.upsertChapter(mediaItemId, lang, chapters);
+                        console.log(`Added chapters for language: ${lang} to video: ${mediaItem.external_identifier}`);
+                    }
+                } catch (error) {
+                    console.error(`Error generating chapters for language ${lang} of video ${mediaItem.external_identifier}:`, error.message);
+                }
+            }
+        }
+    }
 
     if (media && media.length > 0) {
         for (const item of media) {

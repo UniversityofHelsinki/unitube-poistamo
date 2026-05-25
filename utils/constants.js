@@ -19,6 +19,7 @@ const OPENCAST_ACL_PATH = '/acl';
 const OCAST_EVENT_MEDIA_PATH_PREFIX = '/admin-ng/event/';
 const OCAST_EVENT_MEDIA_PATH_SUFFIX = '/asset/media/media.json';
 const OCAST_EVENT_MEDIA_FILE_METADATA = '/asset/media/';
+const OCAST_EVENT_MEDIA_PATH = '/media';
 
 // properties object for the republish query
 // Opencast instantiates a java.util.Properties from the value, so key=value pairs and \n as a delimeter.
@@ -71,5 +72,6 @@ module.exports = {
     STATUS_PRIVATE,
     STATUS_MOODLE,
     MOODLE_ACL_INSTRUCTOR,
-    MOODLE_ACL_LEARNER
+    MOODLE_ACL_LEARNER,
+    OCAST_EVENT_MEDIA_PATH
 }

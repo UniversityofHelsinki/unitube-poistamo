@@ -277,3 +277,24 @@ exports.getMediaFileMetadataForEvent = async (eventId, mediaId) => {
     return response.data;
 };
 
+exports.getVTTFilesForEvent = async (event) => {
+    const mediaUrl = constants.OPENCAST_EVENTS_PATH + event.identifier + constants.OCAST_EVENT_MEDIA_PATH;
+    const response = await security.opencastBase.get(mediaUrl);
+    if (response.data && Array.isArray(response.data)) {
+        return response.data.filter(item => item.mimetype === 'text/vtt');
+    }
+    return [];
+};
+
+exports.getVTTFileContent = async (url) => {
+    let path = url;
+    try {
+        const urlObj = new URL(url);
+        path = urlObj.pathname + urlObj.search;
+    } catch (e) {
+        // if not a valid full URL, assume it's already a path
+    }
+    const response = await security.opencastBase.get(path);
+    return response.data;
+};
+
