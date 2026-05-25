@@ -178,7 +178,7 @@ const processMediaItem = async (eventData, visibility = []) => {
 
                 try {
                     const vttContent = await apiService.getVTTFileContent(vttFile.uri);
-                    const chapters = await chapterGeneratorService.generateChapters(vttContent);
+                    const chapters = await chapterGeneratorService.generateChapters(vttContent, lang);
                     if (chapters) {
                         await databaseService.upsertChapter(mediaItemId, lang, chapters);
                         console.log(`Added chapters for language: ${lang} to video: ${mediaItem.external_identifier}`);
