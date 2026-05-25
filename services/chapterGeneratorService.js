@@ -22,7 +22,7 @@ const generateChapters = async (vttContent, language) => {
                     },
                     {
                         role: 'user',
-                        content: `Please generate chapters for this video based on the following transcript. Use the WebVTT format exactly as shown in the example below.\n\nExample Output Format:\nWEBVTT Chapter 1\n00:00:00.000 --> 00:01:42.000\nOpening credits\n\nChapter 2\n00:01:42.000 --> 00:04:44.000\nA dangerous quest\n\nTranscript:\n${vttContent}`
+                        content: `Please generate chapters for this video based on the following transcript. Use the WebVTT format exactly \nTranscript:\n${vttContent}`
                     }
                 ]
             },
