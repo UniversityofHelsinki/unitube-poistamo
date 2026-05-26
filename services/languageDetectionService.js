@@ -12,7 +12,7 @@ const detectLanguage = async (title, description) => {
 
     try {
         const response = await fetch(
-            'https://ohtu-openai-services.openai.azure.com/openai/deployments/gpt-5.4-mini/chat/completions?api-version=2025-01-01-preview',
+            'https://ohtu-openai-services.openai.azure.com/openai/deployments/gpt-5.5/chat/completions?api-version=2025-01-01-preview',
             {
                 method: 'POST',
                 headers: {
@@ -20,7 +20,7 @@ const detectLanguage = async (title, description) => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    model: 'gpt-5.4-mini',
+                    model: 'gpt-5.5',
                     messages: [
                         {
                             role: 'system',

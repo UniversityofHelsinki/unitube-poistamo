@@ -12,9 +12,9 @@ const generateChapters = async (vttContent, language) => {
     try {
         const languagePrompt = language ? ` Generate the chapters in ${language}.` : '';
         const response = await axios.post(
-            'https://ohtu-openai-services.openai.azure.com/openai/deployments/gpt-5.4-mini/chat/completions?api-version=2025-01-01-preview',
+            'https://ohtu-openai-services.openai.azure.com/openai/deployments/gpt-5.5/chat/completions?api-version=2025-01-01-preview',
             {
-                model: 'gpt-5.4-mini',
+                model: 'gpt-5.5',
                 messages: [
                     {
                         role: 'system',
