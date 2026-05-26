@@ -168,7 +168,7 @@ const processMediaItem = async (eventData, visibility = []) => {
 
     const mediaItemId = await databaseService.upsertMediaItem(mediaItem);
 
-    if (process.env.CHAPTER_DETECTION_ENABLED === 'true' && visibility.includes(constants.STATUS_PUBLISHED)) {
+    if (process.env.CHAPTER_DETECTION_ENABLED === 'true' && (visibility.includes(constants.STATUS_PUBLISHED) || visibility.includes(constants.STATUS_UNLISTED))) {
         const VTTFiles = await apiService.getVTTFilesForEvent(eventData);
         if (VTTFiles && VTTFiles.length > 0) {
             for (const vttFile of VTTFiles) {
