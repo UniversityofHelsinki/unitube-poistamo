@@ -226,3 +226,48 @@ CREATE TABLE IF NOT EXISTS chapters (
         FOREIGN KEY(media_item_id)
         REFERENCES mediaItem(id)
 );
+
+CREATE TABLE IF NOT EXISTS CREATOR (
+                                       id SERIAL PRIMARY KEY,
+                                       eppn VARCHAR(255),
+    first_name VARCHAR(255),
+    last_name VARCHAR(255)
+    );
+
+CREATE TABLE IF NOT EXISTS KEYWORD (
+                                       id SERIAL PRIMARY KEY,
+                                       label VARCHAR(255) UNIQUE
+    );
+
+CREATE TABLE IF NOT EXISTS COLLECTION_KEYWORD (
+                                                  COLLECTION VARCHAR(255),
+    KEYWORD BIGINT,
+    FOREIGN KEY (KEYWORD) REFERENCES KEYWORD (ID),
+    UNIQUE (COLLECTION, KEYWORD)
+    );
+
+CREATE TABLE IF NOT EXISTS MEDIAITEM_KEYWORD (
+                                                 MEDIAITEM VARCHAR(255),
+    KEYWORD BIGINT,
+    FOREIGN KEY (KEYWORD) REFERENCES KEYWORD (ID),
+    UNIQUE (MEDIAITEM, KEYWORD)
+    );
+
+CREATE TABLE IF NOT EXISTS CONTENT_TYPE (
+                                            NAME VARCHAR(255) PRIMARY KEY UNIQUE NOT NULL
+    );
+
+INSERT INTO CONTENT_TYPE (NAME) VALUES ('Opetus'), ('Tapahtuma'), ('Tutkimus'), ('Ohjeet'), ('Muu')
+    ON CONFLICT (NAME) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS mediaitem_transcriptions (
+                                                        id SERIAL PRIMARY KEY,
+                                                        media_item_external_id VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    language VARCHAR(255) NOT NULL,
+    CONSTRAINT fk_media_item_external
+    FOREIGN KEY(media_item_external_id)
+    REFERENCES mediaItem(external_identifier)
+    );
+
+
