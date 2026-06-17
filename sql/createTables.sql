@@ -262,12 +262,13 @@ INSERT INTO CONTENT_TYPE (NAME) VALUES ('Opetus'), ('Tapahtuma'), ('Tutkimus'), 
 
 CREATE TABLE IF NOT EXISTS mediaitem_transcriptions (
                                                         id SERIAL PRIMARY KEY,
-                                                        media_item_external_id VARCHAR(255) NOT NULL,
-    title VARCHAR(255) NOT NULL,
+                                                        media_item_id INTEGER NOT NULL,
+                                                        title VARCHAR(255) NOT NULL,
     language VARCHAR(255) NOT NULL,
-    CONSTRAINT fk_media_item_external
-    FOREIGN KEY(media_item_external_id)
-    REFERENCES mediaItem(external_identifier)
+    CONSTRAINT fk_media_item
+    FOREIGN KEY(media_item_id)
+    REFERENCES mediaItem(id)
     );
+
 
 
