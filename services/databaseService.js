@@ -183,6 +183,15 @@ const deleteArchivedVideoUsers = async () => {
     }
 }
 
+const upsertTranscriptionLanguage = async(mediaItemId, language, title) => {
+    const upsertTranscriptionLanguageSQL = fs.readFileSync(path.resolve(__dirname, "../sql/upsertTranscriptionLanguage.sql"), "utf8");
+    return await database.query(upsertTranscriptionLanguageSQL, [
+        mediaItemId,
+        language,
+        title
+    ]);
+};
+
 module.exports = {
     selectedVideosWithArchivedDates : selectedVideosWithArchivedDates,
     selectedArchivedVideoWithLogId: selectedArchivedVideoWithLogId,
@@ -204,5 +213,6 @@ module.exports = {
     getChapter: getChapter,
     upsertCollection: upsertCollection,
     upsertOwner: upsertOwner,
-    upsertAccessRights: upsertAccessRights
+    upsertAccessRights: upsertAccessRights,
+    upsertTranscriptionLanguage: upsertTranscriptionLanguage
 };

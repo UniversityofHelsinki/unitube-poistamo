@@ -261,14 +261,16 @@ INSERT INTO CONTENT_TYPE (NAME) VALUES ('Opetus'), ('Tapahtuma'), ('Tutkimus'), 
     ON CONFLICT (NAME) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS mediaitem_transcriptions (
-                                                        id SERIAL PRIMARY KEY,
-                                                        media_item_id INTEGER NOT NULL,
-                                                        title VARCHAR(255) NOT NULL,
+    id SERIAL PRIMARY KEY,
+    media_item_id INTEGER NOT NULL,
+    title VARCHAR(255),
     language VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (media_item_id, language),
     CONSTRAINT fk_media_item
-    FOREIGN KEY(media_item_id)
-    REFERENCES mediaItem(id)
-    );
+        FOREIGN KEY(media_item_id)
+        REFERENCES mediaItem(id)
+);
 
 
 

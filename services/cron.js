@@ -190,6 +190,23 @@ const processMediaItem = async (eventData, visibility = []) => {
         }
     }
 
+    //  transcription language for mediaitem to mediaitem_transcriptions table
+    const VTTFiles = await apiService.getVTTFilesForEvent(eventData);
+    if (VTTFiles && VTTFiles.length > 0) {
+        for (const vttFile of VTTFiles) {
+            const tags = vttFile.tags || [];
+            const langTag = tags.find(tag => tag.startsWith('lang:'));
+            const lang = langTag ? langTag.split(':')[1] : 'und';
+
+            // Extract filename from element-description URL
+            const description = vttFile['element-description'];
+            const urlParts = description ? description.split('/') : [];
+            const filename = urlParts.length > 0 ? urlParts[urlParts.length - 1] : '';
+
+            await databaseService.upsertTranscriptionLanguage(mediaItemId, lang, filename);
+        }
+    }
+
     if (media && media.length > 0) {
         for (const item of media) {
             await databaseService.upsertFlavor(mediaItemId, item);
