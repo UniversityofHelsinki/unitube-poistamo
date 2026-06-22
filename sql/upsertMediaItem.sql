@@ -7,6 +7,6 @@ ON CONFLICT (external_identifier) DO UPDATE SET
     duration = EXCLUDED.duration,
     created = EXCLUDED.created,
     license = EXCLUDED.license,
-    language = EXCLUDED.language
+    language = COALESCE(EXCLUDED.language, mediaItem.language)
 RETURNING id;
 

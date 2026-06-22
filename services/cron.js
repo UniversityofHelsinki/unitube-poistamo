@@ -156,8 +156,7 @@ const processMediaItem = async (eventData, visibility = []) => {
         collection_id: eventData.is_part_of || '',
         duration: duration,
         created: eventData.created || null,
-        license: eventData.license,
-        language: null
+        license: eventData.license
     };
 
     if (process.env.LANGUAGE_DETECTION_ENABLED === 'true' && visibility.includes(constants.STATUS_PUBLISHED)) {
