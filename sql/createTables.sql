@@ -155,7 +155,10 @@ CREATE TABLE IF NOT EXISTS mediaItem (
     duration bigint,
     created TIMESTAMP,
     license VARCHAR(255),
-    language VARCHAR(255)
+    language VARCHAR(255),
+    content_type varchar(255),
+    play_count INTEGER DEFAULT 0,
+    foreign key (content_type) references content_type (name)
     );
 
 CREATE TABLE IF NOT EXISTS collection (
