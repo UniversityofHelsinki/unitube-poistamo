@@ -24,12 +24,14 @@ const setVisibilityForSeries = (series) => {
         visibility.push(constants.STATUS_PRIVATE);
     }
 
+    /* DO NOT PUT MOODLE IN SERIES VISIBILITY
     const moodleAclInstructor = series.roles.filter(role => role.role.includes(constants.MOODLE_ACL_INSTRUCTOR));
     const moodleAclLearner = series.roles.filter(role => role.role.includes(constants.MOODLE_ACL_LEARNER));
 
     if (moodleAclInstructor && moodleAclLearner && moodleAclInstructor.length > 0 && moodleAclLearner.length > 0) {
         visibility.push(constants.STATUS_MOODLE);
     }
+    */
     return [...new Set(visibility)];
 };
 
