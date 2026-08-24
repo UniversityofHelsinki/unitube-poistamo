@@ -285,6 +285,7 @@ CREATE TABLE IF NOT EXISTS faculties_departments (
     name_en VARCHAR(255) NOT NULL
     );
 
-
+CREATE UNIQUE INDEX IF NOT EXISTS faculties_departments_unique_unit
+    ON faculties_departments (unique_id, unit_type);
 
 

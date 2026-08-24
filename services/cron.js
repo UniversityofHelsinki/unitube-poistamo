@@ -11,6 +11,25 @@ const commonService = require('./commonService');
 const {detectLanguage} = require("./languageDetectionService");
 const chapterGeneratorService = require('./chapterGeneratorService');
 
+const IMPORTED_UNIT_TYPES = new Set([
+    'tiedekunta',
+    'lailla-erikseen-saadetty-laitos',
+    'ulkopuolisten-kanssa-yhteinen-laitos',
+    'palveluyksikko',
+    'rehtorin-alainen-erillinen-laitos',
+    'tdk-yhteinen-toimintayksikko',
+]);
+
+const mapFacultyDepartment = (unit) => {
+    return {
+        uniqueId: Number(unit.uniqueId),
+        unitType: String(unit.type ?? ''),
+        nameFi: String(unit.nameFi ?? ''),
+        nameSv: String(unit.nameSv ?? ''),
+        nameEn: String(unit.nameEn ?? ''),
+    };
+};
+
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const setVisibilityForSeries = (series) => {
@@ -124,6 +143,46 @@ const runImportScript = async () => {
         console.log('----------------------');
     }
 }
+
+const importFacultiesDepartments = async () => {
+    const apiUrl = process.env.FACULTIES_DEPARTMENTS_API_URL;
+    const apiKey = process.env.FACULTIES_DEPARTMENTS_API_KEY;
+    if (!apiUrl) {
+        throw new Error('FACULTIES_DEPARTMENTS_API_URL is not set');
+    }
+
+    const response = await fetch(apiUrl, {
+        headers: {
+            'X-Api-Key': apiKey,
+        },
+    });
+    if (!response.ok) {
+        throw new Error(`Faculty API returned ${response.status}`);
+    }
+
+    const payload = await response.json();
+    const units = Array.isArray(payload)
+        ? payload
+        : payload?.units || payload?.data || payload?.results || [];
+
+    if (!Array.isArray(units)) {
+        throw new Error('Faculty API response does not contain an array of units');
+    }
+
+    const mappedUnits = units
+        .filter(unit => IMPORTED_UNIT_TYPES.has(unit.type))
+        .map(mapFacultyDepartment);
+    for (const unit of mappedUnits) {
+        if (!Number.isInteger(unit.uniqueId) || !unit.unitType ||
+            !unit.nameFi || !unit.nameSv || !unit.nameEn) {
+            throw new Error(`Invalid faculty/department record: ${JSON.stringify(unit)}`);
+        }
+
+        await databaseService.upsertFacultyDepartment(unit);
+    }
+
+    console.log(`Imported ${mappedUnits.length} faculty/department records`);
+};
 
 const processVideoRow = async (row) => {
     const event = await apiService.getEvent(row.video_id);
@@ -254,3 +313,4 @@ const processSeries = async (seriesId) => {
 module.exports.cronJob = cronJob;
 module.exports.cronJobRemoveArchivedVideoUsers = cronJobRemoveArchivedVideoUsers;
 module.exports.runImportScript = runImportScript;
+module.exports.importFacultiesDepartments = importFacultiesDepartments;

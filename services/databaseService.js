@@ -192,6 +192,17 @@ const upsertTranscriptionLanguage = async(mediaItemId, language, title) => {
     ]);
 };
 
+const upsertFacultyDepartment = async(unit) => {
+    const upsertFacultyDepartmentSQL = fs.readFileSync(path.resolve(__dirname, "../sql/upsertFacultyDepartment.sql"), "utf8");
+    return await database.query(upsertFacultyDepartmentSQL, [
+        unit.uniqueId,
+        unit.unitType,
+        unit.nameFi,
+        unit.nameSv,
+        unit.nameEn
+    ]);
+};
+
 module.exports = {
     selectedVideosWithArchivedDates : selectedVideosWithArchivedDates,
     selectedArchivedVideoWithLogId: selectedArchivedVideoWithLogId,
@@ -214,5 +225,6 @@ module.exports = {
     upsertCollection: upsertCollection,
     upsertOwner: upsertOwner,
     upsertAccessRights: upsertAccessRights,
-    upsertTranscriptionLanguage: upsertTranscriptionLanguage
+    upsertTranscriptionLanguage: upsertTranscriptionLanguage,
+    upsertFacultyDepartment: upsertFacultyDepartment
 };
