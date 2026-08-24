@@ -195,9 +195,7 @@ CREATE TABLE IF NOT EXISTS mediaItem (
     language VARCHAR(255),
     content_type varchar(255),
     play_count INTEGER DEFAULT 0,
-    faculty_department_id INTEGER,
-    foreign key (content_type) references content_type (name),
-    foreign key (faculty_department_id) references faculties_departments (id)
+    foreign key (content_type) references content_type (name)
     );
 
 CREATE INDEX IF NOT EXISTS idx_mediaitem_name_trgm ON mediaItem USING gin (name gin_trgm_ops);
@@ -217,8 +215,10 @@ CREATE TABLE IF NOT EXISTS collection (
     science bigint,
     created timestamp,
     modified timestamp,
+    faculty_department_id INTEGER,
     foreign key (content_type) references content_type (name),
-    foreign key (creator) references creator (id)
+    foreign key (creator) references creator (id),
+    foreign key (faculty_department_id) references faculties_departments (id)
     );
 
 CREATE INDEX IF NOT EXISTS idx_collection_title_trgm ON collection USING gin (title gin_trgm_ops);
