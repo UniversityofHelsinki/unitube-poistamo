@@ -275,10 +275,14 @@ CREATE TABLE IF NOT EXISTS mediaitem_transcriptions (
         REFERENCES mediaItem(id)
 );
 
+
 CREATE TABLE IF NOT EXISTS faculties_departments (
                                                      id SERIAL PRIMARY KEY,
                                                      unique_id INTEGER NOT NULL,
-                                                     unit_type VARCHAR(255) NOT NULL
+                                                     unit_type VARCHAR(255) NOT NULL,
+    name_fi VARCHAR(255) NOT NULL,
+    name_sv VARCHAR(255) NOT NULL,
+    name_en VARCHAR(255) NOT NULL
     );
 
 
