@@ -1,6 +1,28 @@
 const constants = require('../utils/constants');
 const security = require('./security');
 const FormData = require('form-data');
+const commonService = require('./commonService');
+
+exports.getMediaPackage = async (videoId) => {
+    let retries = 0;
+    let maxRetries = 3;
+
+    while (retries < maxRetries) {
+        try {
+            const mediaPackageUrl = constants.OPENCAST_ASSETS_EPISODE_URL + videoId;
+            const response = await security.opencastBase.get(mediaPackageUrl);
+            return response;
+        } catch (error) {
+            if (error.code === 'ECONNRESET') {
+                console.log('Connection reset, retrying...');
+                retries++;
+            } else {
+                throw error;
+            }
+        }
+    }
+    throw new Error(`Failed to establish connection for mediapackage ${videoId} after ${maxRetries} retries.`);
+};
 
 exports.getEvent = async (videoId) => {
     let retries = 0;
@@ -228,3 +250,51 @@ exports.cleanVideo = async (video) => {
         throw error;
     }
 };
+
+exports.getEventAclsFromSeries = async (series) => {
+    const seriesId = series;
+    let seriesAclUrl = constants.OPENCAST_SERIES_PATH + seriesId + constants.OPENCAST_ACL_PATH;
+    const response = await security.opencastBase.get(seriesAclUrl);
+    return response.data;
+};
+
+exports.getMediaForEvent = async (event) => {
+    const mediaUrl = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + event.identifier + constants.OCAST_EVENT_MEDIA_PATH_SUFFIX;
+    const response = await security.opencastBase.get(mediaUrl);
+    return response.data;
+};
+
+exports.getDurationFromMediaFileMetadataForEvent = (event) => {
+    return {
+        ...event,
+        duration: commonService.formatDuration(event.mediaFileMetadata.duration)
+    };
+};
+
+exports.getMediaFileMetadataForEvent = async (eventId, mediaId) => {
+    const mediaFileMetadata = constants.OCAST_EVENT_MEDIA_PATH_PREFIX + eventId + constants.OCAST_EVENT_MEDIA_FILE_METADATA + mediaId + '.json';
+    const response = await security.opencastBase.get(mediaFileMetadata);
+    return response.data;
+};
+
+exports.getVTTFilesForEvent = async (event) => {
+    const mediaUrl = constants.OPENCAST_EVENTS_PATH + event.identifier + constants.OCAST_EVENT_MEDIA_PATH;
+    const response = await security.opencastBase.get(mediaUrl);
+    if (response.data && Array.isArray(response.data)) {
+        return response.data.filter(item => item.mimetype === 'text/vtt');
+    }
+    return [];
+};
+
+exports.getVTTFileContent = async (url) => {
+    let path = url;
+    try {
+        const urlObj = new URL(url);
+        path = urlObj.pathname + urlObj.search;
+    } catch (e) {
+        // if not a valid full URL, assume it's already a path
+    }
+    const response = await security.opencastBase.get(path);
+    return response.data;
+};
+

@@ -145,3 +145,171 @@ Center for Information Technology
      'Du får det här meddelandet eftersom du är administratör för en eller flera videoinspelningar som går ut i Helsingfors universitets Unitube-tjänst. Följande Unitube-inspelning(ar) går snart ut:'
     )
 ON CONFLICT DO NOTHING;
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+CREATE TABLE IF NOT EXISTS faculties_departments (
+                                                     id SERIAL PRIMARY KEY,
+                                                     unique_id INTEGER NOT NULL,
+                                                     unit_type VARCHAR(255) NOT NULL,
+    name_fi VARCHAR(255) NOT NULL,
+    name_sv VARCHAR(255) NOT NULL,
+    name_en VARCHAR(255) NOT NULL,
+    UNIQUE (unique_id, unit_type)
+    );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_faculties_departments_unit
+    ON faculties_departments (unique_id, unit_type);
+
+CREATE TABLE IF NOT EXISTS CREATOR (
+                                       id SERIAL PRIMARY KEY,
+                                       eppn VARCHAR(255),
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    created timestamp,
+    modified timestamp,
+    UNIQUE (eppn)
+    );
+
+CREATE INDEX IF NOT EXISTS idx_creator_first_name_trgm ON creator USING gin (first_name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_creator_last_name_trgm ON creator USING gin (last_name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_creator_eppn_trgm ON creator USING gin (eppn gin_trgm_ops);
+
+CREATE TABLE IF NOT EXISTS CONTENT_TYPE (
+                                            NAME VARCHAR(255) PRIMARY KEY UNIQUE NOT NULL
+    );
+
+INSERT INTO CONTENT_TYPE (NAME) VALUES ('Opetus'), ('Tapahtuma'), ('Tutkimus'), ('Ohjeet'), ('Muu')
+    ON CONFLICT (NAME) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS mediaItem (
+                                         id SERIAL PRIMARY KEY,
+                                         external_identifier VARCHAR(255) UNIQUE NOT NULL, /* event_id */
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(3000) NOT NULL,
+    collection_id VARCHAR(255) NOT NULL,
+    duration bigint,
+    created TIMESTAMP,
+    modified TIMESTAMP,
+    license VARCHAR(255),
+    language VARCHAR(255),
+    content_type varchar(255),
+    play_count INTEGER DEFAULT 0,
+    foreign key (content_type) references content_type (name)
+    );
+
+CREATE INDEX IF NOT EXISTS idx_mediaitem_name_trgm ON mediaItem USING gin (name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_mediaitem_description_trgm ON mediaItem USING gin (description gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_mediaitem_collection_id ON mediaItem (collection_id);
+
+CREATE TABLE IF NOT EXISTS collection (
+                                          id SERIAL PRIMARY KEY,
+                                          external_identifier VARCHAR(255) UNIQUE NOT NULL, /* series_id */
+    title VARCHAR(255) NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    visibility VARCHAR(255) NOT NULL, /* public, private, unlisted */
+    license VARCHAR(255) NOT NULL, /* id */
+    opinfi boolean DEFAULT false,
+    creator bigint,
+    content_type varchar(255),
+    science bigint,
+    created timestamp,
+    modified timestamp,
+    faculty_department_id INTEGER,
+    foreign key (content_type) references content_type (name),
+    foreign key (creator) references creator (id),
+    foreign key (faculty_department_id) references faculties_departments (id)
+    );
+
+CREATE INDEX IF NOT EXISTS idx_collection_title_trgm ON collection USING gin (title gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_collection_description_trgm ON collection USING gin (description gin_trgm_ops);
+
+CREATE TABLE IF NOT EXISTS license (
+                                       id SERIAL PRIMARY KEY,
+                                       name VARCHAR(255) NOT NULL
+    );
+
+CREATE TABLE IF NOT EXISTS presenter (
+                                         id SERIAL PRIMARY KEY,
+                                         name VARCHAR(255) NOT NULL,
+    phone VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL
+    );
+
+CREATE TABLE IF NOT EXISTS owners (
+                                      id SERIAL PRIMARY KEY,
+                                      owner VARCHAR(255) NOT NULL /* group, person */,
+    collection_id VARCHAR(255) NOT NULL,
+    UNIQUE (collection_id, owner),
+    CONSTRAINT fk_collection
+    FOREIGN KEY(collection_id)
+    REFERENCES collection(external_identifier)
+    );
+
+CREATE TABLE IF NOT EXISTS access_rights (
+                                             id SERIAL PRIMARY KEY,
+                                             collection_id VARCHAR(255) NOT NULL,
+    access_rights VARCHAR(255) NOT NULL /* acl */,
+    UNIQUE (collection_id, access_rights)
+    );
+
+CREATE TABLE IF NOT EXISTS flavor (
+                                      id SERIAL PRIMARY KEY,
+                                      media_item_id INTEGER NOT NULL,
+                                      mimetype VARCHAR(255) NOT NULL,
+    type VARCHAR(255) NOT NULL,
+    url TEXT NOT NULL,
+    UNIQUE (media_item_id, type),
+    CONSTRAINT fk_media_item
+    FOREIGN KEY(media_item_id)
+    REFERENCES mediaItem(id)
+    );
+
+CREATE TABLE IF NOT EXISTS chapters (
+                                        id SERIAL PRIMARY KEY,
+                                        media_item_id INTEGER NOT NULL,
+                                        language VARCHAR(10) NOT NULL,
+    vtt_content TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (media_item_id, language),
+    CONSTRAINT fk_media_item
+    FOREIGN KEY(media_item_id)
+    REFERENCES mediaItem(id)
+    );
+
+CREATE TABLE IF NOT EXISTS KEYWORD (
+                                       id SERIAL PRIMARY KEY,
+                                       label VARCHAR(255) UNIQUE
+    );
+
+CREATE TABLE IF NOT EXISTS COLLECTION_KEYWORD (
+                                                  COLLECTION VARCHAR(255),
+    KEYWORD BIGINT,
+    FOREIGN KEY (KEYWORD) REFERENCES KEYWORD (ID),
+    UNIQUE (COLLECTION, KEYWORD)
+    );
+
+CREATE TABLE IF NOT EXISTS MEDIAITEM_KEYWORD (
+                                                 MEDIAITEM VARCHAR(255),
+    KEYWORD BIGINT,
+    FOREIGN KEY (KEYWORD) REFERENCES KEYWORD (ID),
+    UNIQUE (MEDIAITEM, KEYWORD)
+    );
+
+CREATE INDEX IF NOT EXISTS idx_mediaitem_keyword_mediaitem ON MEDIAITEM_KEYWORD (MEDIAITEM);
+CREATE INDEX IF NOT EXISTS idx_collection_keyword_collection ON COLLECTION_KEYWORD (COLLECTION);
+
+CREATE TABLE IF NOT EXISTS mediaitem_transcriptions (
+                                                        id SERIAL PRIMARY KEY,
+                                                        media_item_id INTEGER NOT NULL,
+                                                        title VARCHAR(255),
+    language VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                             UNIQUE (media_item_id, language),
+    CONSTRAINT fk_media_item
+    FOREIGN KEY(media_item_id)
+    REFERENCES mediaItem(id)
+    );
+
+
