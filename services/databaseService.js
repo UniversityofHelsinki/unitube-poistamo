@@ -160,6 +160,11 @@ const updateVideoErrorDate = async(videoId) => {
     return updatedVideoEntry.rowCount;
 };
 
+const removeMediaItemWithAllReferences = async(videoId) => {
+    const removeMediaItemWithAllReferencesSQL = fs.readFileSync(path.resolve(__dirname, "../sql/removeMediaItemWithAllReferences.sql"), "utf8");
+    return await database.query(removeMediaItemWithAllReferencesSQL, [videoId]);
+};
+
 const removeThumbnailImage = async(videoId) => {
     const getThumbnailImageSQL = fs.readFileSync(path.resolve(__dirname, "../sql/getThumbnailImage.sql"), "utf8");
     const foundThumbnailImage = await database.query(getThumbnailImageSQL, [videoId]);
@@ -215,6 +220,7 @@ module.exports = {
     updateVideosTableCleanedStatus: updateVideosTableCleanedStatus,
     restoreVideoStateToBeArchived: restoreVideoStateToBeArchived,
     updateVideoErrorDate: updateVideoErrorDate,
+    removeMediaItemWithAllReferences: removeMediaItemWithAllReferences,
     removeThumbnailImage : removeThumbnailImage,
     deleteArchivedVideoUsers: deleteArchivedVideoUsers,
     getVideosFromVideosTable: getVideosFromVideosTable,

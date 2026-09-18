@@ -225,9 +225,13 @@ CREATE INDEX IF NOT EXISTS idx_collection_title_trgm ON collection USING gin (ti
 CREATE INDEX IF NOT EXISTS idx_collection_description_trgm ON collection USING gin (description gin_trgm_ops);
 
 CREATE TABLE IF NOT EXISTS license (
-                                       id SERIAL PRIMARY KEY,
-                                       name VARCHAR(255) NOT NULL
-    );
+    id serial primary key,
+    name varchar(255) not null,
+    media_item_id integer
+    unique
+    constraint fk_media_item
+    references mediaitem
+);
 
 CREATE TABLE IF NOT EXISTS presenter (
                                          id SERIAL PRIMARY KEY,

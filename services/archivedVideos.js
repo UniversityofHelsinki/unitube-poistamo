@@ -15,6 +15,7 @@ const archiveVideos = async(archivedVideos) => {
                 await databaseService.insertIntoVideoLogs(eventResponse.status, `error archiving video, no video found for this id`, videoId , null, null, null, null);
                 await databaseService.updateVideosTableArchivedStatus(videoId);
                 await databaseService.updateVideosTableDeletedStatus(videoId);
+                await databaseService.removeMediaItemWithAllReferences(videoId);
                 // something went wrong continue to next video
                 continue;
             }
@@ -42,6 +43,7 @@ const archiveVideos = async(archivedVideos) => {
                 }
                 // insert into video_logs table for error in operation
                 await databaseService.insertIntoVideoLogs(archiveResponse.status, `error archiving video: ${archiveResponse.statusText}`, videoId,  videoTitle, originalSeriesId, originalSeriesName, archivedSeriesId );
+                await databaseService.removeMediaItemWithAllReferences(videoId);
                 // something went wrong continue to next video
                 continue;
             } else {
@@ -49,11 +51,13 @@ const archiveVideos = async(archivedVideos) => {
                 await databaseService.insertIntoVideoLogs(archiveResponse.status, `successfully archived video`, videoId, videoTitle, originalSeriesId, originalSeriesName, archivedSeriesId );
                 // update videos table actual_archived_date field to current date
                 await databaseService.updateVideosTableArchivedStatus(videoId);
+                await databaseService.removeMediaItemWithAllReferences(videoId);
+
             }
         } catch (error) {
             // insert into video_logs table for error  logs
             await databaseService.insertIntoVideoLogs(500, error.message, videoId, null, null, null, null);
-
+            await databaseService.removeMediaItemWithAllReferences(videoId);
         }
         await timer.getTimer(60000); // wait for 1 minute before next api call
     }
