@@ -64,6 +64,7 @@ module.exports = app;
 (async () => {
     // START CRONJOB
     await cron.runImportScript();
+    await cron.importFacultiesDepartments();
     await cron.cronJob;
     await cron.cronJobRemoveArchivedVideoUsers;
 })();
