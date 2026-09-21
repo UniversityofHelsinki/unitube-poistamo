@@ -24,7 +24,8 @@ const upsertMediaItem = async(mediaItem) => {
         mediaItem.duration,
         mediaItem.created,
         mediaItem.license,
-        mediaItem.language
+        mediaItem.language,
+        mediaItem.play_count ?? mediaItem.playCount ?? 0
     ]);
     if (result.rows.length > 0) {
         return result.rows[0].id;
@@ -67,7 +68,8 @@ const upsertCollection = async(collection) => {
         collection.description,
         collection.visibility,
         collection.license,
-        collection.opinfi
+        collection.opinfi,
+        collection.created
     ]);
 };
 
@@ -160,6 +162,17 @@ const updateVideoErrorDate = async(videoId) => {
     return updatedVideoEntry.rowCount;
 };
 
+const removeMediaItemWithAllReferences = async(videoId) => {
+    const removeMediaItemWithAllReferencesSQL = fs.readFileSync(path.resolve(__dirname, "../sql/removeMediaItemWithAllReferences.sql"), "utf8");
+    const result = await database.query(removeMediaItemWithAllReferencesSQL, [videoId]);
+    if (result.rowCount === 0) {
+        await insertIntoVideoLogs('200', 'no media item found for removal', videoId, null, null, null, null);
+    } else {
+        await insertIntoVideoLogs('200', 'successfully deleted media item', videoId, null, null, null, null);
+    }
+    return result;
+};
+
 const removeThumbnailImage = async(videoId) => {
     const getThumbnailImageSQL = fs.readFileSync(path.resolve(__dirname, "../sql/getThumbnailImage.sql"), "utf8");
     const foundThumbnailImage = await database.query(getThumbnailImageSQL, [videoId]);
@@ -215,6 +228,7 @@ module.exports = {
     updateVideosTableCleanedStatus: updateVideosTableCleanedStatus,
     restoreVideoStateToBeArchived: restoreVideoStateToBeArchived,
     updateVideoErrorDate: updateVideoErrorDate,
+    removeMediaItemWithAllReferences: removeMediaItemWithAllReferences,
     removeThumbnailImage : removeThumbnailImage,
     deleteArchivedVideoUsers: deleteArchivedVideoUsers,
     getVideosFromVideosTable: getVideosFromVideosTable,

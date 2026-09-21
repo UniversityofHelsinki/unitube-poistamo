@@ -41,6 +41,9 @@ const STATUS_MOODLE = 'moodle';
 const MOODLE_ACL_INSTRUCTOR = 'instructor';
 const MOODLE_ACL_LEARNER = 'learner';
 
+const OCAST_EVENT_VIEWS_PATH = '/usertracking/stats.json?id=';
+
+
 module.exports = {
     ARCHIVED_SERIES,
     OPENCAST_EVENTS_PATH,
@@ -73,5 +76,6 @@ module.exports = {
     STATUS_MOODLE,
     MOODLE_ACL_INSTRUCTOR,
     MOODLE_ACL_LEARNER,
-    OCAST_EVENT_MEDIA_PATH
+    OCAST_EVENT_MEDIA_PATH,
+    OCAST_EVENT_VIEWS_PATH
 }

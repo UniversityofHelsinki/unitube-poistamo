@@ -298,3 +298,16 @@ exports.getVTTFileContent = async (url) => {
     return response.data;
 };
 
+exports.getPlayCount = async (mediaItem) => {
+    const url = `${constants.OCAST_EVENT_VIEWS_PATH}${mediaItem.external_identifier}`;
+    try {
+        const videoViews = await security.opencastPresentationBase.get(url);
+        return videoViews.data;
+    } catch (error) {
+        return {
+            status: 500,
+            message: error.message
+        };
+    }
+};
+
