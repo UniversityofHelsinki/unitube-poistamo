@@ -110,9 +110,10 @@ describe('Video archiving tests', () => {
         await archivedVideos.archiveVideos(videosToArchive);
 
         video_logs = await client.query('SELECT * FROM video_logs');
-        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows).toHaveLength(2);
         expect(video_logs.rows[0].oc_messages).toEqual('successfully archived video');
         expect(video_logs.rows[0].archived_series_id).toEqual(process.env.POISTAMO_OPENCAST_ARCHIVED_SERIES);
+        expect(video_logs.rows[1].oc_messages).toEqual('successfully deleted media item');
 
         videos = await client.query('SELECT video_id, error_date, to_char(actual_archived_date, \'DD.MM.YYYY\') as actual_archived_date FROM videos');
         expect(videos.rows).toHaveLength(1);
@@ -139,9 +140,10 @@ describe('Video archiving tests', () => {
         await archivedVideos.archiveVideos(videosToArchive);
 
         const video_logs = await client.query('SELECT * FROM video_logs');
-        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows).toHaveLength(2);
         expect(video_logs.rows[0].oc_messages).toEqual('error archiving video, no video found for this id');
         expect(video_logs.rows[0].archived_series_id).toBeNull();
+        expect(video_logs.rows[1].oc_messages).toEqual('successfully deleted media item');
 
         let videos = await client.query('SELECT video_id, to_char(actual_archived_date, \'DD.MM.YYYY\') as actual_archived_date, error_date, to_char(deletion_date, \'DD.MM.YYYY\') as deletion_date FROM videos');
         expect(videos.rows).toHaveLength(1);
@@ -240,8 +242,9 @@ describe('Video archiving tests', () => {
         expect(videos.rows[0].error_date).toEqual(today);
 
         const video_logs = await client.query('SELECT * FROM video_logs');
-        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows).toHaveLength(2);
         expect(video_logs.rows[0].oc_messages).toEqual('error archiving video: opencast error');
+        expect(video_logs.rows[1].oc_messages).toEqual('no media item found for removal');
     });
 
     it('logs and cleans up when Opencast event lookup fails', async () => {
@@ -251,9 +254,10 @@ describe('Video archiving tests', () => {
         await archivedVideos.archiveVideos(videosToArchive);
 
         const video_logs = await client.query('SELECT * FROM video_logs');
-        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows).toHaveLength(2);
         expect(video_logs.rows[0].status_code).toEqual('500');
         expect(video_logs.rows[0].oc_messages).toEqual('opencast unavailable');
+        expect(video_logs.rows[1].oc_messages).toEqual('successfully deleted media item');
         expect((await client.query('SELECT * FROM mediaItem')).rows).toEqual([]);
         expect((await client.query('SELECT * FROM flavor')).rows).toEqual([]);
         expect((await client.query('SELECT * FROM chapters')).rows).toEqual([]);
@@ -275,9 +279,10 @@ describe('Video archiving tests', () => {
         await archivedVideos.archiveVideos(videosToArchive);
 
         const video_logs = await client.query('SELECT * FROM video_logs');
-        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows).toHaveLength(2);
         expect(video_logs.rows[0].status_code).toEqual('500');
         expect(video_logs.rows[0].oc_messages).toEqual('series service unavailable');
+        expect(video_logs.rows[1].oc_messages).toEqual('no media item found for removal');
     });
 
     it('logs when moving a video to the archived series fails', async () => {
@@ -297,9 +302,10 @@ describe('Video archiving tests', () => {
         await archivedVideos.archiveVideos(videosToArchive);
 
         const video_logs = await client.query('SELECT * FROM video_logs');
-        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows).toHaveLength(2);
         expect(video_logs.rows[0].status_code).toEqual('500');
         expect(video_logs.rows[0].oc_messages).toEqual('archive service unavailable');
+        expect(video_logs.rows[1].oc_messages).toEqual('no media item found for removal');
     });
 
     afterAll( done => {

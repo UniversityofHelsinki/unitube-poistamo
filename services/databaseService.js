@@ -162,7 +162,13 @@ const updateVideoErrorDate = async(videoId) => {
 
 const removeMediaItemWithAllReferences = async(videoId) => {
     const removeMediaItemWithAllReferencesSQL = fs.readFileSync(path.resolve(__dirname, "../sql/removeMediaItemWithAllReferences.sql"), "utf8");
-    return await database.query(removeMediaItemWithAllReferencesSQL, [videoId]);
+    const result = await database.query(removeMediaItemWithAllReferencesSQL, [videoId]);
+    if (result.rowCount === 0) {
+        await insertIntoVideoLogs('200', 'no media item found for removal', videoId, null, null, null, null);
+    } else {
+        await insertIntoVideoLogs('200', 'successfully deleted media item', videoId, null, null, null, null);
+    }
+    return result;
 };
 
 const removeThumbnailImage = async(videoId) => {
