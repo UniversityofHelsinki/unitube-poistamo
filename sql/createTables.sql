@@ -206,7 +206,7 @@ CREATE TABLE IF NOT EXISTS collection (
                                           id SERIAL PRIMARY KEY,
                                           external_identifier VARCHAR(255) UNIQUE NOT NULL, /* series_id */
     title VARCHAR(255) NOT NULL,
-    description VARCHAR(255) NOT NULL,
+    description VARCHAR(3000) NOT NULL,
     visibility VARCHAR(255) NOT NULL, /* public, private, unlisted */
     license VARCHAR(255) NOT NULL, /* id */
     opinfi boolean DEFAULT false,
