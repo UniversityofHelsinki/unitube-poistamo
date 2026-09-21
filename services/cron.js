@@ -226,6 +226,11 @@ const processMediaItem = async (eventData, visibility = []) => {
         console.log(`Added language: ${detectedLanguage} to video: ${mediaItem.external_identifier}`);
     }
 
+    // get play count from presentation host and update media item play count
+    const playCount = await apiService.getPlayCount(mediaItem);
+
+    mediaItem.play_count = playCount?.stats?.views || 0;
+
     const mediaItemId = await databaseService.upsertMediaItem(mediaItem);
 
     if (process.env.CHAPTER_DETECTION_ENABLED === 'true' && (visibility.includes(constants.STATUS_PUBLISHED) || visibility.includes(constants.STATUS_UNLISTED))) {
@@ -288,7 +293,8 @@ const processSeries = async (seriesId) => {
             description: series.data.description || '',
             visibility: visibility.join(','),
             license: series.data.license || '',
-            opinfi: false
+            opinfi: false,
+            created: series.data.created,
         };
 
         await databaseService.upsertCollection(collection);

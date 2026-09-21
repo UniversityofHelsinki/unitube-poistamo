@@ -24,7 +24,8 @@ const upsertMediaItem = async(mediaItem) => {
         mediaItem.duration,
         mediaItem.created,
         mediaItem.license,
-        mediaItem.language
+        mediaItem.language,
+        mediaItem.play_count ?? mediaItem.playCount ?? 0
     ]);
     if (result.rows.length > 0) {
         return result.rows[0].id;
@@ -67,7 +68,8 @@ const upsertCollection = async(collection) => {
         collection.description,
         collection.visibility,
         collection.license,
-        collection.opinfi
+        collection.opinfi,
+        collection.created
     ]);
 };
 
