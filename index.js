@@ -27,8 +27,8 @@ const createTables = fs.readFileSync(path.resolve(__dirname, "./sql/createTables
 (async () => {
     try {
         await database.query(createTables);
-        // await cron.runImportScript(); // IMPORT FROM OPENCAST
-        // await cron.importFacultiesDepartments(); // IMPORT FACULTIES AND DEPARTMENTS FROM ORGANISATION REGISTRY
+        await cron.runImportScript(); // IMPORT FROM OPENCAST
+        await cron.importFacultiesDepartments(); // IMPORT FACULTIES AND DEPARTMENTS FROM ORGANISATION REGISTRY
     } catch (error) {
         console.error('Error initializing database:', error);
     }
@@ -63,8 +63,6 @@ module.exports = app;
 
 (async () => {
     // START CRONJOB
-    await cron.runImportScript();
-    await cron.importFacultiesDepartments();
     await cron.cronJob;
     await cron.cronJobRemoveArchivedVideoUsers;
 })();
