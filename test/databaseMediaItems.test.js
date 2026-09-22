@@ -44,11 +44,19 @@ beforeEach(async () => {
             play_count INTEGER DEFAULT 0
         )
     `);
+    await client.query(`
+        CREATE TEMPORARY TABLE license (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            media_item_id INTEGER UNIQUE
+        )
+    `);
     await wait(100);
 });
 
 afterEach(async () => {
     await wait(100);
+    await client.query('DROP TABLE IF EXISTS pg_temp.license');
     await client.query('DROP TABLE IF EXISTS pg_temp.mediaItem');
 });
 
@@ -78,6 +86,25 @@ describe('MediaItem upsert tests', () => {
         expect(result.rows[0].play_count).toEqual(42);
         expect(result.rows[0].name).toEqual('Test Video');
         expect(result.rows[0].language).toEqual('fi');
+        expect(result.rows[0].license).toBeNull();
+    });
+
+    it('upserts a license for a mediaItem', async () => {
+        const mediaItemId = await databaseService.upsertMediaItem({
+            external_identifier: 'test-event-license',
+            name: 'Licensed Video',
+            description: 'Description',
+            collection_id: 'test-collection-1',
+            duration: 120,
+            created: new Date(),
+            language: 'fi'
+        });
+
+        await databaseService.upsertLicense(mediaItemId, 'CC BY');
+        await databaseService.upsertLicense(mediaItemId, 'CC BY-SA');
+
+        const result = await client.query('SELECT name, media_item_id FROM license WHERE media_item_id = $1', [mediaItemId]);
+        expect(result.rows).toEqual([{name: 'CC BY-SA', media_item_id: mediaItemId}]);
     });
 
     it('updates play_count on existing mediaItem on conflict', async () => {

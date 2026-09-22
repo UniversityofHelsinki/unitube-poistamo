@@ -23,13 +23,17 @@ const upsertMediaItem = async(mediaItem) => {
         mediaItem.collection_id,
         mediaItem.duration,
         mediaItem.created,
-        mediaItem.license,
         mediaItem.language,
         mediaItem.play_count ?? mediaItem.playCount ?? 0
     ]);
     if (result.rows.length > 0) {
         return result.rows[0].id;
     }
+};
+
+const upsertLicense = async(mediaItemId, license) => {
+    const upsertLicenseSQL = fs.readFileSync(path.resolve(__dirname, "../sql/upsertLicense.sql"), "utf8");
+    return await database.query(upsertLicenseSQL, [license, mediaItemId]);
 };
 
 const upsertFlavor = async(mediaItemId, flavor) => {
@@ -233,6 +237,7 @@ module.exports = {
     deleteArchivedVideoUsers: deleteArchivedVideoUsers,
     getVideosFromVideosTable: getVideosFromVideosTable,
     upsertMediaItem: upsertMediaItem,
+    upsertLicense: upsertLicense,
     upsertFlavor: upsertFlavor,
     upsertChapter: upsertChapter,
     getChapter: getChapter,

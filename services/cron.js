@@ -216,8 +216,7 @@ const processMediaItem = async (eventData, visibility = []) => {
         description: eventData.description || '',
         collection_id: eventData.is_part_of || '',
         duration: duration,
-        created: eventData.created || null,
-        license: eventData.license
+        created: eventData.created || null
     };
 
     if (process.env.LANGUAGE_DETECTION_ENABLED === 'true' && visibility.includes(constants.STATUS_PUBLISHED)) {
@@ -232,6 +231,10 @@ const processMediaItem = async (eventData, visibility = []) => {
     mediaItem.play_count = playCount?.stats?.views || 0;
 
     const mediaItemId = await databaseService.upsertMediaItem(mediaItem);
+
+    if (eventData.license) {
+        await databaseService.upsertLicense(mediaItemId, eventData.license);
+    }
 
     if (process.env.CHAPTER_DETECTION_ENABLED === 'true' && (visibility.includes(constants.STATUS_PUBLISHED) || visibility.includes(constants.STATUS_UNLISTED))) {
         const VTTFiles = await apiService.getVTTFilesForEvent(eventData);
