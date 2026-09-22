@@ -9,6 +9,90 @@ const selectedVideosWithArchivedDates = async() => {
     return await database.query(selectedVideosWithArchivedDatesSQL);
 };
 
+const getVideosFromVideosTable = async() => {
+    const getVideosFromVideosTable = fs.readFileSync(path.resolve(__dirname, "../sql/getVideosFromVideosTable.sql"), "utf8");
+    return await database.query(getVideosFromVideosTable);
+};
+
+const upsertMediaItem = async(mediaItem) => {
+    const upsertMediaItemSQL = fs.readFileSync(path.resolve(__dirname, "../sql/upsertMediaItem.sql"), "utf8");
+    const result = await database.query(upsertMediaItemSQL, [
+        mediaItem.external_identifier,
+        mediaItem.name,
+        mediaItem.description,
+        mediaItem.collection_id,
+        mediaItem.duration,
+        mediaItem.created,
+        mediaItem.language,
+        mediaItem.play_count ?? mediaItem.playCount ?? 0
+    ]);
+    if (result.rows.length > 0) {
+        return result.rows[0].id;
+    }
+};
+
+const upsertLicense = async(mediaItemId, license) => {
+    const upsertLicenseSQL = fs.readFileSync(path.resolve(__dirname, "../sql/upsertLicense.sql"), "utf8");
+    return await database.query(upsertLicenseSQL, [license, mediaItemId]);
+};
+
+const upsertFlavor = async(mediaItemId, flavor) => {
+    const upsertFlavorSQL = fs.readFileSync(path.resolve(__dirname, "../sql/upsertFlavor.sql"), "utf8");
+    return await database.query(upsertFlavorSQL, [
+        mediaItemId,
+        flavor.mimetype,
+        flavor.type,
+        flavor.url
+    ]);
+};
+
+const upsertChapter = async(mediaItemId, language, vttContent) => {
+    const upsertChapterSQL = fs.readFileSync(path.resolve(__dirname, "../sql/upsertChapter.sql"), "utf8");
+    return await database.query(upsertChapterSQL, [
+        mediaItemId,
+        language,
+        vttContent
+    ]);
+};
+
+const getChapter = async(externalIdentifier, language) => {
+    const getChapterSQL = fs.readFileSync(path.resolve(__dirname, "../sql/getChapter.sql"), "utf8");
+    const result = await database.query(getChapterSQL, [externalIdentifier, language]);
+    if (result.rows.length > 0) {
+        return result.rows[0].vtt_content;
+    }
+    return null;
+};
+
+const upsertCollection = async(collection) => {
+    const upsertCollectionSQL = fs.readFileSync(path.resolve(__dirname, "../sql/upsertCollection.sql"), "utf8");
+    return await database.query(upsertCollectionSQL, [
+        collection.external_identifier,
+        collection.title,
+        collection.description,
+        collection.visibility,
+        collection.license,
+        collection.opinfi,
+        collection.created
+    ]);
+};
+
+const upsertOwner = async(collectionId, owner) => {
+    const upsertOwnerSQL = fs.readFileSync(path.resolve(__dirname, "../sql/upsertOwner.sql"), "utf8");
+    return await database.query(upsertOwnerSQL, [
+        collectionId,
+        owner
+    ]);
+};
+
+const upsertAccessRights = async(collectionId, accessRights) => {
+    const upsertAccessRightsSQL = fs.readFileSync(path.resolve(__dirname, "../sql/upsertAccessRights.sql"), "utf8");
+    return await database.query(upsertAccessRightsSQL, [
+        collectionId,
+        accessRights
+    ]);
+};
+
 const selectedArchivedVideoWithLogId = async(videoId) => {
     try {
         const selectedArchivedVideoWithLogIdSQL = fs.readFileSync(path.resolve(__dirname, "../sql/getArchivedVideo.sql"), "utf8");
@@ -82,6 +166,17 @@ const updateVideoErrorDate = async(videoId) => {
     return updatedVideoEntry.rowCount;
 };
 
+const removeMediaItemWithAllReferences = async(videoId) => {
+    const removeMediaItemWithAllReferencesSQL = fs.readFileSync(path.resolve(__dirname, "../sql/removeMediaItemWithAllReferences.sql"), "utf8");
+    const result = await database.query(removeMediaItemWithAllReferencesSQL, [videoId]);
+    if (result.rowCount === 0) {
+        await insertIntoVideoLogs('200', 'no media item found for removal', videoId, null, null, null, null);
+    } else {
+        await insertIntoVideoLogs('200', 'successfully deleted media item', videoId, null, null, null, null);
+    }
+    return result;
+};
+
 const removeThumbnailImage = async(videoId) => {
     const getThumbnailImageSQL = fs.readFileSync(path.resolve(__dirname, "../sql/getThumbnailImage.sql"), "utf8");
     const foundThumbnailImage = await database.query(getThumbnailImageSQL, [videoId]);
@@ -105,6 +200,26 @@ const deleteArchivedVideoUsers = async () => {
     }
 }
 
+const upsertTranscriptionLanguage = async(mediaItemId, language, title) => {
+    const upsertTranscriptionLanguageSQL = fs.readFileSync(path.resolve(__dirname, "../sql/upsertTranscriptionLanguage.sql"), "utf8");
+    return await database.query(upsertTranscriptionLanguageSQL, [
+        mediaItemId,
+        language,
+        title
+    ]);
+};
+
+const upsertFacultyDepartment = async(unit) => {
+    const upsertFacultyDepartmentSQL = fs.readFileSync(path.resolve(__dirname, "../sql/upsertFacultyDepartment.sql"), "utf8");
+    return await database.query(upsertFacultyDepartmentSQL, [
+        unit.uniqueId,
+        unit.unitType,
+        unit.nameFi,
+        unit.nameSv,
+        unit.nameEn
+    ]);
+};
+
 module.exports = {
     selectedVideosWithArchivedDates : selectedVideosWithArchivedDates,
     selectedArchivedVideoWithLogId: selectedArchivedVideoWithLogId,
@@ -117,6 +232,18 @@ module.exports = {
     updateVideosTableCleanedStatus: updateVideosTableCleanedStatus,
     restoreVideoStateToBeArchived: restoreVideoStateToBeArchived,
     updateVideoErrorDate: updateVideoErrorDate,
+    removeMediaItemWithAllReferences: removeMediaItemWithAllReferences,
     removeThumbnailImage : removeThumbnailImage,
-    deleteArchivedVideoUsers: deleteArchivedVideoUsers
+    deleteArchivedVideoUsers: deleteArchivedVideoUsers,
+    getVideosFromVideosTable: getVideosFromVideosTable,
+    upsertMediaItem: upsertMediaItem,
+    upsertLicense: upsertLicense,
+    upsertFlavor: upsertFlavor,
+    upsertChapter: upsertChapter,
+    getChapter: getChapter,
+    upsertCollection: upsertCollection,
+    upsertOwner: upsertOwner,
+    upsertAccessRights: upsertAccessRights,
+    upsertTranscriptionLanguage: upsertTranscriptionLanguage,
+    upsertFacultyDepartment: upsertFacultyDepartment
 };

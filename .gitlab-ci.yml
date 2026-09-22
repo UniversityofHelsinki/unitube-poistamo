@@ -163,6 +163,10 @@ deploy_dev:
     - oc create secret generic poistamo-opencast-dev-password --from-literal=POISTAMO_OPENCAST_PASS=$POISTAMO_OPENCAST_PASS_DEV
     - oc delete secret generic poistamo-api-gw-key --ignore-not-found
     - oc create secret generic poistamo-api-gw-key --from-literal=IAM_GROUPS_API_KEY=$IAM_GROUPS_API_KEY_TEST
+    - oc delete secret generic poistamo-openai-api-key --ignore-not-found
+    - oc create secret generic poistamo-openai-api-key --from-literal=OPENAI_API_KEY=$OPENAI_API_KEY
+    - oc delete secret generic poistamo-faculties-departments-api-key --ignore-not-found
+    - oc create secret generic poistamo-faculties-departments-api-key --from-literal=FACULTIES_DEPARTMENTS_API_KEY=$FACULTIES_DEPARTMENTS_API_KEY_TEST
     # list environment variables here
     # postgres environment variables
     - oc set env --from=secret/poistamo-dev-password deploy/poistamo-dev
@@ -179,9 +183,16 @@ deploy_dev:
     - oc set env deploy/poistamo-dev POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_DEV
     - oc set env deploy/poistamo-dev POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_DEV
     - oc set env deploy/poistamo-dev POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_DEV
+    - oc set env deploy/poistamo-dev POISTAMO_OPENCAST_PRESENTATION_HOST=$POISTAMO_OPENCAST_PRESENTATION_HOST_DEV
     # api-gateway environment variables
     - oc set env deploy/poistamo-dev IAM_GROUPS_HOST=$IAM_GROUPS_HOST_TEST
     - oc set env --from=secret/poistamo-api-gw-key deploy/poistamo-dev
+    - oc set env deploy/poistamo-dev FACULTIES_DEPARTMENTS_API_URL=$FACULTIES_DEPARTMENTS_API_URL_TEST
+    - oc set env --from=secret/poistamo-faculties-departments-api-key deploy/poistamo-dev
+    # OPENAI environment variables
+    - oc set env --from=secret/poistamo-openai-api-key deploy/poistamo-dev
+    - oc set env deploy/poistamo-dev LANGUAGE_DETECTION_ENABLED=$LANGUAGE_DETECTION_ENABLED
+    - oc set env deploy/poistamo-dev CHAPTER_DETECTION_ENABLED=$CHAPTER_DETECTION_ENABLED
     # cronjob variable
     - oc set env deploy/poistamo-dev CRON_START_TIME="30 0 * * *"
     - oc set env deploy/poistamo-dev CRON_START_TIME_REMOVE_USERS="0 3 * * SUN"
@@ -267,6 +278,10 @@ deploy_prod:
     - oc create secret generic poistamo-opencast-prod-password --from-literal=POISTAMO_OPENCAST_PASS=$POISTAMO_OPENCAST_PASS_PROD
     - oc delete secret generic poistamo-api-gw-key --ignore-not-found
     - oc create secret generic poistamo-api-gw-key --from-literal=IAM_GROUPS_API_KEY=$IAM_GROUPS_API_KEY_PROD
+    - oc delete secret generic poistamo-openai-api-key --ignore-not-found
+    - oc create secret generic poistamo-openai-api-key --from-literal=OPENAI_API_KEY=$OPENAI_API_KEY
+    - oc delete secret generic poistamo-faculties-departments-api-key --ignore-not-found
+    - oc create secret generic poistamo-faculties-departments-api-key --from-literal=FACULTIES_DEPARTMENTS_API_KEY=$FACULTIES_DEPARTMENTS_API_KEY_PROD
     # list any environment variables here
     - oc set env --from=secret/poistamo-prod-password deploy/poistamo-prod
     - oc set env deploy/poistamo-prod OPENSHIFT_NODEJS_IP=$OPENSHIFT_NODEJS_IP
@@ -282,9 +297,16 @@ deploy_prod:
     - oc set env deploy/poistamo-prod POISTAMO_OPENCAST_USER=$POISTAMO_OPENCAST_USER_PROD
     - oc set env deploy/poistamo-prod POISTAMO_OPENCAST_HOST=$POISTAMO_OPENCAST_HOST_PROD
     - oc set env deploy/poistamo-prod POISTAMO_OPENCAST_ARCHIVED_SERIES=$POISTAMO_OPENCAST_ARCHIVED_SERIES_PROD
+    - oc set env deploy/poistamo-prod POISTAMO_OPENCAST_PRESENTATION_HOST=$POISTAMO_OPENCAST_PRESENTATION_HOST_PROD
     # api-gateway environment variables
     - oc set env deploy/poistamo-prod IAM_GROUPS_HOST=$IAM_GROUPS_HOST_PROD
     - oc set env --from=secret/poistamo-api-gw-key deploy/poistamo-prod
+    - oc set env deploy/poistamo-prod FACULTIES_DEPARTMENTS_API_URL=$FACULTIES_DEPARTMENTS_API_URL_PROD
+    - oc set env --from=secret/poistamo-faculties-departments-api-key deploy/poistamo-prod
+    # OPENAI environment variables
+    - oc set env --from=secret/poistamo-openai-api-key deploy/poistamo-prod
+    - oc set env deploy/poistamo-prod LANGUAGE_DETECTION_ENABLED=$LANGUAGE_DETECTION_ENABLED
+    - oc set env deploy/poistamo-prod CHAPTER_DETECTION_ENABLED=$CHAPTER_DETECTION_ENABLED
     # cronjob variable
     - oc set env deploy/poistamo-prod CRON_START_TIME="30 0 * * *"
     - oc set env deploy/poistamo-prod CRON_START_TIME_REMOVE_USERS="0 3 * * SUN"
