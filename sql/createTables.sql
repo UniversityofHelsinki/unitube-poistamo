@@ -194,6 +194,7 @@ CREATE TABLE IF NOT EXISTS mediaItem (
     license VARCHAR(255),
     language VARCHAR(255),
     content_type varchar(255),
+    science bigint,
     play_count INTEGER DEFAULT 0,
     foreign key (content_type) references content_type (name)
     );
