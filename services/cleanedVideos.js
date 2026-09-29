@@ -10,6 +10,7 @@ const cleanVideos = async (selectedVideosToBeCleaned) => {
             if (eventResponse.status !== 200) {
                 await databaseService.insertIntoVideoLogs(eventResponse.status, `error cleaning video, no video found for this id`, videoId, null, null, null, null);
                 await databaseService.updateVideosTableCleanedStatus(videoId);
+                await databaseService.removeMediaItemWithAllReferences(videoId);
                 // something went wrong continue to next video
                 continue;
             }
@@ -18,18 +19,20 @@ const cleanVideos = async (selectedVideosToBeCleaned) => {
             if (cleanedResponse.status !== 202) {
                 await databaseService.insertIntoVideoLogs(cleanedResponse.status, `error cleaning video`, videoId, null, null, null, null);
                 await databaseService.updateVideosTableCleanedStatus(videoId);
+                await databaseService.removeMediaItemWithAllReferences(videoId);
                 // something went wrong continue to next video
                 continue;
             } else {
                 // insert into video_logs table for successful operation
                 await databaseService.insertIntoVideoLogs(cleanedResponse.status, `successfully cleaned video`, videoId, null, null, null, null);
                 await databaseService.updateVideosTableCleanedStatus(videoId);
+                await databaseService.removeMediaItemWithAllReferences(videoId);
             }
         } catch (error) {
             console.log(error.message);
             // insert into video_logs table for error logs
             await databaseService.insertIntoVideoLogs(500, error.message, videoId, null, null, null, null);
-
+            await databaseService.removeMediaItemWithAllReferences(videoId);
         }
         await timer.getTimer(60000); // wait for 1 minute before next api call
     }

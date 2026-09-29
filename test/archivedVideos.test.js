@@ -33,6 +33,12 @@ beforeAll(async () => {
 beforeEach(async () => {
     await client.query('CREATE TEMPORARY TABLE video_logs(video_log_id SERIAL NOT NULL, status_code VARCHAR(255) NOT NULL, oc_messages VARCHAR(255) NOT NULL, video_id VARCHAR(255) NOT NULL, video_name VARCHAR(255), original_series_id VARCHAR(255), original_series_name VARCHAR(255), archived_series_id varchar(255), PRIMARY KEY(video_log_id))');
     await client.query('CREATE TEMPORARY TABLE videos(video_id VARCHAR(255) NOT NULL, archived_date date, actual_archived_date date, deletion_date date, video_creation_date date, error_date date, PRIMARY KEY(video_id))');
+    await client.query('CREATE TEMPORARY TABLE mediaItem(id SERIAL PRIMARY KEY, external_identifier VARCHAR(255) UNIQUE NOT NULL, name VARCHAR(255) NOT NULL, description VARCHAR(3000) NOT NULL, collection_id VARCHAR(255) NOT NULL)');
+    await client.query('CREATE TEMPORARY TABLE flavor(id SERIAL PRIMARY KEY, media_item_id INTEGER NOT NULL, mimetype VARCHAR(255) NOT NULL, type VARCHAR(255) NOT NULL, url TEXT NOT NULL)');
+    await client.query('CREATE TEMPORARY TABLE chapters(id SERIAL PRIMARY KEY, media_item_id INTEGER NOT NULL, language VARCHAR(10) NOT NULL, vtt_content TEXT NOT NULL)');
+    await client.query('CREATE TEMPORARY TABLE mediaitem_transcriptions(id SERIAL PRIMARY KEY, media_item_id INTEGER NOT NULL, title VARCHAR(255), language VARCHAR(255) NOT NULL)');
+    await client.query('CREATE TEMPORARY TABLE license(id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, media_item_id INTEGER)');
+    await client.query('CREATE TEMPORARY TABLE MEDIAITEM_KEYWORD(MEDIAITEM VARCHAR(255), KEYWORD BIGINT)');
     await wait(100);
     await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date) VALUES (\'e8a86433-0245-44b8-b0d7-69f6578bac6f\', \'2018-01-01\'::date, \'2008-01-01\'::date)');
     await timer.getTimer.mockResolvedValue(0);
@@ -42,6 +48,12 @@ afterEach(async () => {
     await wait(100);
     await client.query('DROP TABLE IF EXISTS pg_temp.videos');
     await client.query('DROP TABLE IF EXISTS pg_temp.video_logs');
+    await client.query('DROP TABLE IF EXISTS pg_temp.MEDIAITEM_KEYWORD');
+    await client.query('DROP TABLE IF EXISTS pg_temp.license');
+    await client.query('DROP TABLE IF EXISTS pg_temp.mediaitem_transcriptions');
+    await client.query('DROP TABLE IF EXISTS pg_temp.chapters');
+    await client.query('DROP TABLE IF EXISTS pg_temp.flavor');
+    await client.query('DROP TABLE IF EXISTS pg_temp.mediaItem');
 });
 
 afterAll(async () => {
@@ -54,9 +66,21 @@ jest.mock('../services/timer');
 const videosToArchive = [{video_id: 'e8a86433-0245-44b8-b0d7-69f6578bac6f'}];
 const today = format.asString('dd.MM.yyyy', new Date());
 
+const insertMediaItemReferences = async() => {
+    const mediaItem = await client.query("INSERT INTO mediaItem (external_identifier, name, description, collection_id) VALUES ('e8a86433-0245-44b8-b0d7-69f6578bac6f', 'Video', 'Video description', 'collection') RETURNING id");
+    const mediaItemId = mediaItem.rows[0].id;
+    await client.query('INSERT INTO flavor (media_item_id, mimetype, type, url) VALUES ($1, \'video/mp4\', \'presenter\', \'https://example.com/video.mp4\')', [mediaItemId]);
+    await client.query('INSERT INTO chapters (media_item_id, language, vtt_content) VALUES ($1, \'en\', \'WEBVTT\')', [mediaItemId]);
+    await client.query('INSERT INTO mediaitem_transcriptions (media_item_id, language, title) VALUES ($1, \'en\', \'English\')', [mediaItemId]);
+    await client.query('INSERT INTO license (name, media_item_id) VALUES (\'CC BY\', $1)', [mediaItemId]);
+    await client.query('INSERT INTO MEDIAITEM_KEYWORD (MEDIAITEM, KEYWORD) VALUES (\'e8a86433-0245-44b8-b0d7-69f6578bac6f\', 1)');
+};
+
 describe('Video archiving tests', () => {
 
     it('archives a video which is not in archived series', async () => {
+
+        await insertMediaItemReferences();
 
         apiService.getEvent.mockResolvedValue({
             status: 200,
@@ -86,20 +110,29 @@ describe('Video archiving tests', () => {
         await archivedVideos.archiveVideos(videosToArchive);
 
         video_logs = await client.query('SELECT * FROM video_logs');
-        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows).toHaveLength(2);
         expect(video_logs.rows[0].oc_messages).toEqual('successfully archived video');
         expect(video_logs.rows[0].archived_series_id).toEqual(process.env.POISTAMO_OPENCAST_ARCHIVED_SERIES);
+        expect(video_logs.rows[1].oc_messages).toEqual('successfully deleted media item');
 
         videos = await client.query('SELECT video_id, error_date, to_char(actual_archived_date, \'DD.MM.YYYY\') as actual_archived_date FROM videos');
         expect(videos.rows).toHaveLength(1);
         expect(videos.rows[0].actual_archived_date).not.toBeNull();
         expect(videos.rows[0].actual_archived_date).toEqual(today);
         expect(videos.rows[0].error_date).toBeNull();
+
+        expect((await client.query('SELECT * FROM mediaItem')).rows).toEqual([]);
+        expect((await client.query('SELECT * FROM flavor')).rows).toEqual([]);
+        expect((await client.query('SELECT * FROM chapters')).rows).toEqual([]);
+        expect((await client.query('SELECT * FROM mediaitem_transcriptions')).rows).toEqual([]);
+        expect((await client.query('SELECT * FROM license')).rows).toEqual([]);
+        expect((await client.query('SELECT * FROM MEDIAITEM_KEYWORD')).rows).toEqual([]);
     });
 
 
     it('marks a video deleted if it\'s not found from opencast', async () => {
 
+        await insertMediaItemReferences();
         apiService.getEvent.mockResolvedValue({
             status: 404
         });
@@ -107,15 +140,22 @@ describe('Video archiving tests', () => {
         await archivedVideos.archiveVideos(videosToArchive);
 
         const video_logs = await client.query('SELECT * FROM video_logs');
-        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows).toHaveLength(2);
         expect(video_logs.rows[0].oc_messages).toEqual('error archiving video, no video found for this id');
         expect(video_logs.rows[0].archived_series_id).toBeNull();
+        expect(video_logs.rows[1].oc_messages).toEqual('successfully deleted media item');
 
-        videos = await client.query('SELECT video_id, to_char(actual_archived_date, \'DD.MM.YYYY\') as actual_archived_date, error_date, to_char(deletion_date, \'DD.MM.YYYY\') as deletion_date FROM videos');
+        let videos = await client.query('SELECT video_id, to_char(actual_archived_date, \'DD.MM.YYYY\') as actual_archived_date, error_date, to_char(deletion_date, \'DD.MM.YYYY\') as deletion_date FROM videos');
         expect(videos.rows).toHaveLength(1);
         expect(videos.rows[0].actual_archived_date).toEqual(today);
         expect(videos.rows[0].deletion_date).toEqual(today);
         expect(videos.rows[0].error_date).toBeNull();
+        expect((await client.query('SELECT * FROM mediaItem')).rows).toEqual([]);
+        expect((await client.query('SELECT * FROM flavor')).rows).toEqual([]);
+        expect((await client.query('SELECT * FROM chapters')).rows).toEqual([]);
+        expect((await client.query('SELECT * FROM mediaitem_transcriptions')).rows).toEqual([]);
+        expect((await client.query('SELECT * FROM license')).rows).toEqual([]);
+        expect((await client.query('SELECT * FROM MEDIAITEM_KEYWORD')).rows).toEqual([]);
     });
 
 
@@ -202,8 +242,70 @@ describe('Video archiving tests', () => {
         expect(videos.rows[0].error_date).toEqual(today);
 
         const video_logs = await client.query('SELECT * FROM video_logs');
-        expect(video_logs.rows).toHaveLength(1);
+        expect(video_logs.rows).toHaveLength(2);
         expect(video_logs.rows[0].oc_messages).toEqual('error archiving video: opencast error');
+        expect(video_logs.rows[1].oc_messages).toEqual('no media item found for removal');
+    });
+
+    it('logs and cleans up when Opencast event lookup fails', async () => {
+        await insertMediaItemReferences();
+        apiService.getEvent.mockRejectedValue(new Error('opencast unavailable'));
+
+        await archivedVideos.archiveVideos(videosToArchive);
+
+        const video_logs = await client.query('SELECT * FROM video_logs');
+        expect(video_logs.rows).toHaveLength(2);
+        expect(video_logs.rows[0].status_code).toEqual('500');
+        expect(video_logs.rows[0].oc_messages).toEqual('opencast unavailable');
+        expect(video_logs.rows[1].oc_messages).toEqual('successfully deleted media item');
+        expect((await client.query('SELECT * FROM mediaItem')).rows).toEqual([]);
+        expect((await client.query('SELECT * FROM flavor')).rows).toEqual([]);
+        expect((await client.query('SELECT * FROM chapters')).rows).toEqual([]);
+        expect((await client.query('SELECT * FROM mediaitem_transcriptions')).rows).toEqual([]);
+        expect((await client.query('SELECT * FROM license')).rows).toEqual([]);
+        expect((await client.query('SELECT * FROM MEDIAITEM_KEYWORD')).rows).toEqual([]);
+    });
+
+    it('logs when Opencast series lookup fails', async () => {
+        apiService.getEvent.mockResolvedValue({
+            status: 200,
+            data: {
+                is_part_of: '0345f162-9bbe-48fe-bd6f-f061a3300485',
+                title: 'pienivideo.mp4'
+            }
+        });
+        apiService.getSeries.mockRejectedValue(new Error('series service unavailable'));
+
+        await archivedVideos.archiveVideos(videosToArchive);
+
+        const video_logs = await client.query('SELECT * FROM video_logs');
+        expect(video_logs.rows).toHaveLength(2);
+        expect(video_logs.rows[0].status_code).toEqual('500');
+        expect(video_logs.rows[0].oc_messages).toEqual('series service unavailable');
+        expect(video_logs.rows[1].oc_messages).toEqual('no media item found for removal');
+    });
+
+    it('logs when moving a video to the archived series fails', async () => {
+        apiService.getEvent.mockResolvedValue({
+            status: 200,
+            data: {
+                is_part_of: '0345f162-9bbe-48fe-bd6f-f061a3300485',
+                title: 'pienivideo.mp4'
+            }
+        });
+        apiService.getSeries.mockResolvedValue({
+            status: 200,
+            data: {title: 'joku sarja'}
+        });
+        apiService.moveVideoToArchivedSeries.mockRejectedValue(new Error('archive service unavailable'));
+
+        await archivedVideos.archiveVideos(videosToArchive);
+
+        const video_logs = await client.query('SELECT * FROM video_logs');
+        expect(video_logs.rows).toHaveLength(2);
+        expect(video_logs.rows[0].status_code).toEqual('500');
+        expect(video_logs.rows[0].oc_messages).toEqual('archive service unavailable');
+        expect(video_logs.rows[1].oc_messages).toEqual('no media item found for removal');
     });
 
     afterAll( done => {

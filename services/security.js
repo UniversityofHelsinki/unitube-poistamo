@@ -1,4 +1,5 @@
 const adminHost = process.env.POISTAMO_OPENCAST_HOST;
+const presentationHost = process.env.POISTAMO_OPENCAST_PRESENTATION_HOST;
 const username = process.env.POISTAMO_OPENCAST_USER;
 const password = process.env.POISTAMO_OPENCAST_PASS;
 const iamGroupsApiKey = process.env.IAM_GROUPS_API_KEY;
@@ -9,6 +10,14 @@ const axios = require('axios');
 
 module.exports.opencastBase = axios.create({
     baseURL: adminHost,
+    headers: {'authorization': auth},
+    validateStatus: () => { // https://github.com/axios/axios/issues/1143
+        return true;        // without this axios might throw error on non 200 responses
+    }
+});
+
+module.exports.opencastPresentationBase = axios.create({
+    baseURL: presentationHost,
     headers: {'authorization': auth},
     validateStatus: () => { // https://github.com/axios/axios/issues/1143
         return true;        // without this axios might throw error on non 200 responses

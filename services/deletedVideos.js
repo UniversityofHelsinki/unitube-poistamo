@@ -11,6 +11,7 @@ const deleteVideos = async(selectedVideosToBeDeleted) => {
             if (eventResponse.status != '200') {
                 await databaseService.insertIntoVideoLogs(eventResponse.status, `error deleting video, no video found for this id`, videoId, null, null, null, null);
                 await databaseService.updateVideosTableDeletedStatus(videoId);
+                await databaseService.removeMediaItemWithAllReferences(videoId);
                 // something went wrong continue to next video
                 continue;
             }
@@ -45,12 +46,15 @@ const deleteVideos = async(selectedVideosToBeDeleted) => {
                 await databaseService.updateVideosTableDeletedStatus(videoId);
                 // remove thumbnail image from thumbnails table
                 await databaseService.removeThumbnailImage(videoId);
+                // remove media item with all references
+                await databaseService.removeMediaItemWithAllReferences(videoId);
+
             }
         } catch (error) {
             console.log(error.message);
             // insert into video_logs table for error  logs
             await databaseService.insertIntoVideoLogs(500, error.message, videoId, null, null, null, null);
-
+            await databaseService.removeMediaItemWithAllReferences(videoId);
         }
         await timer.getTimer(60000); // wait for 1 minute before next api call
     }
