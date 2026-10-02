@@ -62,3 +62,33 @@ DROP CONSTRAINT collection_keyword_collection_keyword_key;
 ALTER TABLE collection_keyword
     ADD CONSTRAINT uk_collection_keyword
         UNIQUE(collection_id, keyword);
+
+
+-- media_item keyword
+ALTER TABLE mediaitem_keyword
+    ADD COLUMN media_item_id INTEGER;
+
+UPDATE mediaitem_keyword mk
+SET media_item_id = mi.id
+    FROM media_item mi
+WHERE mi.external_identifier = mk.mediaitem;
+
+
+ALTER TABLE mediaitem_keyword
+    ADD CONSTRAINT fk_mediaitem_keyword_media_item
+        FOREIGN KEY (media_item_id)
+            REFERENCES media_item(id);
+
+ALTER TABLE mediaitem_keyword
+    ADD CONSTRAINT uk_mediaitem_keyword
+        UNIQUE (media_item_id, keyword);
+
+ALTER TABLE mediaitem_keyword
+    ALTER COLUMN media_item_id SET NOT NULL;
+
+ALTER TABLE mediaitem_keyword
+DROP CONSTRAINT mediaitem_keyword_mediaitem_keyword_key;
+
+DROP INDEX IF EXISTS idx_mediaitem_keyword_mediaitem;
+CREATE INDEX idx_mediaitem_keyword_media_item_id
+    ON mediaitem_keyword (media_item_id);
