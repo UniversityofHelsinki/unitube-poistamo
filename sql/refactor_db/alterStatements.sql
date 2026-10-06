@@ -123,5 +123,30 @@ ALTER TABLE owners
     ADD CONSTRAINT uk_owners_collection_owner
         UNIQUE (collection_id, owner);
 
+/****ACCESS RIGHTS***/
 
+ALTER TABLE access_rights
+    RENAME COLUMN collection_id TO collection_external_id;
 
+ALTER TABLE access_rights
+    ADD COLUMN collection_id INTEGER;
+
+UPDATE access_rights ar
+SET collection_id = c.id
+FROM collection c
+WHERE c.external_identifier = ar.collection_external_id;
+
+ALTER TABLE access_rights
+    ALTER COLUMN collection_id SET NOT NULL;
+
+ALTER TABLE access_rights
+    DROP CONSTRAINT access_rights_collection_id_access_rights_key;
+
+ALTER TABLE access_rights
+    ADD CONSTRAINT fk_access_rights_collection
+        FOREIGN KEY (collection_id)
+            REFERENCES collection(id);
+
+ALTER TABLE access_rights
+    ADD CONSTRAINT uk_access_rights
+        UNIQUE (collection_id, access_rights);
