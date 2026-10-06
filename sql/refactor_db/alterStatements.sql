@@ -92,3 +92,36 @@ DROP CONSTRAINT mediaitem_keyword_mediaitem_keyword_key;
 DROP INDEX IF EXISTS idx_mediaitem_keyword_mediaitem;
 CREATE INDEX idx_mediaitem_keyword_media_item_id
     ON mediaitem_keyword (media_item_id);
+
+/*****OWNERS*/
+ALTER TABLE owners
+    RENAME COLUMN collection_id TO collection_external_id;
+
+ALTER TABLE owners
+    ADD COLUMN collection_id INTEGER;
+
+UPDATE owners o
+SET collection_id = c.id
+FROM collection c
+WHERE c.external_identifier = o.collection_external_id;
+
+ALTER TABLE owners
+    ALTER COLUMN collection_id SET NOT NULL;
+
+ALTER TABLE owners
+    DROP CONSTRAINT fk_collection;
+
+ALTER TABLE owners
+    ADD CONSTRAINT fk_owners_collection
+        FOREIGN KEY (collection_id)
+            REFERENCES collection(id);
+
+ALTER TABLE owners
+    DROP CONSTRAINT owners_collection_id_owner_key;
+
+ALTER TABLE owners
+    ADD CONSTRAINT uk_owners_collection_owner
+        UNIQUE (collection_id, owner);
+
+
+
