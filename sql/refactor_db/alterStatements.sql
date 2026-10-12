@@ -150,3 +150,144 @@ ALTER TABLE access_rights
 ALTER TABLE access_rights
     ADD CONSTRAINT uk_access_rights
         UNIQUE (collection_id, access_rights);
+
+/**********CONTENT TYPE ********/
+ALTER TABLE collection
+    DROP CONSTRAINT collection_content_type_fkey;
+ALTER TABLE media_item
+    DROP CONSTRAINT mediaitem_content_type_fkey;
+
+ALTER TABLE content_type
+    DROP CONSTRAINT content_type_pkey;
+
+ALTER TABLE content_type
+    RENAME TO content_category;
+
+ALTER TABLE content_category
+    ADD COLUMN id SERIAL;
+
+ALTER TABLE content_category
+    ADD CONSTRAINT content_category_pkey
+        PRIMARY KEY (id);
+
+ALTER TABLE content_category
+    ADD CONSTRAINT content_category_name_key
+        UNIQUE (name);
+
+/****Content category collection muutokset**/
+ALTER TABLE collection
+    ADD COLUMN content_category_id INTEGER;
+
+UPDATE collection c
+SET content_category_id = cc.id
+FROM content_category cc
+WHERE c.content_type = cc.name;
+
+ALTER TABLE collection
+    ADD CONSTRAINT fk_collection_content_category
+        FOREIGN KEY (content_category_id)
+            REFERENCES content_category(id);
+
+ALTER TABLE media_item
+    ADD COLUMN content_category_id INTEGER;
+
+UPDATE media_item mi
+SET content_category_id = cc.id
+FROM content_category cc
+WHERE mi.content_type = cc.name;
+
+ALTER TABLE media_item
+    ADD CONSTRAINT fk_media_item_content_category
+        FOREIGN KEY (content_category_id)
+            REFERENCES content_category(id);
+
+SELECT conname,
+       pg_get_constraintdef(oid)
+FROM pg_constraint
+WHERE conrelid = 'collection'::regclass;
+
+/** VIRW MUUTOS**/
+DROP VIEW search_by_video_and_collection_title_and_description_view;
+CREATE  VIEW search_by_video_and_collection_title_and_description_view
+            (
+             collection_id,
+             collection_description,
+             collection_title,
+             video_id,
+             video_title,
+             video_description,
+             video_thumbnail,
+             video_language,
+             duration,
+             license,
+             created_date,
+             collection_creator,
+             search_vector,
+             content_category,
+             collection_content_category,
+             collection_science
+                )
+AS
+SELECT
+    c.external_identifier AS collection_id,
+    c.description AS collection_description,
+    c.title AS collection_title,
+    mi.external_identifier AS video_id,
+    mi.name AS video_title,
+    mi.description AS video_description,
+    t.thumbnail AS video_thumbnail,
+    mi.language AS video_language,
+    mi.duration,
+    mi.license,
+    mi.created AS created_date,
+    c.creator AS collection_creator,
+
+    to_tsvector(
+            CASE
+                WHEN lower(mi.language) IN ('fi', 'finnish')
+                    THEN 'finnish'::regconfig
+                WHEN lower(mi.language) IN ('en', 'english')
+                    THEN 'english'::regconfig
+                WHEN lower(mi.language) IN ('sv', 'swedish')
+                    THEN 'swedish'::regconfig
+                ELSE 'finnish'::regconfig
+                END,
+            c.title || ' ' ||
+            c.description || ' ' ||
+            mi.name || ' ' ||
+            mi.description
+    ) AS search_vector,
+
+    COALESCE(cc_media.name, cc_collection.name) AS content_type,
+
+    cc_collection.name AS collection_content_category,
+
+    c.science AS collection_science
+
+FROM collection c
+
+         JOIN media_item mi
+              ON c.external_identifier = mi.collection_external_id
+
+         JOIN videos v
+              ON mi.external_identifier = v.video_id
+
+         LEFT JOIN thumbnails t
+                   ON mi.external_identifier = t.video_id
+
+         LEFT JOIN content_category cc_collection
+                   ON c.content_category_id = cc_collection.id
+
+         LEFT JOIN content_category cc_media
+                   ON mi.content_category_id = cc_media.id
+
+WHERE c.visibility = 'published'
+  AND v.actual_archived_date IS NULL
+  AND v.deletion_date IS NULL
+  AND v.cleanup_date IS NULL
+  AND v.error_date IS NULL;
+
+ALTER TABLE collection
+DROP COLUMN content_type;
+
+ALTER TABLE media_item DROP column content_type;
