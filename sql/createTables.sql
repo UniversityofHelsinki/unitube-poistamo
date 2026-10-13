@@ -1,77 +1,77 @@
 CREATE TABLE IF NOT EXISTS videos(
-                       video_id VARCHAR(255) NOT NULL,
-                       archived_date date,
-                       actual_archived_date date,
-                       deletion_date date,
-                       video_creation_date date,
-                       error_date date,
-                       first_notification_sent_at timestamp,
-                       second_notification_sent_at timestamp,
-                       third_notification_sent_at timestamp,
-                       skip_email boolean default false,
-                       cleanup_date date,
-                       PRIMARY KEY(video_id)
-);
+                                     video_id VARCHAR(255) NOT NULL,
+    archived_date date,
+    actual_archived_date date,
+    deletion_date date,
+    video_creation_date date,
+    error_date date,
+    first_notification_sent_at timestamp,
+    second_notification_sent_at timestamp,
+    third_notification_sent_at timestamp,
+    skip_email boolean default false,
+    cleanup_date date,
+    PRIMARY KEY(video_id)
+    );
 
 CREATE TABLE IF NOT EXISTS archived_videos_users(
-                       video_id VARCHAR(255) NOT NULL,
-                       user_id VARCHAR(15) NOT NULL,
-                       video_log_id SERIAL NOT NULL,
-                       archived_date DATE,
-                       created TIMESTAMP,
-                       PRIMARY KEY(video_id, user_id)
-);
+                                                    video_id VARCHAR(255) NOT NULL,
+    user_id VARCHAR(15) NOT NULL,
+    video_log_id SERIAL NOT NULL,
+    archived_date DATE,
+    created TIMESTAMP,
+    PRIMARY KEY(video_id, user_id)
+    );
 
 CREATE TABLE IF NOT EXISTS video_logs(
-                        video_log_id SERIAL NOT NULL,
-                        status_code VARCHAR(255) NOT NULL,
-                        oc_messages VARCHAR(255) NOT NULL,
-                        video_id VARCHAR(255) NOT NULL,
-                        video_name varchar(255),
-                        original_series_id varchar(255),
-                        original_series_name varchar(255),
-                        archived_series_id varchar(255),
-                        PRIMARY KEY(video_log_id),
-                        CONSTRAINT fk_video
-                        FOREIGN KEY(video_id)
-                        REFERENCES videos(video_id)
-);
+                                         video_log_id SERIAL NOT NULL,
+                                         status_code VARCHAR(255) NOT NULL,
+    oc_messages VARCHAR(255) NOT NULL,
+    video_id VARCHAR(255) NOT NULL,
+    video_name varchar(255),
+    original_series_id varchar(255),
+    original_series_name varchar(255),
+    archived_series_id varchar(255),
+    PRIMARY KEY(video_log_id),
+    CONSTRAINT fk_video
+    FOREIGN KEY(video_id)
+    REFERENCES videos(video_id)
+    );
 
 CREATE TABLE IF NOT EXISTS email_templates(
                                               id SERIAL NOT NULL,
                                               name VARCHAR(255) UNIQUE NOT NULL,
-                                              description VARCHAR(255),
-                                              subject VARCHAR(255),
-                                              header_fi TEXT,
-                                              footer_fi TEXT,
-                                              header_sv TEXT,
-                                              footer_sv TEXT,
-                                              header_en TEXT,
-                                              footer_en TEXT,
-                                              headingFI TEXT,
-                                              headingEN TEXT,
-                                              headingSV TEXT,
-                                              linkTextFI VARCHAR(255),
-                                              linkTextEN VARCHAR(255),
-                                              linkTextSV VARCHAR(255),
-                                              linkUrlFI VARCHAR(255),
-                                              linkUrlEN VARCHAR(255),
-                                              linkUrlSV VARCHAR(255),
-                                              messageFI TEXT,
-                                              messageEN TEXT,
-                                              messageSV TEXT,
-                                              modified TIMESTAMP,
-                                              PRIMARY KEY(id)
-);
+    description VARCHAR(255),
+    subject VARCHAR(255),
+    header_fi TEXT,
+    footer_fi TEXT,
+    header_sv TEXT,
+    footer_sv TEXT,
+    header_en TEXT,
+    footer_en TEXT,
+    headingFI TEXT,
+    headingEN TEXT,
+    headingSV TEXT,
+    linkTextFI VARCHAR(255),
+    linkTextEN VARCHAR(255),
+    linkTextSV VARCHAR(255),
+    linkUrlFI VARCHAR(255),
+    linkUrlEN VARCHAR(255),
+    linkUrlSV VARCHAR(255),
+    messageFI TEXT,
+    messageEN TEXT,
+    messageSV TEXT,
+    modified TIMESTAMP,
+    PRIMARY KEY(id)
+    );
 
 CREATE TABLE IF NOT EXISTS  thumbnails (
-    video_id VARCHAR(255) NOT NULL,
+                                           video_id VARCHAR(255) NOT NULL,
     thumbnail BYTEA,
     PRIMARY KEY(video_id),
     CONSTRAINT fk_video_id
-        FOREIGN KEY(video_id)
-            REFERENCES videos(video_id)
-);
+    FOREIGN KEY(video_id)
+    REFERENCES videos(video_id)
+    );
 
 INSERT INTO email_templates (name, description, subject, header_fi, footer_fi, header_sv, footer_sv, header_en, footer_en, headingFI, headingEN, headingSV, linkTextFI, linkTextEN, linkTextSV, linkUrlFI, linkUrlEN, linkUrlSV, messageFI, messageEN, messageSV) VALUES
     ('Vanhenemisviesti', 'Viesti tallenteiden vanhenemisesta', 'Unitube: sinulla on vanhenevia videoita / you have expiring videos / du har videor som går ut', 'För svenska, se nedan / Scroll down for English
@@ -144,7 +144,7 @@ Center for Information Technology
      'You are the recipient of this message because you are the administrator of one or more expiring video recordings in the University of Helsinki Unitube service. The following Unitube recording(s) are about to expire soon:',
      'Du får det här meddelandet eftersom du är administratör för en eller flera videoinspelningar som går ut i Helsingfors universitets Unitube-tjänst. Följande Unitube-inspelning(ar) går snart ut:'
     )
-ON CONFLICT DO NOTHING;
+    ON CONFLICT DO NOTHING;
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
@@ -217,6 +217,7 @@ CREATE TABLE IF NOT EXISTS collection (
     created timestamp,
     modified timestamp,
     faculty_department_id INTEGER,
+    is_creator_hidden     boolean default false,
     foreign key (content_type) references content_type (name),
     foreign key (creator) references creator (id),
     foreign key (faculty_department_id) references faculties_departments (id)
@@ -226,13 +227,13 @@ CREATE INDEX IF NOT EXISTS idx_collection_title_trgm ON collection USING gin (ti
 CREATE INDEX IF NOT EXISTS idx_collection_description_trgm ON collection USING gin (description gin_trgm_ops);
 
 CREATE TABLE IF NOT EXISTS license (
-    id serial primary key,
-    name varchar(255) not null,
+                                       id serial primary key,
+                                       name varchar(255) not null,
     media_item_id integer
     unique
     constraint fk_media_item
     references mediaitem
-);
+    );
 
 CREATE TABLE IF NOT EXISTS presenter (
                                          id SERIAL PRIMARY KEY,
@@ -277,6 +278,7 @@ CREATE TABLE IF NOT EXISTS chapters (
     vtt_content TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    title         varchar(255),
     UNIQUE (media_item_id, language),
     CONSTRAINT fk_media_item
     FOREIGN KEY(media_item_id)
