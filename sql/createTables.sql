@@ -335,6 +335,7 @@ create table if not exists chapters
     vtt_content   text        not null,
     created_at    timestamp with time zone default CURRENT_TIMESTAMP,
     updated_at    timestamp with time zone default CURRENT_TIMESTAMP,
+    title         varchar(255),
     unique (media_item_id, language)
 );
 
