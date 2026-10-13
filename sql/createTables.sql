@@ -216,6 +216,7 @@ create table if not exists collection
     science               bigint,
     created               timestamp,
     modified              timestamp,
+    is_creator_hidden     boolean default false,
     faculty_department_id integer
         references faculties_departments,
     content_category_id   integer
