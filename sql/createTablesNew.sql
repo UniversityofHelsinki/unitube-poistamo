@@ -217,7 +217,7 @@ create table if not exists collection
 
 create table if not exists media_item
 (
-    id                     integer default nextval('mediaitem_id_seq'::regclass) not null
+    id                     serial
     constraint mediaitem_pkey
     primary key,
     external_identifier    varchar(255)                                          not null

@@ -26,6 +26,16 @@ _docker run --name exp_videos_postgres -p 5432:5432 -e POSTGRES_PASSWORD=xxxxxxx
 
 (note: use the same POSTGRES_PASSWORD as defined in the previous step!)
 
+## Initialize an empty database manually
+
+From the project root, run the following against an empty target database (adjust the connection settings as needed):
+
+```sh
+psql -h localhost -p 5432 -U postgres -d expired_videos -v ON_ERROR_STOP=1 -f sql/createTablesNew.sql
+```
+
+The `pg_trgm` extension must be available on the PostgreSQL server, and the database user must have permission to create it. `CREATE TABLE IF NOT EXISTS` does not migrate existing tables. Application startup already loads `sql/createTablesNew.sql`; that behavior is unchanged.
+
 ## Install application dependencies
 Run the following command:
 _npm install_
