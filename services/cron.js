@@ -170,7 +170,7 @@ const importFacultiesDepartments = async () => {
     }
 
     const mappedUnits = units
-        .filter(unit => IMPORTED_UNIT_TYPES.has(unit.type))
+        .filter(unit => IMPORTED_UNIT_TYPES.has(unit.type) || (unit.parent === null && unit.abbreviation === 'HY'))
         .map(mapFacultyDepartment);
     for (const unit of mappedUnits) {
         if (!Number.isInteger(unit.uniqueId) || !unit.unitType ||
