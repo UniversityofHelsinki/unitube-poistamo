@@ -22,11 +22,11 @@ app.use(bodyParser.json());
 
 
 // CREATE TABLES
-const createTables = fs.readFileSync(path.resolve(__dirname, "./sql/createTables.sql"), "utf8");
+const createTables = fs.readFileSync(path.resolve(__dirname, "./sql/createTablesNew.sql"), "utf8");
 
 (async () => {
     try {
-        await database.query(createTables);
+        //await database.query(createTables);
         await cron.runImportScript(); // IMPORT FROM OPENCAST
         await cron.importFacultiesDepartments(); // IMPORT FACULTIES AND DEPARTMENTS FROM ORGANISATION REGISTRY
     } catch (error) {
