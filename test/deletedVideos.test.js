@@ -1,53 +1,15 @@
 const apiService = require('../services/apiService');
 const deletedVideos = require('../services/deletedVideos');
 const timer = require('../services/timer');
-const path = require("path");
-require('dotenv').config({path: path.resolve(__dirname, '../.env')});
+const setupTestDatabase = require('./helpers/database');
 const client = require('../services/database');
-const Pool = require('pg-pool');
 const format = require('date-format');
 const Constants = require("../utils/constants");
 const crypto = require('crypto');
 
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-beforeAll(async () => {
-    const pool = new Pool({
-        user: process.env.POSTGRES_USER,
-        host: process.env.HOST,
-        database: process.env.DATABASE,
-        password: process.env.PASSWORD,
-        port: process.env.PORT,
-        ssl: process.env.SSL ? true : false,
-        max: 1, // Reuse the connection to make sure we always hit the same temporal schema
-        idleTimeoutMillis: 0 // Disable auto-disconnection of idle clients to make sure we always hit the same temporal schema
-    });
-
-    client.end = () => {
-        return pool.end();
-    };
-
-    client.query = (text, values) => {
-        return pool.query(text, values);
-    };
-});
+setupTestDatabase();
 
 beforeEach(async () => {
-    await client.query('CREATE TEMPORARY TABLE video_logs(video_log_id SERIAL NOT NULL, status_code VARCHAR(255) NOT NULL, oc_messages VARCHAR(255) NOT NULL, video_id VARCHAR(255) NOT NULL, video_name VARCHAR(255), original_series_id VARCHAR(255), original_series_name VARCHAR(255), archived_series_id varchar(255), PRIMARY KEY(video_log_id))');
-    await client.query('CREATE TEMPORARY TABLE videos(video_id VARCHAR(255) NOT NULL, archived_date date, actual_archived_date date, deletion_date date, video_creation_date date, error_date date, PRIMARY KEY(video_id))');
-    await client.query('CREATE TEMPORARY TABLE mediaItem(id SERIAL PRIMARY KEY, external_identifier VARCHAR(255) UNIQUE NOT NULL, name VARCHAR(255) NOT NULL, description VARCHAR(3000) NOT NULL, collection_id VARCHAR(255) NOT NULL)');
-    await client.query('CREATE TEMPORARY TABLE flavor(id SERIAL PRIMARY KEY, media_item_id INTEGER NOT NULL, mimetype VARCHAR(255) NOT NULL, type VARCHAR(255) NOT NULL, url TEXT NOT NULL)');
-    await client.query('CREATE TEMPORARY TABLE chapters(id SERIAL PRIMARY KEY, media_item_id INTEGER NOT NULL, language VARCHAR(10) NOT NULL, vtt_content TEXT NOT NULL)');
-    await client.query('CREATE TEMPORARY TABLE mediaitem_transcriptions(id SERIAL PRIMARY KEY, media_item_id INTEGER NOT NULL, title VARCHAR(255), language VARCHAR(255) NOT NULL)');
-    await client.query('CREATE TEMPORARY TABLE license(id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, media_item_id INTEGER)');
-    await client.query('CREATE TEMPORARY TABLE MEDIAITEM_KEYWORD(MEDIAITEM VARCHAR(255), KEYWORD BIGINT)');
-    await client.query('CREATE TEMPORARY TABLE THUMBNAILS(video_id VARCHAR(255) NOT NULL,\n' +
-        '    thumbnail BYTEA,\n' +
-        '    PRIMARY KEY(video_id),\n' +
-        '    CONSTRAINT fk_video_id\n' +
-        '        FOREIGN KEY(video_id)\n' +
-        '            REFERENCES videos(video_id))')
-    await wait(100);
     await client.query('INSERT INTO videos (video_id, archived_date, video_creation_date) VALUES (\'e8a86433-0245-44b8-b0d7-69f6578bac6f\', \'2018-01-01\'::date, \'2008-01-01\'::date)');
     await insertMediaItemReferences();
     const buffer = crypto.randomBytes(128);
@@ -57,18 +19,6 @@ beforeEach(async () => {
     await timer.getTimer.mockResolvedValue(0);
 },);
 
-afterEach(async () => {
-    await wait(100);
-    await client.query('DROP TABLE IF EXISTS pg_temp.thumbnails');
-    await client.query('DROP TABLE IF EXISTS pg_temp.MEDIAITEM_KEYWORD');
-    await client.query('DROP TABLE IF EXISTS pg_temp.license');
-    await client.query('DROP TABLE IF EXISTS pg_temp.mediaitem_transcriptions');
-    await client.query('DROP TABLE IF EXISTS pg_temp.chapters');
-    await client.query('DROP TABLE IF EXISTS pg_temp.flavor');
-    await client.query('DROP TABLE IF EXISTS pg_temp.mediaItem');
-    await client.query('DROP TABLE IF EXISTS pg_temp.videos');
-    await client.query('DROP TABLE IF EXISTS pg_temp.video_logs');
-});
 
 afterAll(async () => {
     jest.clearAllMocks();
@@ -86,17 +36,19 @@ const archivedDate = () => {
 }
 
 const insertMediaItemReferences = async() => {
-    const mediaItem = await client.query("INSERT INTO mediaItem (external_identifier, name, description, collection_id) VALUES ('e8a86433-0245-44b8-b0d7-69f6578bac6f', 'Video', 'Video description', 'collection') RETURNING id");
+    const collection = await client.query("INSERT INTO collection (external_identifier, title, description, visibility, license) VALUES ('collection', 'Collection', 'Collection description', 'public', 'CC BY') RETURNING id");
+    const mediaItem = await client.query("INSERT INTO media_item (external_identifier, name, description, collection_external_id, collection_id) VALUES ('e8a86433-0245-44b8-b0d7-69f6578bac6f', 'Video', 'Video description', 'collection', $1) RETURNING id", [collection.rows[0].id]);
     const mediaItemId = mediaItem.rows[0].id;
     await client.query('INSERT INTO flavor (media_item_id, mimetype, type, url) VALUES ($1, \'video/mp4\', \'presenter\', \'https://example.com/video.mp4\')', [mediaItemId]);
     await client.query('INSERT INTO chapters (media_item_id, language, vtt_content) VALUES ($1, \'en\', \'WEBVTT\')', [mediaItemId]);
     await client.query('INSERT INTO mediaitem_transcriptions (media_item_id, language, title) VALUES ($1, \'en\', \'English\')', [mediaItemId]);
     await client.query('INSERT INTO license (name, media_item_id) VALUES (\'CC BY\', $1)', [mediaItemId]);
-    await client.query('INSERT INTO MEDIAITEM_KEYWORD (MEDIAITEM, KEYWORD) VALUES (\'e8a86433-0245-44b8-b0d7-69f6578bac6f\', 1)');
+    const keyword = await client.query("INSERT INTO keyword (label) VALUES ('test') RETURNING id");
+    await client.query('INSERT INTO mediaitem_keyword (mediaitem, keyword, media_item_id) VALUES ($1, $2, $3)', ['e8a86433-0245-44b8-b0d7-69f6578bac6f', keyword.rows[0].id, mediaItemId]);
 };
 
 const expectMediaItemReferencesRemoved = async() => {
-    expect((await client.query('SELECT * FROM mediaItem')).rows).toEqual([]);
+    expect((await client.query('SELECT * FROM media_item')).rows).toEqual([]);
     expect((await client.query('SELECT * FROM flavor')).rows).toEqual([]);
     expect((await client.query('SELECT * FROM chapters')).rows).toEqual([]);
     expect((await client.query('SELECT * FROM mediaitem_transcriptions')).rows).toEqual([]);
@@ -174,6 +126,7 @@ describe('Video deleting', () => {
 
     it('logs when no media item is found for removal', async() => {
         const videoWithoutMediaItem = [{video_id: 'video-without-media-item'}];
+        await client.query('INSERT INTO videos (video_id) VALUES ($1)', [videoWithoutMediaItem[0].video_id]);
         apiService.getEvent.mockResolvedValue({ status: 404 });
 
         await deletedVideos.deleteVideos(videoWithoutMediaItem);
@@ -245,10 +198,6 @@ describe('Video deleting', () => {
         expect(video_logs.rows[0].oc_messages).toEqual('Opencast unavailable');
         expect(video_logs.rows[1].oc_messages).toEqual('successfully deleted media item');
         await expectMediaItemReferencesRemoved();
-    });
-
-    afterAll( done => {
-        client.end().then(done());
     });
 
 });
