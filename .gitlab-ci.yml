@@ -324,7 +324,7 @@ deploy_prod:
     # cronjob variable
     - oc set env deploy/poistamo-prod CRON_START_TIME="30 0 * * *"
     - oc set env deploy/poistamo-prod CRON_START_TIME_REMOVE_USERS="0 3 * * SUN"
-    - # patch Node version
+    # patch Node version
     - oc patch bc/poistamo-prod --type=merge --patch '{"spec":{"strategy":{"dockerStrategy":{"from":null}}}}'
     - oc start-build poistamo-prod --from-dir=. --follow
     # patch openshift buildConfig file
